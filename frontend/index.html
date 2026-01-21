@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>올인원 AAC</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff7849">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+    <div id="app" class="app-container">
+        
+        <!-- ========== 헤더 ========== -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo">
+                    <i data-lucide="message-circle"></i>
+                    <span>올인원<strong>AAC</strong></span>
+                </div>
+            </div>
+            <div class="header-right">
+                <button id="listenBtn" class="header-action-btn listen" title="상대방 말 듣기">
+                    <i data-lucide="mic"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- ========== 메인 슬라이드 ========== -->
+        <main class="slide-container">
+            <div class="slide-wrapper" id="slideWrapper">
+                
+                <!-- ===== 탭 1: 말하기 ===== -->
+                <section class="slide" id="slideSpeak">
+                    <!-- 긴급 버튼 -->
+                    <div class="emergency-bar">
+                        <button class="emergency-btn" data-text="도와주세요!" data-icon="life-buoy">
+                            <i data-lucide="life-buoy"></i>
+                            <span>도움</span>
+                        </button>
+                        <button class="emergency-btn" data-text="아파요!" data-icon="heart-pulse">
+                            <i data-lucide="heart-pulse"></i>
+                            <span>아픔</span>
+                        </button>
+                        <button class="emergency-btn" data-text="화장실 가고 싶어요" data-icon="door-open">
+                            <i data-lucide="door-open"></i>
+                            <span>화장실</span>
+                        </button>
+                    </div>
+
+                    <!-- 카테고리 탭 -->
+                    <div class="category-tabs">
+                        <button class="tab-btn active" data-category="action">
+                            <i data-lucide="footprints"></i>
+                            <span>행동</span>
+                        </button>
+                        <button class="tab-btn" data-category="feeling">
+                            <i data-lucide="smile"></i>
+                            <span>감정</span>
+                        </button>
+                        <button class="tab-btn" data-category="need">
+                            <i data-lucide="hand"></i>
+                            <span>요청</span>
+                        </button>
+                        <button class="tab-btn" data-category="pain">
+                            <i data-lucide="activity"></i>
+                            <span>통증</span>
+                        </button>
+                        <button class="tab-btn" data-category="place">
+                            <i data-lucide="map-pin"></i>
+                            <span>장소</span>
+                        </button>
+                        <button class="tab-btn" data-category="person">
+                            <i data-lucide="users"></i>
+                            <span>사람</span>
+                        </button>
+                        <button class="tab-btn" data-category="food">
+                            <i data-lucide="utensils"></i>
+                            <span>음식</span>
+                        </button>
+                        <button class="tab-btn" data-category="time">
+                            <i data-lucide="clock"></i>
+                            <span>시간</span>
+                        </button>
+                    </div>
+
+                    <!-- 카드 그리드 -->
+                    <div class="cards-area">
+                        <div id="cardsContainer" class="cards-container"></div>
+                    </div>
+
+                    <!-- 통증 스케일 -->
+                    <div id="painScale" class="pain-scale hidden">
+                        <div class="pain-title">통증 정도</div>
+                        <div class="pain-buttons" id="painButtons"></div>
+                        <div class="pain-labels">
+                            <span>약함</span>
+                            <span>보통</span>
+                            <span>심함</span>
+                        </div>
+                    </div>
+
+                    <!-- AI 추천 패널 -->
+                    <div id="aiSuggestPanel" class="ai-suggest-panel hidden">
+                        <div class="ai-suggest-header">
+                            <i data-lucide="sparkles"></i>
+                            <span id="aiSuggestWord">단어</span> 다음에...
+                            <button id="closeSuggestPanel" class="close-btn">
+                                <i data-lucide="x"></i>
+                            </button>
+                        </div>
+                        <div id="aiSuggestions" class="ai-suggestions"></div>
+                    </div>
+                </section>
+
+                <!-- ===== 탭 2: 사용 기록 ===== -->
+                <section class="slide" id="slideHistory">
+                    <div class="slide-header">
+                        <h2>사용 기록</h2>
+                        <button id="clearHistoryBtn" class="text-btn danger">
+                            <i data-lucide="trash-2"></i>
+                            전체 삭제
+                        </button>
+                    </div>
+                    <div id="historyContainer" class="history-container">
+                        <p class="empty-message">아직 사용 기록이 없습니다</p>
+                    </div>
+                </section>
+
+                <!-- ===== 탭 3: 검색 ===== -->
+                <section class="slide" id="slideSearch">
+                    <div class="search-box">
+                        <i data-lucide="search"></i>
+                        <input type="text" id="searchInput" placeholder="단어나 문장 검색...">
+                    </div>
+                    <div id="searchResults" class="search-results"></div>
+                </section>
+
+                <!-- ===== 탭 4: 설정 ===== -->
+                <section class="slide" id="slideSettings">
+                    <div class="settings-content">
+                        <!-- 화면 설정 -->
+                        <div class="settings-section">
+                            <div class="settings-section-title">
+                                <i data-lucide="monitor"></i>
+                                <span>화면</span>
+                            </div>
+                            <div class="setting-item toggle">
+                                <label>
+                                    <i data-lucide="moon"></i>
+                                    고대비 모드 (다크)
+                                </label>
+                                <label class="switch">
+                                    <input type="checkbox" id="darkModeToggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>글자 크기</label>
+                                <select id="fontSize">
+                                    <option value="small">작게</option>
+                                    <option value="medium" selected>보통</option>
+                                    <option value="large">크게</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 음성 설정 (나중에 AI Adaptive Volume) -->
+                        <div class="settings-section">
+                            <div class="settings-section-title">
+                                <i data-lucide="volume-2"></i>
+                                <span>음성</span>
+                            </div>
+                            <div class="setting-item ai-feature">
+                                <div class="ai-feature-info">
+                                    <i data-lucide="sparkles"></i>
+                                    <div>
+                                        <strong>스마트 음성 (준비 중)</strong>
+                                        <p>주변 소음에 따라 자동으로 음량과 속도가 조절됩니다</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 도움말 -->
+                        <div class="settings-section">
+                            <div class="settings-section-title">
+                                <i data-lucide="help-circle"></i>
+                                <span>사용법</span>
+                            </div>
+                            <div class="help-list">
+                                <div class="help-item">
+                                    <i data-lucide="hand"></i>
+                                    <div>
+                                        <strong>카드 선택</strong>
+                                        <p>카드를 터치하면 메시지가 선택됩니다</p>
+                                    </div>
+                                </div>
+                                <div class="help-item">
+                                    <i data-lucide="sparkles"></i>
+                                    <div>
+                                        <strong>AI 추천</strong>
+                                        <p>카드의 ✨ 버튼을 누르면 다음 말을 추천해줍니다</p>
+                                    </div>
+                                </div>
+                                <div class="help-item">
+                                    <i data-lucide="mic"></i>
+                                    <div>
+                                        <strong>음성 인식</strong>
+                                        <p>마이크 버튼으로 상대방 말 듣고 답변 추천</p>
+                                    </div>
+                                </div>
+                                <div class="help-item">
+                                    <i data-lucide="clock"></i>
+                                    <div>
+                                        <strong>롱프레스</strong>
+                                        <p>카드를 길게 누르면 시제/존댓말 변경</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 앱 정보 -->
+                        <div class="app-info">
+                            <div class="app-info-logo">
+                                <i data-lucide="heart"></i>
+                                <span>바이오헬스 원팀</span>
+                            </div>
+                            <p>버전 2.0.0</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- ========== 출력 바 ========== -->
+        <div class="output-bar">
+            <div id="outputText" class="output-text">
+                <span class="placeholder">카드를 선택하세요</span>
+            </div>
+            <div class="output-actions">
+                <button id="speakBtn" class="output-btn speak" disabled>
+                    <i data-lucide="volume-2"></i>
+                </button>
+                <button id="showBtn" class="output-btn show" disabled>
+                    <i data-lucide="maximize-2"></i>
+                </button>
+                <button id="clearBtn" class="output-btn clear" disabled>
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ========== 하단 탭 바 ========== -->
+        <nav class="tab-bar">
+            <button class="tab-bar-btn active" data-slide="0">
+                <i data-lucide="message-square"></i>
+                <span>말하기</span>
+            </button>
+            <button class="tab-bar-btn" data-slide="1">
+                <i data-lucide="history"></i>
+                <span>기록</span>
+            </button>
+            <button class="tab-bar-btn" data-slide="2">
+                <i data-lucide="search"></i>
+                <span>검색</span>
+            </button>
+            <button class="tab-bar-btn" data-slide="3">
+                <i data-lucide="settings"></i>
+                <span>설정</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- ========== 청자 모드 모달 ========== -->
+    <div id="listenerModal" class="modal-fullscreen hidden">
+        <button id="closeListenerModal" class="modal-close">
+            <i data-lucide="x"></i>
+        </button>
+        <div class="listener-content">
+            <div id="listenerIcon" class="listener-icon">
+                <i data-lucide="message-circle"></i>
+            </div>
+            <div id="listenerText" class="listener-text">메시지</div>
+        </div>
+    </div>
+
+    <!-- ========== 음성 인식 결과 모달 ========== -->
+    <div id="listenResultModal" class="modal-overlay hidden">
+        <div class="modal-content listen-modal">
+            <div class="modal-header">
+                <h3>
+                    <i data-lucide="mic"></i>
+                    상대방이 말한 내용
+                </h3>
+                <button id="closeListenModal" class="modal-close-btn">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="heard-text-box">
+                    <i data-lucide="quote"></i>
+                    <span id="heardText">인식된 내용</span>
+                </div>
+                <div class="response-title">
+                    <i data-lucide="message-circle"></i>
+                    <span>이렇게 답해보세요</span>
+                </div>
+                <div id="aiResponses" class="ai-responses"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 카드 추가 모달 ========== -->
+    <div id="addCardModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>새 카드 추가</h3>
+                <button id="closeAddCardModal" class="modal-close-btn">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="image-upload-section">
+                    <label>📸 사진으로 만들기 (AI - 준비중)</label>
+                    <input type="file" id="cardImageInput" accept="image/*" capture="environment" hidden>
+                    <button type="button" id="uploadImageBtn" class="upload-btn">
+                        <i data-lucide="camera"></i>
+                        <span>사진 촬영/선택</span>
+                    </button>
+                    <div id="imagePreview" class="image-preview hidden">
+                        <img id="previewImg" src="" alt="">
+                        <button id="removeImageBtn" class="remove-img-btn">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="divider"><span>또는</span></div>
+
+                <div class="form-group">
+                    <label>카드 텍스트</label>
+                    <input type="text" id="newCardText" placeholder="예: 사랑해요" maxlength="20">
+                </div>
+                <div class="form-group">
+                    <label>아이콘</label>
+                    <div id="iconSelector" class="icon-grid"></div>
+                </div>
+                <div class="card-preview-section">
+                    <label>미리보기</label>
+                    <div id="cardPreview" class="card-preview">
+                        <div class="card-icon"><i data-lucide="message-circle"></i></div>
+                        <div class="card-text">새 카드</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelAddCard" class="secondary-btn">취소</button>
+                <button id="confirmAddCard" class="primary-btn">
+                    <i data-lucide="plus"></i>
+                    추가
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 롱프레스 메뉴 ========== -->
+    <div id="longpressMenu" class="longpress-menu hidden"></div>
+    <div id="longpressOverlay" class="longpress-overlay hidden"></div>
+
+    <!-- Lucide 아이콘 먼저 로드 -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- 하나로 합친 JS -->
+    <script src="js/app.js"></script>
+
+    <!-- 기존 서비스 워커 해제 -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(regs => {
+                regs.forEach(reg => reg.unregister());
+            });
+        }
+    </script>
+</body>
+</html>
