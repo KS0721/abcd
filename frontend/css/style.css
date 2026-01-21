@@ -31,6 +31,12 @@
     --output-height: 70px;
     --tabbar-height: 64px;
     --safe-bottom: env(safe-area-inset-bottom, 0px);
+    
+    /* 동적 폰트 크기 변수 */
+    --base-font-size: 16px;
+    --card-text-size: 0.85rem;
+    --tab-text-size: 0.75rem;
+    --menu-text-size: 0.9rem;
 }
 
 /* ========== 다크모드 ========== */
@@ -234,7 +240,7 @@ body.dark-mode .emergency-bar {
     border: 2px solid var(--danger);
     border-radius: var(--radius-sm);
     color: var(--danger);
-    font-size: 0.85rem;
+    font-size: var(--card-text-size);
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -283,7 +289,7 @@ body.dark-mode .emergency-bar {
     border: 2px solid transparent;
     border-radius: var(--radius-sm);
     color: var(--text-medium);
-    font-size: 0.75rem;
+    font-size: var(--tab-text-size);
     font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
@@ -420,7 +426,7 @@ body.dark-mode .emergency-bar {
 }
 
 .card-text {
-    font-size: 0.85rem;
+    font-size: var(--card-text-size);
     font-weight: 600;
     color: var(--text-dark);
     text-align: center;
@@ -911,6 +917,7 @@ body.dark-mode .emergency-bar {
     font-weight: 500;
     margin-bottom: 8px;
     color: var(--text-dark);
+    font-size: var(--menu-text-size);
 }
 
 .setting-item.toggle {
