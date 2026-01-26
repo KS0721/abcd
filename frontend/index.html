@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#4A90A4">
     <title>올인원 AAC</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#ff7849">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
     <div id="app" class="app-container">
@@ -36,8 +37,8 @@
                 <section class="slide" id="slideSpeak">
                     <!-- 긴급 버튼 -->
                     <div class="emergency-bar">
-                        <button class="emergency-btn" data-text="도와주세요!" data-icon="life-buoy">
-                            <i data-lucide="life-buoy"></i>
+                        <button class="emergency-btn" data-text="도와주세요!" data-icon="help-circle">
+                            <i data-lucide="help-circle"></i>
                             <span>도움</span>
                         </button>
                         <button class="emergency-btn" data-text="아파요!" data-icon="heart-pulse">
@@ -102,16 +103,16 @@
                         </div>
                     </div>
 
-                    <!-- AI 추천 패널 -->
-                    <div id="aiSuggestPanel" class="ai-suggest-panel hidden">
-                        <div class="ai-suggest-header">
+                    <!-- 추천 패널 -->
+                    <div id="suggestionPanel" class="suggestion-panel hidden">
+                        <div class="suggestion-header">
                             <i data-lucide="sparkles"></i>
-                            <span id="aiSuggestWord">단어</span> 다음에...
-                            <button id="closeSuggestPanel" class="close-btn">
+                            <span id="suggestionWord">단어</span> 다음에...
+                            <button id="closeSuggestionPanel" class="close-btn">
                                 <i data-lucide="x"></i>
                             </button>
                         </div>
-                        <div id="aiSuggestions" class="ai-suggestions"></div>
+                        <div id="suggestionCards" class="suggestion-cards"></div>
                     </div>
                 </section>
 
@@ -167,7 +168,7 @@
                             </div>
                         </div>
 
-                        <!-- 음성 설정 (나중에 AI Adaptive Volume) -->
+                        <!-- 음성 설정 -->
                         <div class="settings-section">
                             <div class="settings-section-title">
                                 <i data-lucide="volume-2"></i>
@@ -201,8 +202,8 @@
                                 <div class="help-item">
                                     <i data-lucide="sparkles"></i>
                                     <div>
-                                        <strong>AI 추천</strong>
-                                        <p>카드의 ✨ 버튼을 누르면 다음 말을 추천해줍니다</p>
+                                        <strong>추천 기능</strong>
+                                        <p>동사 선택 시 관련 단어를 추천해줍니다</p>
                                     </div>
                                 </div>
                                 <div class="help-item">
@@ -276,7 +277,7 @@
 
     <!-- ========== 청자 모드 모달 ========== -->
     <div id="listenerModal" class="modal-fullscreen hidden">
-        <button id="closeListenerModal" class="modal-close">
+        <button id="closeListenerModal" class="modal-close-fullscreen">
             <i data-lucide="x"></i>
         </button>
         <div class="listener-content">
@@ -323,36 +324,21 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="image-upload-section">
-                    <label>📸 사진으로 만들기 (AI - 준비중)</label>
-                    <input type="file" id="cardImageInput" accept="image/*" capture="environment" hidden>
-                    <button type="button" id="uploadImageBtn" class="upload-btn">
-                        <i data-lucide="camera"></i>
-                        <span>사진 촬영/선택</span>
-                    </button>
-                    <div id="imagePreview" class="image-preview hidden">
-                        <img id="previewImg" src="" alt="">
-                        <button id="removeImageBtn" class="remove-img-btn">
-                            <i data-lucide="x"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="divider"><span>또는</span></div>
-
                 <div class="form-group">
                     <label>카드 텍스트</label>
                     <input type="text" id="newCardText" placeholder="예: 사랑해요" maxlength="20">
                 </div>
                 <div class="form-group">
-                    <label>아이콘</label>
+                    <label>아이콘 선택</label>
                     <div id="iconSelector" class="icon-grid"></div>
                 </div>
-                <div class="card-preview-section">
+                <div class="form-group">
                     <label>미리보기</label>
                     <div id="cardPreview" class="card-preview">
-                        <div class="card-icon"><i data-lucide="message-circle"></i></div>
-                        <div class="card-text">새 카드</div>
+                        <div class="preview-icon">
+                            <i data-lucide="message-circle"></i>
+                        </div>
+                        <span class="preview-text">새 카드</span>
                     </div>
                 </div>
             </div>
@@ -366,17 +352,35 @@
         </div>
     </div>
 
+    <!-- ========== 확인 모달 ========== -->
+    <div id="confirmModal" class="modal-overlay hidden">
+        <div class="modal-content confirm-modal">
+            <div class="confirm-icon">
+                <i data-lucide="alert-circle"></i>
+            </div>
+            <p id="confirmMessage" class="confirm-message">정말 삭제할까요?</p>
+            <div class="confirm-buttons">
+                <button id="confirmCancel" class="secondary-btn">취소</button>
+                <button id="confirmOk" class="danger-btn">삭제</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ========== 롱프레스 메뉴 ========== -->
     <div id="longpressMenu" class="longpress-menu hidden"></div>
     <div id="longpressOverlay" class="longpress-overlay hidden"></div>
 
-    <!-- Lucide 아이콘 먼저 로드 -->
+    <!-- Lucide 아이콘 -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
-    <!-- 하나로 합친 JS -->
+    <!-- JS 파일들 (순서 중요!) -->
+    <script src="js/data.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/ui.js"></script>
     <script src="js/app.js"></script>
 
-    <!-- 기존 서비스 워커 해제 -->
+    <!-- 서비스 워커 해제 -->
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(regs => {

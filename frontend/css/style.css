@@ -37,6 +37,12 @@
     --card-text-size: 0.85rem;
     --tab-text-size: 0.75rem;
     --menu-text-size: 0.9rem;
+    
+    /* 카드 그리드 변수 (기본: 일반 모바일 4개) */
+    --card-columns: 4;
+    --card-gap: 10px;
+    --card-padding: 14px 8px;
+    --card-icon-size: 44px;
 }
 
 /* ========== 다크모드 ========== */
@@ -67,6 +73,7 @@ body {
     -webkit-user-select: none;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
+    font-size: var(--base-font-size);
 }
 
 /* 글자 크기 */
@@ -86,7 +93,7 @@ body.font-large { font-size: 18px; }
     position: relative;
 }
 
-/* ========== 헤더 (개선됨) ========== */
+/* ========== 헤더 ========== */
 .app-header {
     height: var(--header-height);
     padding: 0 16px;
@@ -97,7 +104,6 @@ body.font-large { font-size: 18px; }
     border-bottom: 1px solid var(--gray-border);
     flex-shrink: 0;
     z-index: 100;
-    /* 글래스모피즘 효과 */
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
@@ -204,7 +210,7 @@ body.font-large { font-size: 18px; }
 }
 
 /* ========== 말하기 슬라이드 ========== */
-/* 긴급 바 (개선됨) */
+/* 긴급 바 */
 .emergency-bar {
     display: flex;
     gap: 8px;
@@ -263,7 +269,7 @@ body.dark-mode .emergency-bar {
     height: 20px;
 }
 
-/* 카테고리 탭 (개선됨) */
+/* 카테고리 탭 */
 .category-tabs {
     display: flex;
     gap: 6px;
@@ -338,18 +344,18 @@ body.dark-mode .emergency-bar {
 
 .cards-container {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(var(--card-columns), 1fr);
+    gap: var(--card-gap);
 }
 
-/* 카드 (대폭 개선됨) */
+/* 카드 */
 .card {
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 6px;
-    padding: 14px 8px;
+    padding: var(--card-padding);
     background: var(--white);
     border: 2px solid var(--gray-border);
     border-radius: var(--radius);
@@ -388,8 +394,8 @@ body.dark-mode .emergency-bar {
 }
 
 .card-icon {
-    width: 44px;
-    height: 44px;
+    width: var(--card-icon-size);
+    height: var(--card-icon-size);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -433,7 +439,7 @@ body.dark-mode .emergency-bar {
     word-break: keep-all;
 }
 
-/* AI 버튼 (개선됨) */
+/* AI 버튼 */
 .card .ai-btn {
     position: absolute;
     top: 4px;
@@ -511,14 +517,14 @@ body.dark-mode .emergency-bar {
     height: 12px;
 }
 
-/* 카드 추가 버튼 (개선됨) */
+/* 카드 추가 버튼 */
 .add-card-btn {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 4px;
-    padding: 14px 8px;
+    padding: var(--card-padding);
     background: var(--gray-bg);
     border: 2px dashed var(--gray-border);
     border-radius: var(--radius);
@@ -546,7 +552,7 @@ body.dark-mode .emergency-bar {
     transform: rotate(90deg) scale(1.2);
 }
 
-/* 통증 스케일 (개선됨) */
+/* 통증 스케일 */
 .pain-scale {
     margin: 12px;
     padding: 16px;
@@ -610,8 +616,8 @@ body.dark-mode .emergency-bar {
     color: var(--text-light);
 }
 
-/* AI 추천 패널 (개선됨) */
-.ai-suggest-panel {
+/* 추천 패널 */
+.suggestion-panel {
     position: fixed;
     bottom: calc(var(--output-height) + var(--tabbar-height) + var(--safe-bottom) + 10px);
     left: 50%;
@@ -637,7 +643,7 @@ body.dark-mode .emergency-bar {
     }
 }
 
-.ai-suggest-header {
+.suggestion-header {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -648,7 +654,7 @@ body.dark-mode .emergency-bar {
     font-weight: 600;
 }
 
-.ai-suggest-header i {
+.suggestion-header i {
     width: 18px;
     height: 18px;
     animation: sparkle 1.5s ease-in-out infinite;
@@ -679,39 +685,13 @@ body.dark-mode .emergency-bar {
     height: 16px;
 }
 
-.ai-suggestions {
+.suggestion-cards {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     padding: 12px;
     max-height: 200px;
     overflow-y: auto;
-}
-
-.ai-suggest-btn {
-    padding: 10px 16px;
-    background: var(--secondary);
-    border: 2px solid var(--gray-border);
-    border-radius: 20px;
-    font-size: 0.95rem;
-    font-weight: 500;
-    color: var(--text-dark);
-    cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-}
-
-.ai-suggest-btn:hover {
-    background: var(--primary-light);
-    border-color: var(--primary);
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 120, 73, 0.3);
-}
-
-.ai-suggest-btn:active {
-    background: var(--primary);
-    transform: scale(0.97);
 }
 
 /* ========== 사용 기록 슬라이드 ========== */
@@ -794,7 +774,7 @@ body.dark-mode .emergency-bar {
     animation: fadeIn 0.5s ease;
 }
 
-/* ========== 검색 슬라이드 (개선됨) ========== */
+/* ========== 검색 슬라이드 ========== */
 .search-box {
     display: flex;
     align-items: center;
@@ -939,19 +919,6 @@ body.dark-mode .emergency-bar {
     color: var(--text-medium);
 }
 
-.range-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.8rem;
-    color: var(--text-light);
-}
-
-.range-wrapper input[type="range"] {
-    flex: 1;
-    accent-color: var(--primary);
-}
-
 select {
     width: 100%;
     padding: 10px 12px;
@@ -974,7 +941,7 @@ select:focus {
     box-shadow: 0 0 0 3px rgba(255, 120, 73, 0.1);
 }
 
-/* 토글 스위치 (개선됨) */
+/* 토글 스위치 */
 .switch {
     position: relative;
     width: 50px;
@@ -1019,58 +986,6 @@ input:checked + .slider::before {
 
 .slider:active::before {
     width: 26px;
-}
-
-/* 사용자 섹션 */
-.user-section {
-    padding: 16px;
-}
-
-.user-logged-out {
-    text-align: center;
-}
-
-.user-logged-out p {
-    color: var(--text-light);
-    margin-bottom: 12px;
-}
-
-.user-logged-in {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.user-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.user-avatar {
-    width: 44px;
-    height: 44px;
-    background: var(--secondary);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--primary);
-}
-
-.user-avatar i {
-    width: 22px;
-    height: 22px;
-}
-
-.user-name {
-    font-weight: 600;
-    display: block;
-}
-
-.user-email {
-    font-size: 0.85rem;
-    color: var(--text-light);
 }
 
 /* 도움말 */
@@ -1133,7 +1048,7 @@ input:checked + .slider::before {
     height: 18px;
 }
 
-/* ========== 출력 바 (개선됨) ========== */
+/* ========== 출력 바 ========== */
 .output-bar {
     display: flex;
     align-items: center;
@@ -1250,7 +1165,7 @@ input:checked + .slider::before {
     color: white;
 }
 
-/* ========== 탭 바 (개선됨) ========== */
+/* ========== 탭 바 ========== */
 .tab-bar {
     display: flex;
     height: var(--tabbar-height);
@@ -1312,7 +1227,7 @@ input:checked + .slider::before {
     color: var(--primary-light);
 }
 
-/* ========== 모달 (개선됨) ========== */
+/* ========== 모달 공통 ========== */
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -1415,7 +1330,74 @@ input:checked + .slider::before {
     flex: 1;
 }
 
-/* 청자 모드 풀스크린 (개선됨) */
+/* ========== 확인 모달 (커스텀 confirm) ========== */
+.confirm-modal {
+    max-width: 320px;
+    text-align: center;
+    padding: 28px 24px;
+    border-radius: var(--radius-lg);
+}
+
+.confirm-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 20px;
+    background: var(--danger-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--danger);
+    animation: iconPulse 2s ease-in-out infinite;
+}
+
+.confirm-icon i {
+    width: 30px;
+    height: 30px;
+}
+
+.confirm-message {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    line-height: 1.5;
+    margin-bottom: 24px;
+    word-break: keep-all;
+}
+
+.confirm-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.confirm-buttons button {
+    flex: 1;
+    padding: 14px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.danger-btn {
+    background: var(--danger);
+    border: none;
+    color: white;
+    box-shadow: 0 4px 12px rgba(232, 90, 90, 0.3);
+}
+
+.danger-btn:hover {
+    background: #c62828;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(232, 90, 90, 0.4);
+}
+
+.danger-btn:active {
+    transform: scale(0.97);
+}
+
+/* 청자 모드 풀스크린 */
 .modal-fullscreen {
     position: fixed;
     inset: 0;
@@ -1427,7 +1409,7 @@ input:checked + .slider::before {
     animation: fadeIn 0.3s ease;
 }
 
-.modal-fullscreen .modal-close {
+.modal-fullscreen .modal-close-fullscreen {
     position: absolute;
     top: 20px;
     right: 20px;
@@ -1444,13 +1426,13 @@ input:checked + .slider::before {
     box-shadow: var(--shadow);
 }
 
-.modal-fullscreen .modal-close:hover {
+.modal-fullscreen .modal-close-fullscreen:hover {
     background: var(--danger-light);
     color: var(--danger);
     transform: scale(1.1) rotate(90deg);
 }
 
-.modal-fullscreen .modal-close i {
+.modal-fullscreen .modal-close-fullscreen i {
     width: 28px;
     height: 28px;
 }
@@ -1579,123 +1561,6 @@ input:checked + .slider::before {
 }
 
 /* 카드 추가 모달 */
-.image-upload-section {
-    margin-bottom: 16px;
-}
-
-.image-upload-section > label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 10px;
-}
-
-.upload-btn {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 20px;
-    background: var(--gray-bg);
-    border: 2px dashed var(--gray-border);
-    border-radius: var(--radius);
-    color: var(--text-medium);
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.25s ease;
-}
-
-.upload-btn:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-    background: var(--secondary);
-}
-
-.upload-btn i {
-    width: 24px;
-    height: 24px;
-}
-
-.image-preview {
-    position: relative;
-    display: inline-block;
-    margin-top: 12px;
-}
-
-.image-preview img {
-    max-width: 100%;
-    max-height: 150px;
-    border-radius: var(--radius-sm);
-}
-
-.remove-img-btn {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    width: 24px;
-    height: 24px;
-    background: var(--danger);
-    border: none;
-    border-radius: 50%;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.remove-img-btn:hover {
-    transform: scale(1.2);
-}
-
-.remove-img-btn i {
-    width: 14px;
-    height: 14px;
-}
-
-.analyzing {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 20px;
-    color: var(--primary);
-}
-
-.spinner {
-    width: 24px;
-    height: 24px;
-    border: 3px solid var(--gray-border);
-    border-top-color: var(--primary);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.divider {
-    display: flex;
-    align-items: center;
-    margin: 16px 0;
-    color: var(--text-light);
-    font-size: 0.85rem;
-}
-
-.divider::before,
-.divider::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background: var(--gray-border);
-}
-
-.divider span {
-    padding: 0 12px;
-}
-
 .form-group {
     margin-bottom: 16px;
 }
@@ -1706,9 +1571,7 @@ input:checked + .slider::before {
     margin-bottom: 8px;
 }
 
-.form-group input[type="text"],
-.form-group input[type="email"],
-.form-group input[type="password"] {
+.form-group input[type="text"] {
     width: 100%;
     padding: 12px 14px;
     border: 2px solid var(--gray-border);
@@ -1766,17 +1629,6 @@ input:checked + .slider::before {
     height: 20px;
 }
 
-.card-preview-section {
-    text-align: center;
-}
-
-.card-preview-section > label {
-    display: block;
-    font-weight: 500;
-    color: var(--text-light);
-    margin-bottom: 10px;
-}
-
 .card-preview {
     display: inline-flex;
     flex-direction: column;
@@ -1789,27 +1641,28 @@ input:checked + .slider::before {
     box-shadow: var(--shadow);
 }
 
-/* 인증 모달 */
-.auth-modal {
-    max-width: 340px;
+.card-preview .preview-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--secondary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
 }
 
-.error-msg {
-    background: var(--danger-light);
-    color: var(--danger);
-    padding: 10px 12px;
-    border-radius: var(--radius-sm);
-    margin-bottom: 12px;
-    font-size: 0.9rem;
+.card-preview .preview-icon i {
+    width: 22px;
+    height: 22px;
 }
 
-.auth-switch {
-    margin-top: 16px;
-    text-align: center;
-    color: var(--text-light);
+.card-preview .preview-text {
+    font-weight: 600;
+    color: var(--text-dark);
 }
 
-/* 버튼 (개선됨) */
+/* 버튼 */
 .primary-btn {
     display: inline-flex;
     align-items: center;
@@ -1834,10 +1687,6 @@ input:checked + .slider::before {
 
 .primary-btn:active {
     transform: scale(0.97);
-}
-
-.primary-btn.full {
-    width: 100%;
 }
 
 .primary-btn i {
@@ -1898,7 +1747,7 @@ input:checked + .slider::before {
     height: 16px;
 }
 
-/* 롱프레스 메뉴 (개선됨) */
+/* 롱프레스 메뉴 */
 .longpress-overlay {
     position: fixed;
     inset: 0;
@@ -2041,38 +1890,295 @@ body.dark-mode .ai-feature {
     color: var(--text-light);
 }
 
-/* ========== 반응형 최적화 ========== */
-@media (min-width: 768px) {
-    .cards-container {
-        grid-template-columns: repeat(4, 1fr);
-    }
-    
-    .card {
-        padding: 16px 10px;
-    }
-    
-    .card-icon {
-        width: 48px;
-        height: 48px;
-    }
-    
-    .emergency-btn {
-        padding: 14px 10px;
-    }
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--gray-border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
 }
 
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ========== 반응형: 작은 모바일 (360px 이하) - 카드 3개 ========== */
 @media (max-width: 360px) {
-    .cards-container {
-        grid-template-columns: repeat(2, 1fr);
+    :root {
+        --card-columns: 3;
+        --card-gap: 8px;
+        --card-padding: 12px 6px;
+        --card-icon-size: 36px;
+        --base-font-size: 14px;
+        --card-text-size: 0.75rem;
+        --tab-text-size: 0.7rem;
+    }
+    
+    .app-container {
+        max-width: 100%;
     }
     
     .emergency-bar {
-        flex-wrap: wrap;
+        padding: 10px 12px;
+        gap: 6px;
     }
     
     .emergency-btn {
-        flex: 1 1 calc(50% - 4px);
-        min-width: 100px;
+        padding: 10px 6px;
+        font-size: 0.75rem;
+    }
+    
+    .emergency-btn i {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .category-tabs {
+        padding: 10px;
+        gap: 4px;
+    }
+    
+    .tab-btn {
+        padding: 6px 10px;
+    }
+    
+    .tab-btn i {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .cards-area {
+        padding: 10px;
+    }
+    
+    .card-icon i {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .add-card-btn {
+        min-height: 76px;
+        font-size: 0.7rem;
+    }
+    
+    .add-card-btn i {
+        width: 20px;
+        height: 20px;
+    }
+    
+    /* 확인 모달 - 작은 모바일 */
+    .confirm-modal {
+        max-width: 280px;
+        padding: 24px 20px;
+    }
+    
+    .confirm-icon {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 16px;
+    }
+    
+    .confirm-icon i {
+        width: 26px;
+        height: 26px;
+    }
+    
+    .confirm-message {
+        font-size: 0.95rem;
+        margin-bottom: 20px;
+    }
+    
+    .confirm-buttons {
+        gap: 10px;
+    }
+    
+    .confirm-buttons button {
+        padding: 12px 14px;
+        font-size: 0.95rem;
+    }
+    
+    .output-bar {
+        padding: 0 12px;
+        gap: 8px;
+    }
+    
+    .output-text {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .output-btn {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .output-btn i {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+/* ========== 반응형: 일반 모바일 (361px ~ 767px) - 카드 4개 ========== */
+@media (min-width: 361px) and (max-width: 767px) {
+    :root {
+        --card-columns: 4;
+        --card-gap: 10px;
+        --card-padding: 14px 8px;
+        --card-icon-size: 44px;
+    }
+}
+
+/* ========== 반응형: 태블릿 (768px 이상) - 카드 5개 ========== */
+@media (min-width: 768px) {
+    :root {
+        --card-columns: 5;
+        --card-gap: 12px;
+        --card-padding: 16px 10px;
+        --card-icon-size: 52px;
+        --base-font-size: 18px;
+        --card-text-size: 0.9rem;
+        --tab-text-size: 0.8rem;
+        --menu-text-size: 1rem;
+    }
+    
+    .app-container {
+        max-width: 800px;
+    }
+    
+    .emergency-bar {
+        padding: 14px 20px;
+        gap: 12px;
+    }
+    
+    .emergency-btn {
+        padding: 14px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .emergency-btn i {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .category-tabs {
+        padding: 14px 16px;
+        gap: 8px;
+    }
+    
+    .tab-btn {
+        padding: 10px 18px;
+    }
+    
+    .tab-btn i {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .cards-area {
+        padding: 16px;
+    }
+    
+    .card-icon i {
+        width: 26px;
+        height: 26px;
+    }
+    
+    .add-card-btn {
+        min-height: 100px;
+        font-size: 0.85rem;
+    }
+    
+    .add-card-btn i {
+        width: 28px;
+        height: 28px;
+    }
+    
+    /* 확인 모달 - 태블릿 */
+    .confirm-modal {
+        max-width: 380px;
+        padding: 32px 28px;
+    }
+    
+    .confirm-icon {
+        width: 70px;
+        height: 70px;
+        margin-bottom: 24px;
+    }
+    
+    .confirm-icon i {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .confirm-message {
+        font-size: 1.15rem;
+        margin-bottom: 28px;
+    }
+    
+    .confirm-buttons button {
+        padding: 16px 20px;
+        font-size: 1.05rem;
+    }
+    
+    .output-bar {
+        height: 80px;
+        padding: 0 20px;
+        gap: 14px;
+    }
+    
+    .output-text {
+        padding: 14px 18px;
+        font-size: 1.1rem;
+    }
+    
+    .output-btn {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .output-btn i {
+        width: 26px;
+        height: 26px;
+    }
+    
+    .tab-bar {
+        height: 72px;
+    }
+    
+    .tab-bar-btn {
+        font-size: 0.8rem;
+    }
+    
+    .tab-bar-btn i {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .listener-text {
+        font-size: 3rem;
+    }
+    
+    .listener-icon {
+        width: 140px;
+        height: 140px;
+    }
+    
+    .listener-icon i {
+        width: 70px;
+        height: 70px;
+    }
+}
+
+/* ========== 반응형: 큰 태블릿/데스크탑 (1024px 이상) - 카드 6개 ========== */
+@media (min-width: 1024px) {
+    :root {
+        --card-columns: 6;
+        --card-gap: 14px;
+    }
+    
+    .app-container {
+        max-width: 960px;
     }
 }
 
@@ -2083,7 +2189,32 @@ body.dark-mode .ai-feature {
     .tab-btn:active,
     .output-btn:not(:disabled):active,
     .primary-btn:active,
-    .ai-suggest-btn:active {
+    .secondary-btn:active,
+    .danger-btn:active {
         transform: scale(0.95);
+    }
+}
+
+/* ========== 접근성: 고대비 모드 ========== */
+@media (prefers-contrast: high) {
+    :root {
+        --gray-border: #000000;
+        --text-medium: #333333;
+    }
+    
+    .card {
+        border-width: 3px;
+    }
+    
+    .card.selected {
+        border-color: #000000;
+    }
+}
+
+/* ========== 접근성: 움직임 감소 ========== */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
     }
 }

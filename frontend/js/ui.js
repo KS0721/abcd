@@ -1,0 +1,666 @@
+// ========================================
+// ui.js - 카드 렌더링, 모달, 슬라이드, UI
+// ========================================
+console.log('🎨 ui.js 로드됨');
+
+// ========================================
+// 슬라이드 네비게이션
+// ========================================
+function goToSlide(index) {
+    const wrapper = document.getElementById('slideWrapper');
+    const tabs = document.querySelectorAll('.tab-bar-btn');
+    
+    State.currentSlide = index;
+    wrapper.style.transform = `translateX(-${index * 100}%)`;
+    
+    tabs.forEach((tab, i) => {
+        tab.classList.toggle('active', i === index);
+    });
+    
+    if (index === 1) renderHistory();
+    
+    lucide.createIcons();
+}
+
+function handleSwipe() {
+    const diff = touchStartX - touchEndX;
+    const threshold = 80;
+    
+    if (Math.abs(diff) > threshold) {
+        if (diff > 0 && State.currentSlide < 3) {
+            goToSlide(State.currentSlide + 1);
+        } else if (diff < 0 && State.currentSlide > 0) {
+            goToSlide(State.currentSlide - 1);
+        }
+    }
+}
+
+// ========================================
+// TTS
+// ========================================
+function speak(text) {
+    if ('speechSynthesis' in window && text) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'ko-KR';
+        utterance.rate = 0.9;
+        utterance.pitch = 1;
+        window.speechSynthesis.speak(utterance);
+    }
+}
+
+// ========================================
+// 출력 바 업데이트
+// ========================================
+function updateOutputBar() {
+    const sentence = buildSentence();
+    const outputText = document.getElementById('outputText');
+    const speakBtn = document.getElementById('speakBtn');
+    const showBtn = document.getElementById('showBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    
+    if (sentence) {
+        outputText.innerHTML = sentence;
+        outputText.classList.add('has-message');
+        speakBtn.disabled = false;
+        showBtn.disabled = false;
+        clearBtn.disabled = false;
+        State.currentMessage = sentence;
+        State.currentIcon = Selection.predicate?.icon || 'message-circle';
+    } else {
+        outputText.innerHTML = '<span class="placeholder">카드를 선택하세요</span>';
+        outputText.classList.remove('has-message');
+        speakBtn.disabled = true;
+        showBtn.disabled = true;
+        clearBtn.disabled = true;
+        State.currentMessage = '';
+    }
+    
+    updateCardStyles();
+}
+
+function updateCardStyles() {
+    document.querySelectorAll('.card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    
+    const allSelected = [];
+    
+    if (Selection.time) {
+        allSelected.push({ text: Selection.time.text, category: 'time' });
+    }
+    
+    Selection.place.forEach(item => {
+        allSelected.push({ text: item.text, category: 'place' });
+    });
+    
+    Selection.person.forEach(item => {
+        allSelected.push({ text: item.text, category: 'person' });
+    });
+    
+    Selection.food.forEach(item => {
+        allSelected.push({ text: item.text, category: 'food' });
+    });
+    
+    Selection.need.forEach(item => {
+        allSelected.push({ text: item.text, category: 'need' });
+    });
+    
+    if (Selection.predicate) {
+        allSelected.push({ text: Selection.predicate.text, category: Selection.predicate.category });
+    }
+    
+    allSelected.forEach(item => {
+        document.querySelectorAll('.card').forEach(card => {
+            const cardText = card.dataset.text;
+            const cardCategory = card.dataset.category;
+            
+            if (cardText === item.text && cardCategory === item.category) {
+                card.classList.add('selected');
+            }
+        });
+    });
+}
+
+// ========================================
+// 추천 탭 관리
+// ========================================
+function showSuggestionTab(predicateText) {
+    const suggestion = VERB_SUGGESTIONS[predicateText];
+    
+    if (!suggestion || !suggestion.show) {
+        hideSuggestionTab();
+        return;
+    }
+    
+    State.showSuggestions = true;
+    State.currentPredicate = predicateText;
+    
+    const categoryTabs = document.querySelector('.category-tabs');
+    let suggestionTab = document.getElementById('suggestionTab');
+    
+    if (!suggestionTab) {
+        suggestionTab = document.createElement('button');
+        suggestionTab.id = 'suggestionTab';
+        suggestionTab.className = 'tab-btn suggestion-tab';
+        suggestionTab.dataset.category = 'suggestion';
+        suggestionTab.innerHTML = `<i data-lucide="sparkles"></i><span>추천</span>`;
+        suggestionTab.addEventListener('click', () => {
+            document.querySelectorAll('.category-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+            suggestionTab.classList.add('active');
+            renderSuggestionCards(predicateText);
+        });
+        categoryTabs.insertBefore(suggestionTab, categoryTabs.firstChild);
+    }
+    
+    document.querySelectorAll('.category-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+    suggestionTab.classList.add('active');
+    renderSuggestionCards(predicateText);
+    
+    suggestionTab.scrollIntoView({ behavior: 'smooth', inline: 'start' });
+    
+    lucide.createIcons();
+}
+
+function hideSuggestionTab() {
+    State.showSuggestions = false;
+    State.currentPredicate = null;
+    const suggestionTab = document.getElementById('suggestionTab');
+    if (suggestionTab) {
+        suggestionTab.remove();
+    }
+}
+
+function renderSuggestionCards(predicateText) {
+    const container = document.getElementById('cardsContainer');
+    if (!container) return;
+    
+    const suggestion = VERB_SUGGESTIONS[predicateText];
+    if (!suggestion || !suggestion.show) return;
+    
+    container.innerHTML = '';
+    
+    suggestion.categories.forEach(category => {
+        let allCards = getCardData(category);
+        
+        // food 카테고리 필터링
+        if (category === 'food' && suggestion.foodFilter) {
+            allCards = allCards.filter(card => card.type === suggestion.foodFilter);
+        }
+        
+        allCards.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'card suggestion-card';
+            card.dataset.text = item.text;
+            card.dataset.category = category;
+            card.innerHTML = `
+                <div class="card-icon"><i data-lucide="${item.icon}"></i></div>
+                <div class="card-text">${item.text}</div>
+            `;
+            
+            card.addEventListener('click', () => {
+                handleCardSelect(category, item, item.text);
+            });
+            
+            container.appendChild(card);
+        });
+    });
+    
+    const painScale = document.getElementById('painScale');
+    if (painScale) painScale.classList.add('hidden');
+    
+    lucide.createIcons();
+    updateCardStyles();
+}
+
+// ========================================
+// 카드 렌더링
+// ========================================
+function renderCards(category) {
+    const container = document.getElementById('cardsContainer');
+    if (!container) return;
+    
+    State.currentCategory = category;
+    const cards = getCardData(category);
+    const userCardTexts = (State.userCards[category] || []).map(c => c.text);
+    
+    container.innerHTML = '';
+    
+    cards.forEach(item => {
+        let displayText = item.text;
+        
+        if (category === 'pain') {
+            if (!['어지러움', '토할 것 같음', '추움', '열남'].includes(item.text)) {
+                displayText = item.text + ' 아파요';
+            } else if (item.text === '어지러움') displayText = '어지러워요';
+            else if (item.text === '토할 것 같음') displayText = '토할 것 같아요';
+            else if (item.text === '추움') displayText = '추워요';
+            else if (item.text === '열남') displayText = '열나요';
+        }
+        
+        const isUserCard = userCardTexts.includes(item.text);
+        
+        const card = document.createElement('div');
+        card.className = `card${isUserCard ? ' user-card' : ''}`;
+        card.dataset.text = item.text;
+        card.dataset.category = category;
+        card.innerHTML = `
+            <div class="card-icon"><i data-lucide="${item.icon}"></i></div>
+            <div class="card-text">${displayText}</div>
+            ${isUserCard ? `<button class="delete-btn" title="삭제"><i data-lucide="x"></i></button>` : ''}
+        `;
+        
+        card.addEventListener('click', (e) => {
+            if (e.target.closest('.delete-btn')) return;
+            handleCardSelect(category, { ...item, displayText }, displayText);
+        });
+        
+        if (isUserCard) {
+            card.querySelector('.delete-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteUserCard(category, item.text);
+            });
+        }
+        
+        setupLongPress(card, displayText, item.icon);
+        
+        container.appendChild(card);
+    });
+    
+    const addBtn = document.createElement('div');
+    addBtn.className = 'add-card-btn';
+    addBtn.innerHTML = `<i data-lucide="plus"></i><span>추가</span>`;
+    addBtn.addEventListener('click', () => openAddCardModal(category));
+    container.appendChild(addBtn);
+    
+    const painScale = document.getElementById('painScale');
+    if (painScale) painScale.classList.toggle('hidden', category !== 'pain');
+    
+    lucide.createIcons();
+    updateCardStyles();
+}
+
+// ========================================
+// 통증 버튼 생성
+// ========================================
+function createPainButtons() {
+    const container = document.getElementById('painButtons');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    for (let i = 1; i <= 10; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'pain-btn';
+        btn.dataset.level = i;
+        btn.textContent = i;
+        
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.pain-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            State.selectedPainLevel = i;
+            updatePainMessage();
+        });
+        
+        container.appendChild(btn);
+    }
+}
+
+// ========================================
+// 기록 렌더링
+// ========================================
+function renderHistory() {
+    const container = document.getElementById('historyContainer');
+    if (!container) return;
+    
+    if (State.sentenceHistory.length === 0) {
+        container.innerHTML = '<p class="empty-message">아직 사용 기록이 없습니다</p>';
+        return;
+    }
+    
+    container.innerHTML = State.sentenceHistory.map(sentence => `
+        <div class="history-item" data-text="${sentence}">
+            <div class="icon"><i data-lucide="message-square"></i></div>
+            <div class="text">${sentence}</div>
+        </div>
+    `).join('');
+    
+    container.querySelectorAll('.history-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const text = item.dataset.text;
+            clearSelection();
+            Selection.predicate = { text, icon: 'history', displayText: text, category: 'history' };
+            updateOutputBar();
+            speak(text);
+            goToSlide(0);
+        });
+    });
+    
+    lucide.createIcons();
+}
+
+// ========================================
+// 롱프레스 메뉴
+// ========================================
+let longPressTimer = null;
+
+function setupLongPress(card, text, icon) {
+    const startPress = (e) => {
+        if (e.target.closest('.delete-btn')) return;
+        
+        longPressTimer = setTimeout(() => {
+            showLongPressMenu(text, icon, e);
+        }, 500);
+    };
+    
+    const endPress = () => clearTimeout(longPressTimer);
+    
+    card.addEventListener('mousedown', startPress);
+    card.addEventListener('mouseup', endPress);
+    card.addEventListener('mouseleave', endPress);
+    card.addEventListener('touchstart', startPress, { passive: true });
+    card.addEventListener('touchend', endPress);
+    card.addEventListener('touchcancel', endPress);
+}
+
+function showLongPressMenu(text, icon, e) {
+    const conjugation = verbConjugations[text];
+    if (!conjugation) return;
+    
+    closeLongPressMenu();
+    
+    const overlay = document.getElementById('longpressOverlay');
+    const menu = document.getElementById('longpressMenu');
+    
+    overlay.classList.remove('hidden');
+    menu.classList.remove('hidden');
+    
+    menu.innerHTML = `
+        <div class="longpress-menu-header">${text}</div>
+        <div class="longpress-menu-section">
+            <div class="longpress-menu-label">시제</div>
+            <div class="longpress-menu-item selected" data-text="${text}">${text} <span class="tag">현재</span></div>
+            <div class="longpress-menu-item" data-text="${conjugation.past}">${conjugation.past} <span class="tag">과거</span></div>
+            <div class="longpress-menu-item" data-text="${conjugation.future}">${conjugation.future} <span class="tag">미래</span></div>
+        </div>
+        <div class="longpress-menu-section">
+            <div class="longpress-menu-label">존댓말</div>
+            <div class="longpress-menu-item" data-text="${conjugation.casual}">${conjugation.casual} <span class="tag">반말</span></div>
+            <div class="longpress-menu-item" data-text="${conjugation.formal}">${conjugation.formal} <span class="tag">높임</span></div>
+        </div>
+    `;
+    
+    const rect = e.target.closest('.card').getBoundingClientRect();
+    menu.style.left = `${Math.min(rect.left, window.innerWidth - 200)}px`;
+    menu.style.top = `${Math.max(rect.top - 200, 10)}px`;
+    
+    menu.querySelectorAll('.longpress-menu-item').forEach(item => {
+        item.addEventListener('click', () => {
+            Selection.predicate = { text: item.dataset.text, icon, displayText: item.dataset.text, category: 'action' };
+            updateOutputBar();
+            closeLongPressMenu();
+        });
+    });
+    
+    overlay.addEventListener('click', closeLongPressMenu);
+}
+
+function closeLongPressMenu() {
+    document.getElementById('longpressOverlay')?.classList.add('hidden');
+    document.getElementById('longpressMenu')?.classList.add('hidden');
+}
+
+// ========================================
+// 청자 모드 모달
+// ========================================
+function showListenerModal(text, icon) {
+    const modal = document.getElementById('listenerModal');
+    const iconEl = document.getElementById('listenerIcon');
+    const textEl = document.getElementById('listenerText');
+    
+    iconEl.innerHTML = `<i data-lucide="${icon}"></i>`;
+    textEl.textContent = text;
+    modal.classList.remove('hidden');
+    
+    lucide.createIcons();
+}
+
+function closeListenerModal() {
+    document.getElementById('listenerModal')?.classList.add('hidden');
+}
+
+// ========================================
+// 음성 인식 모달
+// ========================================
+function closeListenModal() {
+    document.getElementById('listenResultModal')?.classList.add('hidden');
+}
+
+async function startListening() {
+    const btn = document.getElementById('listenBtn');
+    const modal = document.getElementById('listenResultModal');
+    const heardText = document.getElementById('heardText');
+    const responses = document.getElementById('aiResponses');
+    
+    if (State.isListening) return;
+    
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert('이 브라우저에서는 음성 인식을 지원하지 않습니다.');
+        return;
+    }
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'ko-KR';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    
+    try {
+        State.isListening = true;
+        btn.classList.add('listening');
+        
+        recognition.start();
+        
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            
+            heardText.textContent = transcript;
+            modal.classList.remove('hidden');
+            responses.innerHTML = '<div class="loading"><div class="spinner"></div><span>추천 중...</span></div>';
+            
+            const dummyResponses = getDummyResponses(transcript);
+            
+            setTimeout(() => {
+                responses.innerHTML = dummyResponses.map(r => 
+                    `<button class="ai-response-btn" data-response="${r}">${r}</button>`
+                ).join('');
+                
+                responses.querySelectorAll('.ai-response-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        clearSelection();
+                        Selection.predicate = { text: btn.dataset.response, icon: 'message-circle', displayText: btn.dataset.response, category: 'response' };
+                        updateOutputBar();
+                        speak(btn.dataset.response);
+                        addToHistory(btn.dataset.response);
+                        closeListenModal();
+                    });
+                });
+                
+                lucide.createIcons();
+            }, 300);
+            
+            State.isListening = false;
+            btn.classList.remove('listening');
+        };
+        
+        recognition.onerror = (event) => {
+            console.error('음성 인식 오류:', event.error);
+            alert('음성 인식에 실패했습니다. 다시 시도해주세요.');
+            State.isListening = false;
+            btn.classList.remove('listening');
+        };
+        
+        recognition.onend = () => {
+            State.isListening = false;
+            btn.classList.remove('listening');
+        };
+        
+    } catch (error) {
+        alert('음성 인식 실패: ' + error.message);
+        State.isListening = false;
+        btn.classList.remove('listening');
+    }
+}
+
+// ========================================
+// 카드 추가 모달
+// ========================================
+let addingToCategory = 'action';
+let selectedIconForNewCard = 'message-circle';
+
+function openAddCardModal(category) {
+    addingToCategory = category;
+    selectedIconForNewCard = 'message-circle';
+    
+    const modal = document.getElementById('addCardModal');
+    const iconSelector = document.getElementById('iconSelector');
+    const textInput = document.getElementById('newCardText');
+    
+    textInput.value = '';
+    
+    iconSelector.innerHTML = availableIcons.map(icon => `
+        <div class="icon-option ${icon === selectedIconForNewCard ? 'selected' : ''}" data-icon="${icon}">
+            <i data-lucide="${icon}"></i>
+        </div>
+    `).join('');
+    
+    iconSelector.querySelectorAll('.icon-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            iconSelector.querySelectorAll('.icon-option').forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+            selectedIconForNewCard = opt.dataset.icon;
+            updateCardPreview();
+        });
+    });
+    
+    updateCardPreview();
+    modal.classList.remove('hidden');
+    lucide.createIcons();
+}
+
+function closeAddCardModal() {
+    document.getElementById('addCardModal')?.classList.add('hidden');
+}
+
+function updateCardPreview() {
+    const preview = document.getElementById('cardPreview');
+    const text = document.getElementById('newCardText')?.value || '새 카드';
+    
+    preview.innerHTML = `
+        <div class="preview-icon"><i data-lucide="${selectedIconForNewCard}"></i></div>
+        <span class="preview-text">${text}</span>
+    `;
+    lucide.createIcons();
+}
+
+function confirmAddCard() {
+    const text = document.getElementById('newCardText')?.value.trim();
+    
+    if (!text) {
+        alert('카드 텍스트를 입력해주세요');
+        return;
+    }
+    
+    const existing = getCardData(addingToCategory);
+    if (existing.some(c => c.text === text)) {
+        alert('이미 같은 이름의 카드가 있습니다');
+        return;
+    }
+    
+    if (!State.userCards[addingToCategory]) {
+        State.userCards[addingToCategory] = [];
+    }
+    
+    State.userCards[addingToCategory].push({
+        icon: selectedIconForNewCard,
+        text: text
+    });
+    
+    saveUserCards();
+    closeAddCardModal();
+    renderCards(addingToCategory);
+    
+    alert(`"${text}" 카드가 추가되었습니다`);
+}
+
+// ========================================
+// 확인 모달 (커스텀 confirm)
+// ========================================
+let confirmResolve = null;
+
+function showConfirmModal(message) {
+    return new Promise((resolve) => {
+        confirmResolve = resolve;
+        
+        const modal = document.getElementById('confirmModal');
+        const messageEl = document.getElementById('confirmMessage');
+        
+        if (!modal || !messageEl) {
+            // 모달이 없으면 기본 confirm 사용
+            resolve(confirm(message));
+            return;
+        }
+        
+        messageEl.textContent = message;
+        modal.classList.remove('hidden');
+        
+        lucide.createIcons();
+    });
+}
+
+function closeConfirmModal(result) {
+    const modal = document.getElementById('confirmModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+    
+    if (confirmResolve) {
+        confirmResolve(result);
+        confirmResolve = null;
+    }
+}
+
+// ========================================
+// 폰트 크기 적용
+// ========================================
+function applyFontSize(size) {
+    const sizeMap = {
+        'small': '14px',
+        'medium': '16px',
+        'large': '18px'
+    };
+    
+    const rootSize = sizeMap[size] || '16px';
+    document.documentElement.style.setProperty('--base-font-size', rootSize);
+    
+    const cardSizeMap = {
+        'small': '0.75rem',
+        'medium': '0.85rem',
+        'large': '0.95rem'
+    };
+    document.documentElement.style.setProperty('--card-text-size', cardSizeMap[size] || '0.85rem');
+    
+    const tabSizeMap = {
+        'small': '0.7rem',
+        'medium': '0.75rem',
+        'large': '0.85rem'
+    };
+    document.documentElement.style.setProperty('--tab-text-size', tabSizeMap[size] || '0.75rem');
+    
+    const menuSizeMap = {
+        'small': '0.8rem',
+        'medium': '0.9rem',
+        'large': '1rem'
+    };
+    document.documentElement.style.setProperty('--menu-text-size', menuSizeMap[size] || '0.9rem');
+}
