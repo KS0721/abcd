@@ -8,7 +8,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#4A90A4">
     <title>올인원 AAC</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/modal.css">
+    <link rel="stylesheet" href="css/responsive.css">
     <link rel="manifest" href="manifest.json">
 </head>
 <body>
@@ -23,9 +27,6 @@
                 </div>
             </div>
             <div class="header-right">
-                <button id="listenBtn" class="header-action-btn listen" title="상대방 말 듣기">
-                    <i data-lucide="mic"></i>
-                </button>
             </div>
         </header>
 
@@ -168,20 +169,21 @@
                             </div>
                         </div>
 
-                        <!-- 음성 설정 -->
+                        <!-- 진동 설정 -->
                         <div class="settings-section">
                             <div class="settings-section-title">
-                                <i data-lucide="volume-2"></i>
-                                <span>음성</span>
+                                <i data-lucide="vibrate"></i>
+                                <span>피드백</span>
                             </div>
-                            <div class="setting-item ai-feature">
-                                <div class="ai-feature-info">
-                                    <i data-lucide="sparkles"></i>
-                                    <div>
-                                        <strong>스마트 음성 (준비 중)</strong>
-                                        <p>주변 소음에 따라 자동으로 음량과 속도가 조절됩니다</p>
-                                    </div>
-                                </div>
+                            <div class="setting-item toggle">
+                                <label>
+                                    <i data-lucide="smartphone"></i>
+                                    진동 피드백
+                                </label>
+                                <label class="switch">
+                                    <input type="checkbox" id="vibrationToggle" checked>
+                                    <span class="slider"></span>
+                                </label>
                             </div>
                         </div>
 
@@ -204,13 +206,6 @@
                                     <div>
                                         <strong>추천 기능</strong>
                                         <p>동사 선택 시 관련 단어를 추천해줍니다</p>
-                                    </div>
-                                </div>
-                                <div class="help-item">
-                                    <i data-lucide="mic"></i>
-                                    <div>
-                                        <strong>음성 인식</strong>
-                                        <p>마이크 버튼으로 상대방 말 듣고 답변 추천</p>
                                     </div>
                                 </div>
                                 <div class="help-item">
@@ -285,32 +280,6 @@
                 <i data-lucide="message-circle"></i>
             </div>
             <div id="listenerText" class="listener-text">메시지</div>
-        </div>
-    </div>
-
-    <!-- ========== 음성 인식 결과 모달 ========== -->
-    <div id="listenResultModal" class="modal-overlay hidden">
-        <div class="modal-content listen-modal">
-            <div class="modal-header">
-                <h3>
-                    <i data-lucide="mic"></i>
-                    상대방이 말한 내용
-                </h3>
-                <button id="closeListenModal" class="modal-close-btn">
-                    <i data-lucide="x"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="heard-text-box">
-                    <i data-lucide="quote"></i>
-                    <span id="heardText">인식된 내용</span>
-                </div>
-                <div class="response-title">
-                    <i data-lucide="message-circle"></i>
-                    <span>이렇게 답해보세요</span>
-                </div>
-                <div id="aiResponses" class="ai-responses"></div>
-            </div>
         </div>
     </div>
 

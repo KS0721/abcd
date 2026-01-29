@@ -15,7 +15,6 @@ const State = {
     selectedPainLevel: null,
     userCards: {},
     sentenceHistory: [],
-    isListening: false,
     showSuggestions: false,
     currentPredicate: null
 };
@@ -57,16 +56,30 @@ function loadLocalData() {
     const settings = localStorage.getItem('aac_settings');
     if (settings) {
         const s = JSON.parse(settings);
+        
+        // 다크모드
         if (s.darkMode) document.body.classList.add('dark-mode');
         const darkModeToggle = document.getElementById('darkModeToggle');
         if (darkModeToggle) darkModeToggle.checked = s.darkMode || false;
         
+        // 폰트 크기
         if (s.fontSize) {
             document.body.classList.add(`font-${s.fontSize}`);
             const fontSizeSelect = document.getElementById('fontSize');
             if (fontSizeSelect) fontSizeSelect.value = s.fontSize;
             applyFontSize(s.fontSize);
         }
+        
+        // 진동 설정 (기본값: true)
+        const vibrationToggle = document.getElementById('vibrationToggle');
+        if (vibrationToggle) {
+            // vibration이 명시적으로 false가 아니면 true (기본값 ON)
+            vibrationToggle.checked = s.vibration !== false;
+        }
+    } else {
+        // 설정이 없으면 진동 기본값 ON
+        const vibrationToggle = document.getElementById('vibrationToggle');
+        if (vibrationToggle) vibrationToggle.checked = true;
     }
 }
 
@@ -81,7 +94,8 @@ function saveUserCards() {
 function saveSettings() {
     const settings = {
         darkMode: document.body.classList.contains('dark-mode'),
-        fontSize: document.getElementById('fontSize')?.value || 'medium'
+        fontSize: document.getElementById('fontSize')?.value || 'medium',
+        vibration: document.getElementById('vibrationToggle')?.checked !== false
     };
     localStorage.setItem('aac_settings', JSON.stringify(settings));
 }
@@ -222,20 +236,4 @@ function getAllWords() {
         });
     });
     return words;
-}
-
-// ========================================
-// 음성 응답 더미 데이터
-// ========================================
-function getDummyResponses(heardText) {
-    if (heardText.includes('먹') || heardText.includes('밥')) {
-        return ['네, 먹었어요', '아니요, 아직이요', '배고파요', '괜찮아요', '나중에 먹을래요'];
-    }
-    if (heardText.includes('아프') || heardText.includes('아파')) {
-        return ['네, 아파요', '아니요, 괜찮아요', '조금 아파요', '많이 아파요', '여기가 아파요'];
-    }
-    if (heardText.includes('괜찮')) {
-        return ['네, 괜찮아요', '아니요', '조금 힘들어요', '도와주세요'];
-    }
-    return ['네', '아니요', '괜찮아요', '잘 모르겠어요', '다시 말해주세요'];
 }

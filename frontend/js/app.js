@@ -19,6 +19,7 @@ function setupEventListeners() {
     // 하단 탭 바
     document.querySelectorAll('.tab-bar-btn').forEach(btn => {
         btn.addEventListener('click', () => {
+            vibrate();
             goToSlide(parseInt(btn.dataset.slide));
         });
     });
@@ -26,6 +27,7 @@ function setupEventListeners() {
     // 카테고리 탭
     document.querySelectorAll('.category-tabs .tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
+            vibrate();
             document.querySelectorAll('.category-tabs .tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             renderCards(btn.dataset.category);
@@ -55,6 +57,8 @@ function setupEventListeners() {
     // 출력 바 버튼들
     document.getElementById('speakBtn')?.addEventListener('click', () => {
         if (State.currentMessage) {
+            vibrate();
+            showListenerModal(State.currentMessage, State.currentIcon, false);
             speak(State.currentMessage);
             addToHistory(State.currentMessage);
         }
@@ -62,13 +66,14 @@ function setupEventListeners() {
     
     document.getElementById('showBtn')?.addEventListener('click', () => {
         if (State.currentMessage) {
-            showListenerModal(State.currentMessage, State.currentIcon);
-            speak(State.currentMessage);
+            vibrate();
+            showListenerModal(State.currentMessage, State.currentIcon, false);
             addToHistory(State.currentMessage);
         }
     });
     
     document.getElementById('clearBtn')?.addEventListener('click', () => {
+        vibrate();
         clearSelection();
         State.currentMessage = '';
         State.currentIcon = 'message-circle';
@@ -80,6 +85,7 @@ function setupEventListeners() {
     // 긴급 버튼
     document.querySelectorAll('.emergency-btn').forEach(btn => {
         btn.addEventListener('click', () => {
+            vibrate(100); // 긴급은 진동 더 길게
             const text = btn.dataset.text;
             const icon = btn.dataset.icon || 'alert-triangle';
             
@@ -87,20 +93,20 @@ function setupEventListeners() {
             Selection.predicate = { text, icon, displayText: text, category: 'emergency' };
             updateOutputBar();
             speak(text);
-            showListenerModal(text, icon);
+            showListenerModal(text, icon, true);  // 긴급 모드
             addToHistory(text);
         });
     });
     
     // 청자 모달 닫기
-    document.getElementById('closeListenerModal')?.addEventListener('click', closeListenerModal);
-    
-    // 음성 인식
-    document.getElementById('listenBtn')?.addEventListener('click', startListening);
-    document.getElementById('closeListenModal')?.addEventListener('click', closeListenModal);
+    document.getElementById('closeListenerModal')?.addEventListener('click', () => {
+        vibrate();
+        closeListenerModal();
+    });
     
     // 기록 삭제 (커스텀 모달 사용)
     document.getElementById('clearHistoryBtn')?.addEventListener('click', async () => {
+        vibrate();
         if (State.sentenceHistory.length === 0) {
             alert('삭제할 기록이 없습니다');
             return;
@@ -159,6 +165,7 @@ function setupEventListeners() {
         
         results.querySelectorAll('.search-result-item').forEach(item => {
             item.addEventListener('click', () => {
+                vibrate();
                 const text = item.dataset.text;
                 const icon = item.dataset.icon;
                 const category = item.dataset.category;
@@ -178,30 +185,49 @@ function setupEventListeners() {
     
     // 설정 - 다크모드
     document.getElementById('darkModeToggle')?.addEventListener('change', (e) => {
+        vibrate();
         document.body.classList.toggle('dark-mode', e.target.checked);
         saveSettings();
     });
     
     // 설정 - 폰트 크기
     document.getElementById('fontSize')?.addEventListener('change', (e) => {
+        vibrate();
         document.body.classList.remove('font-small', 'font-medium', 'font-large');
         document.body.classList.add(`font-${e.target.value}`);
         applyFontSize(e.target.value);
         saveSettings();
     });
     
+    // 설정 - 진동
+    document.getElementById('vibrationToggle')?.addEventListener('change', () => {
+        vibrate();
+        saveSettings();
+    });
+    
     // 카드 추가 모달
     document.getElementById('newCardText')?.addEventListener('input', updateCardPreview);
-    document.getElementById('closeAddCardModal')?.addEventListener('click', closeAddCardModal);
-    document.getElementById('cancelAddCard')?.addEventListener('click', closeAddCardModal);
-    document.getElementById('confirmAddCard')?.addEventListener('click', confirmAddCard);
+    document.getElementById('closeAddCardModal')?.addEventListener('click', () => {
+        vibrate();
+        closeAddCardModal();
+    });
+    document.getElementById('cancelAddCard')?.addEventListener('click', () => {
+        vibrate();
+        closeAddCardModal();
+    });
+    document.getElementById('confirmAddCard')?.addEventListener('click', () => {
+        vibrate();
+        confirmAddCard();
+    });
     
     // 확인 모달 버튼
     document.getElementById('confirmCancel')?.addEventListener('click', () => {
+        vibrate();
         closeConfirmModal(false);
     });
     
     document.getElementById('confirmOk')?.addEventListener('click', () => {
+        vibrate();
         closeConfirmModal(true);
     });
 }

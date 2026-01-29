@@ -4,6 +4,15 @@
 console.log('🎨 ui.js 로드됨');
 
 // ========================================
+// 진동
+// ========================================
+function vibrate(duration = 50) {
+    if ('vibrate' in navigator) {
+        navigator.vibrate(duration);
+    }
+}
+
+// ========================================
 // 슬라이드 네비게이션
 // ========================================
 function goToSlide(index) {
@@ -146,6 +155,7 @@ function showSuggestionTab(predicateText) {
         suggestionTab.dataset.category = 'suggestion';
         suggestionTab.innerHTML = `<i data-lucide="sparkles"></i><span>추천</span>`;
         suggestionTab.addEventListener('click', () => {
+            vibrate();
             document.querySelectorAll('.category-tabs .tab-btn').forEach(b => b.classList.remove('active'));
             suggestionTab.classList.add('active');
             renderSuggestionCards(predicateText);
@@ -199,6 +209,7 @@ function renderSuggestionCards(predicateText) {
             `;
             
             card.addEventListener('click', () => {
+                vibrate();
                 handleCardSelect(category, item, item.text);
             });
             
@@ -252,12 +263,14 @@ function renderCards(category) {
         
         card.addEventListener('click', (e) => {
             if (e.target.closest('.delete-btn')) return;
+            vibrate();
             handleCardSelect(category, { ...item, displayText }, displayText);
         });
         
         if (isUserCard) {
             card.querySelector('.delete-btn').addEventListener('click', (e) => {
                 e.stopPropagation();
+                vibrate();
                 deleteUserCard(category, item.text);
             });
         }
@@ -270,7 +283,10 @@ function renderCards(category) {
     const addBtn = document.createElement('div');
     addBtn.className = 'add-card-btn';
     addBtn.innerHTML = `<i data-lucide="plus"></i><span>추가</span>`;
-    addBtn.addEventListener('click', () => openAddCardModal(category));
+    addBtn.addEventListener('click', () => {
+        vibrate();
+        openAddCardModal(category);
+    });
     container.appendChild(addBtn);
     
     const painScale = document.getElementById('painScale');
@@ -296,6 +312,7 @@ function createPainButtons() {
         btn.textContent = i;
         
         btn.addEventListener('click', () => {
+            vibrate();
             document.querySelectorAll('.pain-btn').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected');
             State.selectedPainLevel = i;
@@ -327,6 +344,7 @@ function renderHistory() {
     
     container.querySelectorAll('.history-item').forEach(item => {
         item.addEventListener('click', () => {
+            vibrate();
             const text = item.dataset.text;
             clearSelection();
             Selection.predicate = { text, icon: 'history', displayText: text, category: 'history' };
@@ -349,6 +367,7 @@ function setupLongPress(card, text, icon) {
         if (e.target.closest('.delete-btn')) return;
         
         longPressTimer = setTimeout(() => {
+            vibrate(100);
             showLongPressMenu(text, icon, e);
         }, 500);
     };
@@ -396,6 +415,7 @@ function showLongPressMenu(text, icon, e) {
     
     menu.querySelectorAll('.longpress-menu-item').forEach(item => {
         item.addEventListener('click', () => {
+            vibrate();
             Selection.predicate = { text: item.dataset.text, icon, displayText: item.dataset.text, category: 'action' };
             updateOutputBar();
             closeLongPressMenu();
@@ -413,12 +433,23 @@ function closeLongPressMenu() {
 // ========================================
 // 청자 모드 모달
 // ========================================
-function showListenerModal(text, icon) {
+function showListenerModal(text, icon, isEmergency = false) {
     const modal = document.getElementById('listenerModal');
     const iconEl = document.getElementById('listenerIcon');
     const textEl = document.getElementById('listenerText');
     
-    iconEl.innerHTML = `<i data-lucide="${icon}"></i>`;
+    // 기존 모드 클래스 제거
+    modal.classList.remove('normal-mode', 'emergency-mode');
+    
+    // 긴급 여부에 따라 클래스 추가
+    if (isEmergency) {
+        modal.classList.add('emergency-mode');
+    } else {
+        modal.classList.add('normal-mode');
+    }
+    
+    // 아이콘 크기 크게 설정
+    iconEl.innerHTML = `<i data-lucide="${icon}" style="width: 120px; height: 120px; stroke-width: 1.5;"></i>`;
     textEl.textContent = text;
     modal.classList.remove('hidden');
     
@@ -427,89 +458,14 @@ function showListenerModal(text, icon) {
 
 function closeListenerModal() {
     document.getElementById('listenerModal')?.classList.add('hidden');
-}
-
-// ========================================
-// 음성 인식 모달
-// ========================================
-function closeListenModal() {
-    document.getElementById('listenResultModal')?.classList.add('hidden');
-}
-
-async function startListening() {
-    const btn = document.getElementById('listenBtn');
-    const modal = document.getElementById('listenResultModal');
-    const heardText = document.getElementById('heardText');
-    const responses = document.getElementById('aiResponses');
     
-    if (State.isListening) return;
-    
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        alert('이 브라우저에서는 음성 인식을 지원하지 않습니다.');
-        return;
-    }
-    
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'ko-KR';
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    
-    try {
-        State.isListening = true;
-        btn.classList.add('listening');
-        
-        recognition.start();
-        
-        recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            
-            heardText.textContent = transcript;
-            modal.classList.remove('hidden');
-            responses.innerHTML = '<div class="loading"><div class="spinner"></div><span>추천 중...</span></div>';
-            
-            const dummyResponses = getDummyResponses(transcript);
-            
-            setTimeout(() => {
-                responses.innerHTML = dummyResponses.map(r => 
-                    `<button class="ai-response-btn" data-response="${r}">${r}</button>`
-                ).join('');
-                
-                responses.querySelectorAll('.ai-response-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        clearSelection();
-                        Selection.predicate = { text: btn.dataset.response, icon: 'message-circle', displayText: btn.dataset.response, category: 'response' };
-                        updateOutputBar();
-                        speak(btn.dataset.response);
-                        addToHistory(btn.dataset.response);
-                        closeListenModal();
-                    });
-                });
-                
-                lucide.createIcons();
-            }, 300);
-            
-            State.isListening = false;
-            btn.classList.remove('listening');
-        };
-        
-        recognition.onerror = (event) => {
-            console.error('음성 인식 오류:', event.error);
-            alert('음성 인식에 실패했습니다. 다시 시도해주세요.');
-            State.isListening = false;
-            btn.classList.remove('listening');
-        };
-        
-        recognition.onend = () => {
-            State.isListening = false;
-            btn.classList.remove('listening');
-        };
-        
-    } catch (error) {
-        alert('음성 인식 실패: ' + error.message);
-        State.isListening = false;
-        btn.classList.remove('listening');
-    }
+    // 선택 초기화
+    clearSelection();
+    State.currentMessage = '';
+    State.currentIcon = 'message-circle';
+    State.selectedPainPart = null;
+    State.selectedPainLevel = null;
+    updateOutputBar();
 }
 
 // ========================================
@@ -536,6 +492,7 @@ function openAddCardModal(category) {
     
     iconSelector.querySelectorAll('.icon-option').forEach(opt => {
         opt.addEventListener('click', () => {
+            vibrate();
             iconSelector.querySelectorAll('.icon-option').forEach(o => o.classList.remove('selected'));
             opt.classList.add('selected');
             selectedIconForNewCard = opt.dataset.icon;
@@ -606,7 +563,6 @@ function showConfirmModal(message) {
         const messageEl = document.getElementById('confirmMessage');
         
         if (!modal || !messageEl) {
-            // 모달이 없으면 기본 confirm 사용
             resolve(confirm(message));
             return;
         }
@@ -636,31 +592,31 @@ function closeConfirmModal(result) {
 function applyFontSize(size) {
     const sizeMap = {
         'small': '14px',
-        'medium': '16px',
-        'large': '18px'
+        'medium': '18px',
+        'large': '24px'
     };
     
-    const rootSize = sizeMap[size] || '16px';
+    const rootSize = sizeMap[size] || '18px';
     document.documentElement.style.setProperty('--base-font-size', rootSize);
     
     const cardSizeMap = {
-        'small': '0.75rem',
-        'medium': '0.85rem',
-        'large': '0.95rem'
+        'small': '0.8rem',
+        'medium': '1rem',
+        'large': '1.3rem'
     };
-    document.documentElement.style.setProperty('--card-text-size', cardSizeMap[size] || '0.85rem');
+    document.documentElement.style.setProperty('--card-text-size', cardSizeMap[size] || '1rem');
     
     const tabSizeMap = {
         'small': '0.7rem',
-        'medium': '0.75rem',
-        'large': '0.85rem'
+        'medium': '0.85rem',
+        'large': '1.1rem'
     };
-    document.documentElement.style.setProperty('--tab-text-size', tabSizeMap[size] || '0.75rem');
+    document.documentElement.style.setProperty('--tab-text-size', tabSizeMap[size] || '0.85rem');
     
     const menuSizeMap = {
-        'small': '0.8rem',
-        'medium': '0.9rem',
-        'large': '1rem'
+        'small': '0.85rem',
+        'medium': '1rem',
+        'large': '1.3rem'
     };
-    document.documentElement.style.setProperty('--menu-text-size', menuSizeMap[size] || '0.9rem');
+    document.documentElement.style.setProperty('--menu-text-size', menuSizeMap[size] || '1rem');
 }

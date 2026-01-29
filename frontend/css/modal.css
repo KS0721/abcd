@@ -1,0 +1,408 @@
+/* ========================================
+   modal.css - 모달 공통, 청자모달, 카드추가모달, 확인모달, 롱프레스메뉴
+   ======================================== */
+
+/* ========== 모달 공통 ========== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+    animation: fadeIn 0.25s ease;
+}
+
+.modal-content {
+    width: 100%;
+    max-width: 400px;
+    max-height: 85vh;
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: modalSlideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes modalSlideUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(50px) scale(0.9);
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--gray-border);
+    background: var(--gray-bg);
+}
+
+.modal-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+}
+
+.modal-header h3 i {
+    width: 20px;
+    height: 20px;
+    color: var(--primary);
+}
+
+.modal-close-btn {
+    width: 36px;
+    height: 36px;
+    background: var(--gray-bg);
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-medium);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+    background: var(--danger-light);
+    color: var(--danger);
+    transform: rotate(90deg);
+}
+
+.modal-close-btn i {
+    width: 20px;
+    height: 20px;
+}
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 12px;
+    padding: 16px 20px;
+    border-top: 1px solid var(--gray-border);
+    background: var(--gray-bg);
+}
+
+.modal-footer button {
+    flex: 1;
+}
+
+/* ========== 청자 모드 모달 (풀스크린) ========== */
+.modal-fullscreen {
+    position: fixed;
+    inset: 0;
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-fullscreen .modal-close-fullscreen {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
+    background: var(--gray-bg);
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: var(--shadow);
+}
+
+.modal-fullscreen .modal-close-fullscreen:hover {
+    background: var(--danger-light);
+    color: var(--danger);
+    transform: scale(1.1) rotate(90deg);
+}
+
+.modal-fullscreen .modal-close-fullscreen i {
+    width: 28px;
+    height: 28px;
+}
+
+.listener-content {
+    text-align: center;
+    padding: 40px;
+    animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.listener-icon {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 30px;
+    background: var(--secondary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    box-shadow: 0 8px 24px rgba(255, 120, 73, 0.25);
+    animation: iconPulse 2s ease-in-out infinite;
+}
+
+.listener-icon i {
+    width: 60px;
+    height: 60px;
+}
+
+.listener-text {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    word-break: keep-all;
+    animation: fadeInUp 0.6s ease 0.2s backwards;
+}
+
+/* ========== 청자 모달 - 일반 메시지 (검정+노랑 테두리) ========== */
+.modal-fullscreen.normal-mode {
+    background: #000000;
+}
+
+.modal-fullscreen.normal-mode .listener-icon {
+    width: 180px;
+    height: 180px;
+    background: transparent;
+    border: 6px solid #FFD600;
+    box-shadow: 0 0 30px rgba(255, 214, 0, 0.5);
+}
+
+.modal-fullscreen.normal-mode .listener-icon i {
+    width: 80px;
+    height: 80px;
+    color: #FFD600;
+    stroke-width: 1.5;
+}
+
+.modal-fullscreen.normal-mode .listener-text {
+    color: #FFD600;
+    font-size: 3rem;
+}
+
+.modal-fullscreen.normal-mode .modal-close-fullscreen {
+    background: transparent;
+    border: 2px solid #FFD600;
+    color: #FFD600;
+}
+
+.modal-fullscreen.normal-mode .modal-close-fullscreen:hover {
+    background: #FFD600;
+    color: #000000;
+}
+
+/* ========== 청자 모달 - 긴급 메시지 (검정+빨강 테두리) ========== */
+.modal-fullscreen.emergency-mode {
+    background: #000000;
+}
+
+.modal-fullscreen.emergency-mode .listener-icon {
+    width: 180px;
+    height: 180px;
+    background: transparent;
+    border: 6px solid #FF0000;
+    box-shadow: 0 0 40px rgba(255, 0, 0, 0.6);
+    animation: emergencyPulse 0.8s ease-in-out infinite;
+}
+
+.modal-fullscreen.emergency-mode .listener-icon i {
+    width: 80px;
+    height: 80px;
+    color: #FF0000;
+    stroke-width: 1.5;
+}
+
+.modal-fullscreen.emergency-mode .listener-text {
+    color: #FF0000;
+    font-size: 3rem;
+    animation: emergencyBlink 0.8s ease-in-out infinite;
+}
+
+.modal-fullscreen.emergency-mode .modal-close-fullscreen {
+    background: transparent;
+    border: 2px solid #FF0000;
+    color: #FF0000;
+}
+
+.modal-fullscreen.emergency-mode .modal-close-fullscreen:hover {
+    background: #FF0000;
+    color: #FFFFFF;
+}
+
+@keyframes emergencyPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 40px rgba(255, 0, 0, 0.6);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 60px rgba(255, 0, 0, 1);
+    }
+}
+
+@keyframes emergencyBlink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* ========== 확인 모달 (커스텀 confirm) ========== */
+.confirm-modal {
+    max-width: 320px;
+    text-align: center;
+    padding: 28px 24px;
+    border-radius: var(--radius-lg);
+}
+
+.confirm-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 20px;
+    background: var(--danger-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--danger);
+    animation: iconPulse 2s ease-in-out infinite;
+}
+
+.confirm-icon i {
+    width: 30px;
+    height: 30px;
+}
+
+.confirm-message {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    line-height: 1.5;
+    margin-bottom: 24px;
+    word-break: keep-all;
+}
+
+.confirm-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.confirm-buttons button {
+    flex: 1;
+    padding: 14px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+/* ========== 롱프레스 메뉴 ========== */
+.longpress-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+}
+
+.longpress-menu {
+    position: fixed;
+    background: var(--white);
+    border: 2px solid var(--primary);
+    border-radius: var(--radius);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+    min-width: 180px;
+    z-index: 501;
+    animation: popIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes popIn {
+    from { 
+        opacity: 0; 
+        transform: scale(0.8);
+    }
+    to { 
+        opacity: 1; 
+        transform: scale(1);
+    }
+}
+
+.longpress-menu-header {
+    padding: 12px 14px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    color: white;
+    font-weight: 600;
+    border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.longpress-menu-section {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--gray-border);
+}
+
+.longpress-menu-section:last-child {
+    border-bottom: none;
+}
+
+.longpress-menu-label {
+    padding: 6px 14px;
+    font-size: 0.75rem;
+    color: var(--text-light);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.longpress-menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.longpress-menu-item:hover {
+    background: var(--secondary);
+}
+
+.longpress-menu-item.selected {
+    background: var(--primary);
+    color: white;
+}
+
+.longpress-menu-item .tag {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    background: var(--gray-bg);
+    border-radius: 10px;
+    color: var(--text-light);
+}
+
+.longpress-menu-item.selected .tag {
+    background: rgba(255,255,255,0.2);
+    color: white;
+}
