@@ -24,7 +24,7 @@ const Selection = {
     place: [],
     person: [],
     food: [],
-    need: null,  // 배열에서 단일 객체로 변경
+    need: null,
     predicate: null
 };
 
@@ -36,10 +36,16 @@ function clearSelection() {
     Selection.place = [];
     Selection.person = [];
     Selection.food = [];
-    Selection.need = null;  // 배열에서 null로 변경
+    Selection.need = null;
     Selection.predicate = null;
     State.showSuggestions = false;
     State.currentPredicate = null;
+    State.selectedPainPart = null;
+    State.selectedPainLevel = null;
+    
+    // 통증 버튼 선택 해제
+    document.querySelectorAll('.pain-btn').forEach(b => b.classList.remove('selected'));
+    
     hideSuggestionTab();
 }
 
@@ -57,12 +63,10 @@ function loadLocalData() {
     if (settings) {
         const s = JSON.parse(settings);
         
-        // 다크모드
         if (s.darkMode) document.body.classList.add('dark-mode');
         const darkModeToggle = document.getElementById('darkModeToggle');
         if (darkModeToggle) darkModeToggle.checked = s.darkMode || false;
         
-        // 폰트 크기
         if (s.fontSize) {
             document.body.classList.add(`font-${s.fontSize}`);
             const fontSizeSelect = document.getElementById('fontSize');
@@ -70,13 +74,11 @@ function loadLocalData() {
             applyFontSize(s.fontSize);
         }
         
-        // 진동 설정 (기본값: true)
         const vibrationToggle = document.getElementById('vibrationToggle');
         if (vibrationToggle) {
             vibrationToggle.checked = s.vibration !== false;
         }
     } else {
-        // 설정이 없으면 진동 기본값 ON
         const vibrationToggle = document.getElementById('vibrationToggle');
         if (vibrationToggle) vibrationToggle.checked = true;
     }
@@ -117,7 +119,7 @@ function getCardData(category) {
 }
 
 // ========================================
-// 카드 선택 처리 (모든 단어 유지 - 초기화 없음)
+// 카드 선택 처리
 // ========================================
 function handleCardSelect(category, item, displayText) {
     const card = { 
@@ -125,16 +127,34 @@ function handleCardSelect(category, item, displayText) {
         icon: item.icon, 
         displayText: displayText, 
         category: category, 
-        type: item.type 
+        type: item.type,
+        originalText: item.originalText || item.text
     };
     
     // 서술어 카테고리 (action, feeling, pain) - 단일 선택, 토글
     if (PREDICATE_CATEGORIES.includes(category)) {
-        if (Selection.predicate && Selection.predicate.text === item.text && Selection.predicate.category === category) {
+        const compareText = item.originalText || item.text;
+        
+        if (Selection.predicate && 
+            (Selection.predicate.originalText || Selection.predicate.text) === compareText && 
+            Selection.predicate.category === category) {
             Selection.predicate = null;
+            State.selectedPainPart = null;
+            State.selectedPainLevel = null;
+            document.querySelectorAll('.pain-btn').forEach(b => b.classList.remove('selected'));
             hideSuggestionTab();
         } else {
             Selection.predicate = card;
+            
+            // pain 카테고리인 경우 State에도 저장
+            if (category === 'pain') {
+                State.selectedPainPart = {
+                    text: item.originalText || item.text,
+                    display: displayText,
+                    icon: item.icon
+                };
+            }
+            
             showSuggestionTab(item.text);
         }
     }
@@ -170,7 +190,7 @@ function handleCardSelect(category, item, displayText) {
 }
 
 // ========================================
-// 커스텀 카드 삭제 (커스텀 모달 사용)
+// 커스텀 카드 삭제
 // ========================================
 async function deleteUserCard(category, text) {
     const confirmed = await showConfirmModal(`"${text}" 카드를 삭제할까요?`);
@@ -203,7 +223,8 @@ function updatePainMessage() {
         text: message, 
         icon: State.selectedPainPart.icon,
         displayText: message,
-        category: 'pain'
+        category: 'pain',
+        originalText: State.selectedPainPart.text
     };
     updateOutputBar();
 }

@@ -119,7 +119,6 @@ function updateCardStyles() {
         allSelected.push({ text: Selection.time.text, category: 'time' });
     }
     
-    // 배열 안전하게 처리
     if (Selection.place && Array.isArray(Selection.place)) {
         Selection.place.forEach(item => {
             allSelected.push({ text: item.text, category: 'place' });
@@ -138,13 +137,14 @@ function updateCardStyles() {
         });
     }
     
-    // need는 단일 객체
     if (Selection.need) {
         allSelected.push({ text: Selection.need.text, category: 'need' });
     }
     
+    // predicate는 원본 텍스트로 비교 (pain 카테고리의 경우 originalText 사용)
     if (Selection.predicate) {
-        allSelected.push({ text: Selection.predicate.text, category: Selection.predicate.category });
+        const originalText = Selection.predicate.originalText || Selection.predicate.text;
+        allSelected.push({ text: originalText, category: Selection.predicate.category });
     }
     
     allSelected.forEach(item => {
@@ -221,7 +221,6 @@ function renderSuggestionCards(predicateText) {
     suggestion.categories.forEach(category => {
         let allCards = getCardData(category);
         
-        // food 카테고리 필터링
         if (category === 'food' && suggestion.foodFilter) {
             allCards = allCards.filter(card => card.type === suggestion.foodFilter);
         }
@@ -269,6 +268,7 @@ function renderCards(category) {
     cards.forEach(item => {
         let displayText = item.text;
         
+        // pain 카테고리 텍스트 변환
         if (category === 'pain') {
             if (!['어지러움', '토할 것 같음', '추움', '열남'].includes(item.text)) {
                 displayText = item.text + ' 아파요';
@@ -282,7 +282,7 @@ function renderCards(category) {
         
         const card = document.createElement('div');
         card.className = `card${isUserCard ? ' user-card' : ''}`;
-        card.dataset.text = item.text;
+        card.dataset.text = item.text;  // 원본 텍스트 저장 (비교용)
         card.dataset.category = category;
         card.dataset.icon = item.icon;
         card.innerHTML = `
@@ -294,7 +294,13 @@ function renderCards(category) {
         card.addEventListener('click', (e) => {
             if (e.target.closest('.delete-btn')) return;
             vibrate();
-            handleCardSelect(category, { ...item, displayText }, displayText);
+            
+            // pain 카테고리는 originalText를 함께 전달
+            if (category === 'pain') {
+                handleCardSelect(category, { ...item, originalText: item.text, displayText }, displayText);
+            } else {
+                handleCardSelect(category, { ...item, displayText }, displayText);
+            }
         });
         
         if (isUserCard) {
@@ -469,7 +475,10 @@ function showListenerModal(text, icon, isEmergency = false) {
     const iconEl = document.getElementById('listenerIcon');
     const textEl = document.getElementById('listenerText');
     
-    if (!modal || !iconEl || !textEl) return;
+    if (!modal || !iconEl || !textEl) {
+        console.error('청자 모달 요소를 찾을 수 없음');
+        return;
+    }
     
     // 기존 모드 클래스 제거
     modal.classList.remove('normal-mode', 'emergency-mode');
