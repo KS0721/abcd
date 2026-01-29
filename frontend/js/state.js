@@ -24,7 +24,7 @@ const Selection = {
     place: [],
     person: [],
     food: [],
-    need: [],
+    need: null,  // 배열에서 단일 객체로 변경
     predicate: null
 };
 
@@ -36,7 +36,7 @@ function clearSelection() {
     Selection.place = [];
     Selection.person = [];
     Selection.food = [];
-    Selection.need = [];
+    Selection.need = null;  // 배열에서 null로 변경
     Selection.predicate = null;
     State.showSuggestions = false;
     State.currentPredicate = null;
@@ -73,7 +73,6 @@ function loadLocalData() {
         // 진동 설정 (기본값: true)
         const vibrationToggle = document.getElementById('vibrationToggle');
         if (vibrationToggle) {
-            // vibration이 명시적으로 false가 아니면 true (기본값 ON)
             vibrationToggle.checked = s.vibration !== false;
         }
     } else {
@@ -118,7 +117,7 @@ function getCardData(category) {
 }
 
 // ========================================
-// 카드 선택 처리
+// 카드 선택 처리 (모든 단어 유지 - 초기화 없음)
 // ========================================
 function handleCardSelect(category, item, displayText) {
     const card = { 
@@ -129,29 +128,7 @@ function handleCardSelect(category, item, displayText) {
         type: item.type 
     };
     
-    // need 카테고리
-    if (category === 'need') {
-        const index = Selection.need.findIndex(i => i.text === item.text);
-        if (index >= 0) {
-            Selection.need.splice(index, 1);
-        } else {
-            Selection.need.push(card);
-        }
-        Selection.predicate = null;
-        Selection.time = null;
-        Selection.place = [];
-        Selection.person = [];
-        Selection.food = [];
-        hideSuggestionTab();
-        updateOutputBar();
-        return;
-    }
-    
-    if (Selection.need.length > 0) {
-        Selection.need = [];
-    }
-    
-    // 서술어 카테고리
+    // 서술어 카테고리 (action, feeling, pain) - 단일 선택, 토글
     if (PREDICATE_CATEGORIES.includes(category)) {
         if (Selection.predicate && Selection.predicate.text === item.text && Selection.predicate.category === category) {
             Selection.predicate = null;
@@ -160,7 +137,16 @@ function handleCardSelect(category, item, displayText) {
             Selection.predicate = card;
             showSuggestionTab(item.text);
         }
-    } 
+    }
+    // need 카테고리 - 단일 선택, 토글
+    else if (category === 'need') {
+        if (Selection.need && Selection.need.text === item.text) {
+            Selection.need = null;
+        } else {
+            Selection.need = card;
+        }
+    }
+    // 시간 카테고리 - 단일 선택, 토글
     else if (category === 'time') {
         if (Selection.time && Selection.time.text === item.text) {
             Selection.time = null;
@@ -168,6 +154,7 @@ function handleCardSelect(category, item, displayText) {
             Selection.time = card;
         }
     }
+    // 다중 선택 카테고리 (place, person, food) - 토글
     else if (CATEGORY_RULES.multiple.includes(category)) {
         const list = Selection[category];
         const index = list.findIndex(i => i.text === item.text);

@@ -54,7 +54,8 @@ body.dark-mode .emergency-bar {
 .category-tabs {
     display: flex;
     gap: 6px;
-    padding: 12px;
+    padding: 12px 16px;
+    padding-left: 16px;
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;

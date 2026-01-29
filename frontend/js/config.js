@@ -78,22 +78,18 @@ const VERB_SUGGESTIONS = {
 // 카테고리 규칙
 // ========================================
 const CATEGORY_RULES = {
-    single: ['action', 'feeling', 'pain', 'time'],
-    multiple: ['food', 'place', 'person', 'need']
+    single: ['action', 'feeling', 'pain', 'time', 'need'],  // need를 single로 이동
+    multiple: ['food', 'place', 'person']
 };
 
-const PREDICATE_CATEGORIES = ['action', 'feeling', 'need', 'pain'];
+// need 제거 - need는 single로 처리
+const PREDICATE_CATEGORIES = ['action', 'feeling', 'pain'];
 
 // ========================================
-// 문장 생성 (단순 연결)
+// 문장 생성 (단순 연결) - need도 다른 선택과 함께 표시
 // ========================================
 function buildSentence() {
     const parts = [];
-    
-    // need 카테고리 처리
-    if (Selection.need.length > 0) {
-        return buildNeedSentence();
-    }
     
     // 시간
     if (Selection.time) {
@@ -115,32 +111,16 @@ function buildSentence() {
         parts.push(item.text);
     });
     
-    // 서술어
+    // 서술어 (action, feeling, pain)
     if (Selection.predicate) {
         parts.push(Selection.predicate.text);
     }
     
-    return parts.join(' ');
-}
-
-function buildNeedSentence() {
-    if (Selection.need.length === 0) return '';
-    
-    // 단일 요청
-    if (Selection.need.length === 1) {
-        return Selection.need[0].text;
+    // 요청 (need) - 맨 마지막에 추가
+    if (Selection.need) {
+        parts.push(Selection.need.text);
     }
     
-    // 복수 요청 - 단어만 추출해서 연결
-    const items = Selection.need.map(n => {
-        let item = n.text;
-        // "주세요", "불러주세요", "해주세요" 등 제거
-        item = item.replace(' 주세요', '')
-                   .replace(' 불러주세요', '')
-                   .replace(' 해주세요', '')
-                   .replace('해주세요', '');
-        return item;
-    });
-    
-    return items.join(' ') + ' 주세요';
+    return parts.join(' ');
 }
+// buildNeedSentence 제거 - 더 이상 필요 없음

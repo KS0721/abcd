@@ -7,7 +7,10 @@ console.log('🎨 ui.js 로드됨');
 // 진동
 // ========================================
 function vibrate(duration = 50) {
-    if ('vibrate' in navigator) {
+    const settings = JSON.parse(localStorage.getItem('aac_settings') || '{}');
+    const vibrationEnabled = settings.vibration !== false;
+    
+    if (vibrationEnabled && 'vibrate' in navigator) {
         navigator.vibrate(duration);
     }
 }
@@ -75,7 +78,23 @@ function updateOutputBar() {
         showBtn.disabled = false;
         clearBtn.disabled = false;
         State.currentMessage = sentence;
-        State.currentIcon = Selection.predicate?.icon || 'message-circle';
+        
+        // 아이콘 결정 - 우선순위: predicate > need > food > place > person > time > 기본값
+        if (Selection.predicate && Selection.predicate.icon) {
+            State.currentIcon = Selection.predicate.icon;
+        } else if (Selection.need && Selection.need.icon) {
+            State.currentIcon = Selection.need.icon;
+        } else if (Selection.food && Selection.food.length > 0 && Selection.food[0].icon) {
+            State.currentIcon = Selection.food[0].icon;
+        } else if (Selection.place && Selection.place.length > 0 && Selection.place[0].icon) {
+            State.currentIcon = Selection.place[0].icon;
+        } else if (Selection.person && Selection.person.length > 0 && Selection.person[0].icon) {
+            State.currentIcon = Selection.person[0].icon;
+        } else if (Selection.time && Selection.time.icon) {
+            State.currentIcon = Selection.time.icon;
+        } else {
+            State.currentIcon = 'message-circle';
+        }
     } else {
         outputText.innerHTML = '<span class="placeholder">카드를 선택하세요</span>';
         outputText.classList.remove('has-message');
@@ -83,6 +102,7 @@ function updateOutputBar() {
         showBtn.disabled = true;
         clearBtn.disabled = true;
         State.currentMessage = '';
+        State.currentIcon = 'message-circle';
     }
     
     updateCardStyles();
@@ -99,21 +119,29 @@ function updateCardStyles() {
         allSelected.push({ text: Selection.time.text, category: 'time' });
     }
     
-    Selection.place.forEach(item => {
-        allSelected.push({ text: item.text, category: 'place' });
-    });
+    // 배열 안전하게 처리
+    if (Selection.place && Array.isArray(Selection.place)) {
+        Selection.place.forEach(item => {
+            allSelected.push({ text: item.text, category: 'place' });
+        });
+    }
     
-    Selection.person.forEach(item => {
-        allSelected.push({ text: item.text, category: 'person' });
-    });
+    if (Selection.person && Array.isArray(Selection.person)) {
+        Selection.person.forEach(item => {
+            allSelected.push({ text: item.text, category: 'person' });
+        });
+    }
     
-    Selection.food.forEach(item => {
-        allSelected.push({ text: item.text, category: 'food' });
-    });
+    if (Selection.food && Array.isArray(Selection.food)) {
+        Selection.food.forEach(item => {
+            allSelected.push({ text: item.text, category: 'food' });
+        });
+    }
     
-    Selection.need.forEach(item => {
-        allSelected.push({ text: item.text, category: 'need' });
-    });
+    // need는 단일 객체
+    if (Selection.need) {
+        allSelected.push({ text: Selection.need.text, category: 'need' });
+    }
     
     if (Selection.predicate) {
         allSelected.push({ text: Selection.predicate.text, category: Selection.predicate.category });
@@ -203,6 +231,7 @@ function renderSuggestionCards(predicateText) {
             card.className = 'card suggestion-card';
             card.dataset.text = item.text;
             card.dataset.category = category;
+            card.dataset.icon = item.icon;
             card.innerHTML = `
                 <div class="card-icon"><i data-lucide="${item.icon}"></i></div>
                 <div class="card-text">${item.text}</div>
@@ -255,6 +284,7 @@ function renderCards(category) {
         card.className = `card${isUserCard ? ' user-card' : ''}`;
         card.dataset.text = item.text;
         card.dataset.category = category;
+        card.dataset.icon = item.icon;
         card.innerHTML = `
             <div class="card-icon"><i data-lucide="${item.icon}"></i></div>
             <div class="card-text">${displayText}</div>
@@ -398,14 +428,14 @@ function showLongPressMenu(text, icon, e) {
         <div class="longpress-menu-header">${text}</div>
         <div class="longpress-menu-section">
             <div class="longpress-menu-label">시제</div>
-            <div class="longpress-menu-item selected" data-text="${text}">${text} <span class="tag">현재</span></div>
-            <div class="longpress-menu-item" data-text="${conjugation.past}">${conjugation.past} <span class="tag">과거</span></div>
-            <div class="longpress-menu-item" data-text="${conjugation.future}">${conjugation.future} <span class="tag">미래</span></div>
+            <div class="longpress-menu-item selected" data-text="${text}" data-icon="${icon}">${text} <span class="tag">현재</span></div>
+            <div class="longpress-menu-item" data-text="${conjugation.past}" data-icon="${icon}">${conjugation.past} <span class="tag">과거</span></div>
+            <div class="longpress-menu-item" data-text="${conjugation.future}" data-icon="${icon}">${conjugation.future} <span class="tag">미래</span></div>
         </div>
         <div class="longpress-menu-section">
             <div class="longpress-menu-label">존댓말</div>
-            <div class="longpress-menu-item" data-text="${conjugation.casual}">${conjugation.casual} <span class="tag">반말</span></div>
-            <div class="longpress-menu-item" data-text="${conjugation.formal}">${conjugation.formal} <span class="tag">높임</span></div>
+            <div class="longpress-menu-item" data-text="${conjugation.casual}" data-icon="${icon}">${conjugation.casual} <span class="tag">반말</span></div>
+            <div class="longpress-menu-item" data-text="${conjugation.formal}" data-icon="${icon}">${conjugation.formal} <span class="tag">높임</span></div>
         </div>
     `;
     
@@ -416,7 +446,8 @@ function showLongPressMenu(text, icon, e) {
     menu.querySelectorAll('.longpress-menu-item').forEach(item => {
         item.addEventListener('click', () => {
             vibrate();
-            Selection.predicate = { text: item.dataset.text, icon, displayText: item.dataset.text, category: 'action' };
+            const itemIcon = item.dataset.icon || icon;
+            Selection.predicate = { text: item.dataset.text, icon: itemIcon, displayText: item.dataset.text, category: 'action' };
             updateOutputBar();
             closeLongPressMenu();
         });
@@ -438,6 +469,8 @@ function showListenerModal(text, icon, isEmergency = false) {
     const iconEl = document.getElementById('listenerIcon');
     const textEl = document.getElementById('listenerText');
     
+    if (!modal || !iconEl || !textEl) return;
+    
     // 기존 모드 클래스 제거
     modal.classList.remove('normal-mode', 'emergency-mode');
     
@@ -448,8 +481,11 @@ function showListenerModal(text, icon, isEmergency = false) {
         modal.classList.add('normal-mode');
     }
     
+    // 아이콘이 없거나 기본값이면 State.currentIcon 사용
+    const displayIcon = icon && icon !== 'message-circle' ? icon : State.currentIcon;
+    
     // 아이콘 크기 크게 설정
-    iconEl.innerHTML = `<i data-lucide="${icon}" style="width: 120px; height: 120px; stroke-width: 1.5;"></i>`;
+    iconEl.innerHTML = `<i data-lucide="${displayIcon}" style="width: 120px; height: 120px; stroke-width: 1.5;"></i>`;
     textEl.textContent = text;
     modal.classList.remove('hidden');
     
