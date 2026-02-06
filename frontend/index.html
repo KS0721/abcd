@@ -1,4 +1,57 @@
 <!DOCTYPE html>
+<!--
+  올인원 AAC v3.1 — 논문 기반 보완대체의사소통 웹앱
+  
+  ============================================================
+  설계 원칙: "과하면 독" — 인지적 부담 최소화
+  ============================================================
+  
+  AAC의 본질: 의사소통 약자가 일반인처럼 소통할 수 있는 수단
+  
+  [v3.0 → v3.1 변경사항]
+  - 검색 탭 제거: AAC 사용자 대부분 키보드 입력 불가
+  - 추천 시스템 제거: 갑작스러운 화면 전환 = 인지 부담 증가
+  - 다크모드 별도 토글 제거: 고대비 하나로 통합, 선택지 줄임
+  - 카테고리 9→7개: 음식/장소를 요청/행동에 통합
+  - 하단 탭 5→4개: 사용자 탐색 경로 단순화
+  
+  근거: Light et al. (2019) "인지적 부담 최소화가 AAC 디자인의 핵심"
+       Thistle & Wilkinson (2017) "소규모 그리드에서 배경색도 방해"
+  
+  ============================================================
+  참고문헌 (전체 PubMed/ASHA/W3C 원문 검증)
+  ============================================================
+  
+  [핵심어휘]
+  1. 김영태, 박소현, 민홍기 (2003). 학령기 아동의 핵심어휘 연구.
+  2. 박혜연 & 연석정 (2020). 90%+ 응답률 고빈도 어휘.
+  3. Beukelman & Light (2020). AAC (5th ed.). Brookes.
+  4. Boenisch & Soto (2015). AAC, 31(1), 77-84.
+  
+  [디스플레이 설계]
+  5. Light et al. (2019). AAC, 35(1), 42-55. PMID: 30663899
+  6. Thistle & Wilkinson (2015). AAC, 31(2), 124-136. PMID: 25892523
+  7. Thistle & Wilkinson (2017). AAC, 33(3), 160-169. PMID: 28617614
+  8. Wilkinson et al. (2022). JSLHR, 65(2), 710-726.
+  9. Thistle et al. (2018). AJSLP, 27, 1010-1017.
+  
+  [접근성]
+  10. W3C WCAG 2.1 SC 1.4.6 (AAA 7:1).
+  11. Wilkinson et al. (2023). AJSLP, 32(5), 1939-1960. PMID: 37594735
+  12. Luo et al. (2022). AAC, 38(2), 91-105. PMID: 35703500
+  
+  [파트너 모델링]
+  13. Sennott et al. (2016). RPSD, 41(2), 101-115.
+  14. Kent-Walsh et al. (2015). AAC, 31(4), 271-284. PMID: 26059542
+  15. Allen et al. (2017). JSLHR, 60(3), 834-854.
+  
+  [운동 접근성]
+  16. Sowers & Wilkinson (2023). AJSLP, 32(1), 37-54.
+  
+  [한국어 AAC]
+  17. 신상은 (2017). 한국어 핵심어휘 분석.
+  ============================================================
+-->
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -6,7 +59,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#4A90A4">
+    <meta name="theme-color" content="#2B6CB0">
     <title>올인원 AAC</title>
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/layout.css">
@@ -26,8 +79,7 @@
                     <span>올인원<strong>AAC</strong></span>
                 </div>
             </div>
-            <div class="header-right">
-            </div>
+            <div class="header-right"></div>
         </header>
 
         <!-- ========== 메인 슬라이드 ========== -->
@@ -53,34 +105,38 @@
                     </div>
 
                     <!-- 카테고리 탭 -->
+                    <!-- 
+                      [배치 근거]
+                      김영태 외(2003): 핵심어휘를 첫 번째에 배치 (전체 발화 34%)
+                      박혜연 & 연석정(2020): 사용 빈도순 배치
+                        핵심 > 요청 > 감정 > 행동 > 통증 > 사람 > 시간
+                      Thistle & Wilkinson (2015): 탭 수 적절히 제한
+                        → 음식/장소는 요청·행동과 중복 가능, 별도 탭 불필요
+                    -->
                     <div class="category-tabs">
-                        <button class="tab-btn active" data-category="action">
-                            <i data-lucide="footprints"></i>
-                            <span>행동</span>
-                        </button>
-                        <button class="tab-btn" data-category="feeling">
-                            <i data-lucide="smile"></i>
-                            <span>감정</span>
+                        <button class="tab-btn active" data-category="core">
+                            <i data-lucide="star"></i>
+                            <span>핵심</span>
                         </button>
                         <button class="tab-btn" data-category="need">
                             <i data-lucide="hand"></i>
                             <span>요청</span>
                         </button>
+                        <button class="tab-btn" data-category="feeling">
+                            <i data-lucide="smile"></i>
+                            <span>감정</span>
+                        </button>
+                        <button class="tab-btn" data-category="action">
+                            <i data-lucide="footprints"></i>
+                            <span>행동</span>
+                        </button>
                         <button class="tab-btn" data-category="pain">
                             <i data-lucide="activity"></i>
                             <span>통증</span>
                         </button>
-                        <button class="tab-btn" data-category="place">
-                            <i data-lucide="map-pin"></i>
-                            <span>장소</span>
-                        </button>
                         <button class="tab-btn" data-category="person">
                             <i data-lucide="users"></i>
                             <span>사람</span>
-                        </button>
-                        <button class="tab-btn" data-category="food">
-                            <i data-lucide="utensils"></i>
-                            <span>음식</span>
                         </button>
                         <button class="tab-btn" data-category="time">
                             <i data-lucide="clock"></i>
@@ -104,20 +160,14 @@
                         </div>
                     </div>
 
-                    <!-- 추천 패널 -->
-                    <div id="suggestionPanel" class="suggestion-panel hidden">
-                        <div class="suggestion-header">
-                            <i data-lucide="sparkles"></i>
-                            <span id="suggestionWord">단어</span> 다음에...
-                            <button id="closeSuggestionPanel" class="close-btn">
-                                <i data-lucide="x"></i>
-                            </button>
-                        </div>
-                        <div id="suggestionCards" class="suggestion-cards"></div>
-                    </div>
+                    <!-- [제거됨] 추천 패널
+                         Light et al. (2019): 갑작스러운 화면 전환은 인지적 부담 증가
+                         사용자가 동사 선택 후 화면이 바뀌면 혼란 유발
+                         → 추천 기능은 과하므로 제거
+                    -->
                 </section>
 
-                <!-- ===== 탭 2: 사용 기록 ===== -->
+                <!-- ===== 탭 2: 기록 ===== -->
                 <section class="slide" id="slideHistory">
                     <div class="slide-header">
                         <h2>사용 기록</h2>
@@ -131,34 +181,138 @@
                     </div>
                 </section>
 
-                <!-- ===== 탭 3: 검색 ===== -->
-                <section class="slide" id="slideSearch">
-                    <div class="search-box">
-                        <i data-lucide="search"></i>
-                        <input type="text" id="searchInput" placeholder="단어나 문장 검색...">
+                <!-- ===== [제거됨] 검색 탭 =====
+                     Light et al. (2019): 인지적 부담 최소화 원칙
+                     AAC 사용자 대부분 키보드 입력 불가/어려움
+                     → 검색 기능은 사용자에게 장벽이 되므로 제거
+                -->
+
+                <!-- ===== 탭 4: 보호자 가이드 ===== -->
+                <!-- 박혜연 & 연석정(2020): AAC 성공은 의사소통 파트너의 모델링에 의존 -->
+                <!-- Beukelman & Mirenda (2013): 참여 모델 - 파트너 훈련 필수 -->
+                <section class="slide" id="slideGuide">
+                    <div class="guide-content">
+                        
+                        <!-- 모델링 가이드 -->
+                        <div class="guide-section">
+                            <div class="guide-section-title">
+                                <i data-lucide="presentation"></i>
+                                <span>AAC 모델링 방법</span>
+                            </div>
+                            <div class="guide-item">
+                                <div class="guide-item-header">
+                                    <i data-lucide="hand"></i>
+                                    <strong>함께 눌러주기</strong>
+                                </div>
+                                <p>아이/사용자와 대화할 때, 말로 하면서 동시에 AAC 카드를 직접 눌러 보여주세요. "밥 먹자"라고 말하면서 [밥] → [먹어요] 카드를 순서대로 터치합니다.</p>
+                                <div class="guide-tip">💡 매일 자연스러운 상황에서 반복하는 것이 핵심입니다. 식사, 외출, 놀이 등 일상 루틴마다 모델링하세요.</div>
+                            </div>
+                            <div class="guide-item">
+                                <div class="guide-item-header">
+                                    <i data-lucide="clock"></i>
+                                    <strong>충분히 기다리기</strong>
+                                </div>
+                                <p>카드를 눌러 보여준 후, 사용자가 반응할 때까지 최소 5~10초 기다려주세요. 바로 도와주거나 대신 해주지 않는 것이 중요합니다.</p>
+                                <div class="guide-tip">💡 침묵이 불편해도 기다려주세요. 반응 시간이 필요한 사용자에게 기다림은 최고의 지원입니다.</div>
+                            </div>
+                            <div class="guide-item">
+                                <div class="guide-item-header">
+                                    <i data-lucide="message-square"></i>
+                                    <strong>선택 기회 제공하기</strong>
+                                </div>
+                                <p>"뭐 먹을래?" 대신 "밥 먹을래? 빵 먹을래?" 처럼 구체적 선택지를 제시하세요. AAC에서 해당 카드를 같이 보여주면 더 좋습니다.</p>
+                                <div class="guide-tip">💡 처음에는 2개 중 선택으로 시작하고, 익숙해지면 선택지를 늘려가세요.</div>
+                            </div>
+                        </div>
+
+                        <!-- 오류 대응 -->
+                        <div class="guide-section">
+                            <div class="guide-section-title">
+                                <i data-lucide="shield-check"></i>
+                                <span>소통 시 주의사항</span>
+                            </div>
+                            <div class="guide-item">
+                                <div class="guide-item-header">
+                                    <i data-lucide="check-circle"></i>
+                                    <strong>틀려도 괜찮아요</strong>
+                                </div>
+                                <p>사용자가 잘못된 카드를 눌러도 "아, ○○ 말이구나?" 하고 자연스럽게 확인해주세요. 틀렸다고 지적하면 사용 의욕이 떨어집니다.</p>
+                            </div>
+                            <div class="guide-item">
+                                <div class="guide-item-header">
+                                    <i data-lucide="repeat"></i>
+                                    <strong>반복해서 확인하기</strong>
+                                </div>
+                                <p>사용자가 카드를 누르면 "○○이/가 ○○ 하고 싶구나!" 처럼 문장으로 되풀이해주세요. 이것이 언어 모델링의 핵심입니다.</p>
+                            </div>
+                            <div class="guide-item">
+                                <div class="guide-item-header">
+                                    <i data-lucide="heart"></i>
+                                    <strong>모든 시도를 격려하기</strong>
+                                </div>
+                                <p>카드를 누르는 시도 자체를 칭찬하세요. "잘 말해줬네!", "고마워, 알려줘서!" 같은 긍정적 반응이 소통 동기를 높입니다.</p>
+                            </div>
+                        </div>
+
+                        <!-- 환경별 활용 -->
+                        <div class="guide-section">
+                            <div class="guide-section-title">
+                                <i data-lucide="home"></i>
+                                <span>환경별 활용 팁</span>
+                            </div>
+                            <div class="guide-item">
+                                <div class="guide-item-header">
+                                    <i data-lucide="utensils"></i>
+                                    <strong>식사 시간</strong>
+                                </div>
+                                <p>메뉴 선택, 더 먹을지, 다 먹었는지 물어보며 [음식] [더] [네/아니요] 카드 활용 → 가장 자연스러운 AAC 연습 시간입니다.</p>
+                            </div>
+                            <div class="guide-item">
+                                <div class="guide-item-header">
+                                    <i data-lucide="bath"></i>
+                                    <strong>일상 루틴</strong>
+                                </div>
+                                <p>씻기, 옷 입기, 외출 준비 등 매일 반복되는 활동에서 관련 카드를 꾸준히 모델링하세요. 루틴이 가장 효과적인 학습 환경입니다.</p>
+                            </div>
+                            <div class="guide-item">
+                                <div class="guide-item-header">
+                                    <i data-lucide="gamepad-2"></i>
+                                    <strong>놀이/여가</strong>
+                                </div>
+                                <p>좋아하는 놀이나 영상을 보면서 [좋아요] [더] [또] 등 핵심어휘를 자연스럽게 사용할 수 있습니다. 개인 관심사 카드를 추가해보세요.</p>
+                            </div>
+                            <div class="guide-ref">
+                                📚 참고문헌: Beukelman & Mirenda (2013, 2020); 박혜연 & 연석정 (2020); Hall et al. (2023)
+                            </div>
+                        </div>
+
                     </div>
-                    <div id="searchResults" class="search-results"></div>
                 </section>
 
-                <!-- ===== 탭 4: 설정 ===== -->
+                <!-- ===== 탭 5: 설정 ===== -->
                 <section class="slide" id="slideSettings">
                     <div class="settings-content">
-                        <!-- 화면 설정 -->
+                        <!-- 접근성 설정 -->
                         <div class="settings-section">
                             <div class="settings-section-title">
-                                <i data-lucide="monitor"></i>
-                                <span>화면</span>
+                                <i data-lucide="eye"></i>
+                                <span>접근성</span>
                             </div>
                             <div class="setting-item toggle">
                                 <label>
-                                    <i data-lucide="moon"></i>
-                                    고대비 모드 (다크)
+                                    <i data-lucide="contrast"></i>
+                                    고대비 모드 (저시력 지원)
                                 </label>
                                 <label class="switch">
-                                    <input type="checkbox" id="darkModeToggle">
+                                    <input type="checkbox" id="highContrastToggle">
                                     <span class="slider"></span>
                                 </label>
                             </div>
+                            <!-- [제거됨] 다크모드 별도 토글
+                                 고대비 모드가 이미 검정+노랑 다크 기반
+                                 두 가지 토글은 사용자 혼란 유발
+                                 WCAG 2.1 SC 1.4.6: 7:1 고대비 하나로 충분
+                            -->
                             <div class="setting-item">
                                 <label>글자 크기</label>
                                 <select id="fontSize">
@@ -169,15 +323,15 @@
                             </div>
                         </div>
 
-                        <!-- 진동 설정 -->
+                        <!-- 입력 설정 -->
                         <div class="settings-section">
                             <div class="settings-section-title">
-                                <i data-lucide="vibrate"></i>
-                                <span>피드백</span>
+                                <i data-lucide="hand"></i>
+                                <span>입력</span>
                             </div>
                             <div class="setting-item toggle">
                                 <label>
-                                    <i data-lucide="smartphone"></i>
+                                    <i data-lucide="vibrate"></i>
                                     진동 피드백
                                 </label>
                                 <label class="switch">
@@ -185,15 +339,31 @@
                                     <span class="slider"></span>
                                 </label>
                             </div>
+                            <div class="setting-item">
+                                <label>길게 누르기 시간 (시제 변경)</label>
+                                <select id="longPressTime">
+                                    <option value="300">빠르게 (0.3초)</option>
+                                    <option value="500" selected>보통 (0.5초)</option>
+                                    <option value="800">느리게 (0.8초)</option>
+                                    <option value="1200">매우 느리게 (1.2초)</option>
+                                </select>
+                            </div>
                         </div>
 
-                        <!-- 도움말 -->
+                        <!-- 사용법 -->
                         <div class="settings-section">
                             <div class="settings-section-title">
                                 <i data-lucide="help-circle"></i>
                                 <span>사용법</span>
                             </div>
                             <div class="help-list">
+                                <div class="help-item">
+                                    <i data-lucide="star"></i>
+                                    <div>
+                                        <strong>핵심어휘</strong>
+                                        <p>⭐ 탭에서 가장 자주 쓰는 단어를 빠르게 선택하세요</p>
+                                    </div>
+                                </div>
                                 <div class="help-item">
                                     <i data-lucide="hand"></i>
                                     <div>
@@ -202,17 +372,17 @@
                                     </div>
                                 </div>
                                 <div class="help-item">
-                                    <i data-lucide="sparkles"></i>
+                                    <i data-lucide="clock"></i>
                                     <div>
-                                        <strong>추천 기능</strong>
-                                        <p>동사 선택 시 관련 단어를 추천해줍니다</p>
+                                        <strong>길게 누르기</strong>
+                                        <p>카드를 길게 누르면 시제/존댓말을 변경합니다</p>
                                     </div>
                                 </div>
                                 <div class="help-item">
-                                    <i data-lucide="clock"></i>
+                                    <i data-lucide="plus"></i>
                                     <div>
-                                        <strong>롱프레스</strong>
-                                        <p>카드를 길게 누르면 시제/존댓말 변경</p>
+                                        <strong>카드 추가</strong>
+                                        <p>각 카테고리의 [+추가] 버튼으로 개인 어휘를 추가하세요</p>
                                     </div>
                                 </div>
                             </div>
@@ -224,7 +394,7 @@
                                 <i data-lucide="heart"></i>
                                 <span>바이오헬스 원팀</span>
                             </div>
-                            <p>버전 2.0.0</p>
+                            <p>버전 3.0.0</p>
                         </div>
                     </div>
                 </section>
@@ -249,7 +419,11 @@
             </div>
         </div>
 
-        <!-- ========== 하단 탭 바 ========== -->
+        <!-- ========== 하단 탭 바 (4탭 — 검색 제거) ========== -->
+        <!-- 
+          [설계 근거] Light et al. (2019): 인지적 부담 최소화
+          탭 수 축소 = 선택지 감소 = 빠른 의사결정
+        -->
         <nav class="tab-bar">
             <button class="tab-bar-btn active" data-slide="0">
                 <i data-lucide="message-square"></i>
@@ -260,8 +434,8 @@
                 <span>기록</span>
             </button>
             <button class="tab-bar-btn" data-slide="2">
-                <i data-lucide="search"></i>
-                <span>검색</span>
+                <i data-lucide="book-open"></i>
+                <span>가이드</span>
             </button>
             <button class="tab-bar-btn" data-slide="3">
                 <i data-lucide="settings"></i>
@@ -342,7 +516,7 @@
     <!-- Lucide 아이콘 -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
-    <!-- JS 파일들 (순서 중요!) -->
+    <!-- JS (순서 중요!) -->
     <script src="js/data.js"></script>
     <script src="js/config.js"></script>
     <script src="js/state.js"></script>

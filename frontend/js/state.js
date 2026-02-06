@@ -8,7 +8,7 @@ console.log('📊 state.js 로드됨');
 // ========================================
 const State = {
     currentSlide: 0,
-    currentCategory: 'action',
+    currentCategory: 'core',  // 기본값: 핵심어휘
     currentMessage: '',
     currentIcon: 'message-circle',
     selectedPainPart: null,
@@ -21,9 +21,7 @@ const State = {
 
 const Selection = {
     time: null,
-    place: [],
     person: [],
-    food: [],
     need: null,
     predicate: null
 };
@@ -33,9 +31,7 @@ const Selection = {
 // ========================================
 function clearSelection() {
     Selection.time = null;
-    Selection.place = [];
     Selection.person = [];
-    Selection.food = [];
     Selection.need = null;
     Selection.predicate = null;
     State.showSuggestions = false;
@@ -43,10 +39,7 @@ function clearSelection() {
     State.selectedPainPart = null;
     State.selectedPainLevel = null;
     
-    // 통증 버튼 선택 해제
     document.querySelectorAll('.pain-btn').forEach(b => b.classList.remove('selected'));
-    
-    hideSuggestionTab();
 }
 
 // ========================================
@@ -63,24 +56,34 @@ function loadLocalData() {
     if (settings) {
         const s = JSON.parse(settings);
         
-        if (s.darkMode) document.body.classList.add('dark-mode');
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        if (darkModeToggle) darkModeToggle.checked = s.darkMode || false;
+        // 고대비 모드 (다크모드 통합)
+        if (s.highContrast) {
+            document.body.classList.add('high-contrast');
+            document.body.classList.add('dark-mode');
+            const toggle = document.getElementById('highContrastToggle');
+            if (toggle) toggle.checked = true;
+        }
         
+        // 폰트 크기
         if (s.fontSize) {
             document.body.classList.add(`font-${s.fontSize}`);
-            const fontSizeSelect = document.getElementById('fontSize');
-            if (fontSizeSelect) fontSizeSelect.value = s.fontSize;
+            const select = document.getElementById('fontSize');
+            if (select) select.value = s.fontSize;
             applyFontSize(s.fontSize);
         }
         
-        const vibrationToggle = document.getElementById('vibrationToggle');
-        if (vibrationToggle) {
-            vibrationToggle.checked = s.vibration !== false;
+        // 진동
+        const vibToggle = document.getElementById('vibrationToggle');
+        if (vibToggle) vibToggle.checked = s.vibration !== false;
+        
+        // 롱프레스 시간
+        if (s.longPressTime) {
+            const select = document.getElementById('longPressTime');
+            if (select) select.value = s.longPressTime;
         }
     } else {
-        const vibrationToggle = document.getElementById('vibrationToggle');
-        if (vibrationToggle) vibrationToggle.checked = true;
+        const vibToggle = document.getElementById('vibrationToggle');
+        if (vibToggle) vibToggle.checked = true;
     }
 }
 
@@ -94,16 +97,17 @@ function saveUserCards() {
 
 function saveSettings() {
     const settings = {
+        highContrast: document.body.classList.contains('high-contrast'),
         darkMode: document.body.classList.contains('dark-mode'),
         fontSize: document.getElementById('fontSize')?.value || 'medium',
-        vibration: document.getElementById('vibrationToggle')?.checked !== false
+        vibration: document.getElementById('vibrationToggle')?.checked !== false,
+        longPressTime: document.getElementById('longPressTime')?.value || '500'
     };
     localStorage.setItem('aac_settings', JSON.stringify(settings));
 }
 
 function addToHistory(sentence) {
     if (!sentence || State.sentenceHistory.includes(sentence)) return;
-    
     State.sentenceHistory.unshift(sentence);
     if (State.sentenceHistory.length > 50) State.sentenceHistory.pop();
     saveHistory();
@@ -131,7 +135,7 @@ function handleCardSelect(category, item, displayText) {
         originalText: item.originalText || item.text
     };
     
-    // 서술어 카테고리 (action, feeling, pain) - 단일 선택, 토글
+    // 서술어 카테고리 (core, action, feeling, pain) - 단일 선택, 토글
     if (PREDICATE_CATEGORIES.includes(category)) {
         const compareText = item.originalText || item.text;
         
@@ -142,11 +146,9 @@ function handleCardSelect(category, item, displayText) {
             State.selectedPainPart = null;
             State.selectedPainLevel = null;
             document.querySelectorAll('.pain-btn').forEach(b => b.classList.remove('selected'));
-            hideSuggestionTab();
         } else {
             Selection.predicate = card;
             
-            // pain 카테고리인 경우 State에도 저장
             if (category === 'pain') {
                 State.selectedPainPart = {
                     text: item.originalText || item.text,
@@ -154,11 +156,9 @@ function handleCardSelect(category, item, displayText) {
                     icon: item.icon
                 };
             }
-            
-            showSuggestionTab(item.text);
         }
     }
-    // need 카테고리 - 단일 선택, 토글
+    // need - 단일 선택, 토글
     else if (category === 'need') {
         if (Selection.need && Selection.need.text === item.text) {
             Selection.need = null;
@@ -166,7 +166,7 @@ function handleCardSelect(category, item, displayText) {
             Selection.need = card;
         }
     }
-    // 시간 카테고리 - 단일 선택, 토글
+    // 시간 - 단일 선택, 토글
     else if (category === 'time') {
         if (Selection.time && Selection.time.text === item.text) {
             Selection.time = null;
@@ -174,11 +174,10 @@ function handleCardSelect(category, item, displayText) {
             Selection.time = card;
         }
     }
-    // 다중 선택 카테고리 (place, person, food) - 토글
+    // 다중 선택 (place, person, food) - 토글
     else if (CATEGORY_RULES.multiple.includes(category)) {
         const list = Selection[category];
         const index = list.findIndex(i => i.text === item.text);
-        
         if (index >= 0) {
             list.splice(index, 1);
         } else {
@@ -194,7 +193,6 @@ function handleCardSelect(category, item, displayText) {
 // ========================================
 async function deleteUserCard(category, text) {
     const confirmed = await showConfirmModal(`"${text}" 카드를 삭제할까요?`);
-    
     if (!confirmed) return;
     
     if (State.userCards[category]) {
@@ -230,7 +228,7 @@ function updatePainMessage() {
 }
 
 // ========================================
-// 검색용 전체 단어 가져오기
+// 검색용 전체 단어
 // ========================================
 function getAllWords() {
     const words = [];

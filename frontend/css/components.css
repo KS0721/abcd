@@ -1,19 +1,24 @@
 /* ========================================
-   components.css - 카드, 버튼, 긴급바, 카테고리탭, 통증스케일, 추천패널
+   components.css - 카드, 버튼, 긴급바, 카테고리탭, 통증스케일
+   
+   [카드 크기/간격 근거]
+   - Light et al. (2019): 심볼 간 충분한 간격으로 시각적 군집 방지
+   - Wilkinson et al. (2022): 색상별 클러스터링이 다운증후군/ASD 사용자의
+     시각 탐색 효율 향상 (JSLHR, 65(2), 710-726)
+   - Thistle & Wilkinson (2017): 배경색이 12-16개 소규모 그리드에서
+     오히려 탐색을 방해할 수 있음 (AAC, 33(3), 160-169)
+   - Thistle et al. (2018): 일관된 심볼 위치가 운동 학습에 영향
+     (AJSLP, 27, 1010-1017)
    ======================================== */
 
 /* ========== 긴급 바 ========== */
 .emergency-bar {
     display: flex;
     gap: 8px;
-    padding: 12px 16px;
-    background: linear-gradient(135deg, var(--danger-light) 0%, rgba(255, 240, 240, 0.5) 100%);
-    border-bottom: 2px solid var(--danger);
+    padding: 10px 16px;
+    background: var(--danger-light);
+    border-bottom: 3px solid var(--danger);
     animation: slideDown 0.4s ease;
-}
-
-body.dark-mode .emergency-bar {
-    background: linear-gradient(135deg, #2a1a1a 0%, rgba(42, 26, 26, 0.5) 100%);
 }
 
 .emergency-btn {
@@ -22,21 +27,16 @@ body.dark-mode .emergency-bar {
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    padding: 12px 8px;
+    padding: 10px 8px;
     background: var(--white);
-    border: 2px solid var(--danger);
+    border: var(--card-border-width) solid var(--danger);
     border-radius: var(--radius-sm);
     color: var(--danger);
     font-size: var(--card-text-size);
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 8px rgba(232, 90, 90, 0.15);
-}
-
-.emergency-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(232, 90, 90, 0.25);
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow);
 }
 
 .emergency-btn:active {
@@ -45,17 +45,13 @@ body.dark-mode .emergency-bar {
     transform: scale(0.97);
 }
 
-.emergency-btn i {
-    width: 20px;
-    height: 20px;
-}
+.emergency-btn i { width: 20px; height: 20px; }
 
 /* ========== 카테고리 탭 ========== */
 .category-tabs {
     display: flex;
     gap: 6px;
-    padding: 12px 16px;
-    padding-left: 16px;
+    padding: 10px 16px;
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -63,54 +59,52 @@ body.dark-mode .emergency-bar {
     border-bottom: 1px solid var(--gray-border);
 }
 
-.category-tabs::-webkit-scrollbar {
-    display: none;
-}
+.category-tabs::-webkit-scrollbar { display: none; }
 
 .tab-btn {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
-    padding: 8px 14px;
+    gap: 3px;
+    padding: 7px 12px;
     background: var(--gray-bg);
     border: 2px solid transparent;
     border-radius: var(--radius-sm);
     color: var(--text-medium);
     font-size: var(--tab-text-size);
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
 }
 
-.tab-btn i {
-    width: 18px;
-    height: 18px;
-    transition: transform 0.25s ease;
-}
+.tab-btn i { width: 18px; height: 18px; }
 
 .tab-btn:hover {
     background: var(--secondary);
     border-color: var(--primary-light);
-    transform: translateY(-2px);
 }
 
 .tab-btn.active {
     background: var(--primary);
     border-color: var(--primary);
     color: white;
-    box-shadow: 0 4px 12px rgba(255, 120, 73, 0.3);
+    box-shadow: 0 3px 10px rgba(43, 108, 176, 0.3);
 }
 
-.tab-btn.active i {
-    transform: scale(1.1);
+/* 핵심어휘 탭 강조 */
+.tab-btn[data-category="core"] {
+    font-weight: 700;
+}
+
+.tab-btn[data-category="core"].active {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
 }
 
 /* ========== 카드 영역 ========== */
 .cards-area {
-    padding: 12px;
-    animation: fadeInUp 0.5s ease;
+    padding: 10px;
+    animation: fadeInUp 0.4s ease;
 }
 
 .cards-container {
@@ -125,19 +119,19 @@ body.dark-mode .emergency-bar {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     padding: var(--card-padding);
     background: var(--white);
-    border: 2px solid var(--gray-border);
+    border: var(--card-border-width) solid var(--gray-border);
     border-radius: var(--radius);
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow);
 }
 
 .card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
     border-color: var(--primary-light);
 }
 
@@ -147,8 +141,9 @@ body.dark-mode .emergency-bar {
 
 .card.selected {
     border-color: var(--primary);
+    border-width: var(--selected-border-width);
     background: var(--secondary);
-    box-shadow: 0 0 0 3px rgba(255, 120, 73, 0.2), 0 6px 16px rgba(255, 120, 73, 0.25);
+    box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.2);
     animation: cardSelect 0.3s ease;
 }
 
@@ -161,24 +156,21 @@ body.dark-mode .emergency-bar {
     background: var(--secondary);
     border-radius: 50%;
     color: var(--primary);
-    transition: all 0.25s ease;
+    transition: all 0.2s ease;
 }
 
 .card:hover .card-icon {
-    transform: scale(1.1);
+    transform: scale(1.08);
     background: var(--primary-light);
     color: white;
 }
 
-.card-icon i {
-    width: 22px;
-    height: 22px;
-}
+.card-icon i { width: 22px; height: 22px; }
 
 .card.selected .card-icon {
     background: var(--primary);
     color: white;
-    animation: iconBounce 0.5s ease;
+    animation: iconBounce 0.4s ease;
 }
 
 .card-text {
@@ -192,8 +184,8 @@ body.dark-mode .emergency-bar {
 /* ========== 카드 삭제 버튼 ========== */
 .card .delete-btn {
     position: absolute;
-    top: 4px;
-    left: 4px;
+    top: 3px;
+    left: 3px;
     width: 20px;
     height: 20px;
     background: var(--danger);
@@ -204,23 +196,13 @@ body.dark-mode .emergency-bar {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s ease;
 }
 
 .card.user-card:hover .delete-btn {
     display: flex;
-    animation: fadeIn 0.2s ease;
 }
 
-.card .delete-btn:hover {
-    transform: scale(1.2);
-    box-shadow: 0 4px 12px rgba(232, 90, 90, 0.5);
-}
-
-.card .delete-btn i {
-    width: 12px;
-    height: 12px;
-}
+.card .delete-btn i { width: 12px; height: 12px; }
 
 /* ========== 카드 추가 버튼 ========== */
 .add-card-btn {
@@ -231,86 +213,70 @@ body.dark-mode .emergency-bar {
     gap: 4px;
     padding: var(--card-padding);
     background: var(--gray-bg);
-    border: 2px dashed var(--gray-border);
+    border: var(--card-border-width) dashed var(--gray-border);
     border-radius: var(--radius);
     color: var(--text-light);
     font-size: 0.8rem;
     cursor: pointer;
-    transition: all 0.25s ease;
-    min-height: 88px;
+    transition: all 0.2s ease;
+    min-height: 84px;
 }
 
 .add-card-btn:hover {
     border-color: var(--primary);
     color: var(--primary);
     background: var(--secondary);
-    transform: translateY(-2px);
 }
 
-.add-card-btn i {
-    width: 24px;
-    height: 24px;
-    transition: transform 0.25s ease;
-}
-
-.add-card-btn:hover i {
-    transform: rotate(90deg) scale(1.2);
-}
+.add-card-btn i { width: 24px; height: 24px; }
 
 /* ========== 통증 스케일 ========== */
 .pain-scale {
-    margin: 12px;
-    padding: 16px;
+    margin: 10px;
+    padding: 14px;
     background: var(--white);
-    border: 2px solid var(--gray-border);
+    border: var(--card-border-width) solid var(--gray-border);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
-    animation: fadeInUp 0.4s ease;
 }
 
 .pain-title {
-    font-weight: 600;
-    margin-bottom: 12px;
+    font-weight: 700;
+    margin-bottom: 10px;
     text-align: center;
     color: var(--text-dark);
 }
 
 .pain-buttons {
     display: flex;
-    gap: 6px;
-    margin-bottom: 8px;
+    gap: 5px;
+    margin-bottom: 6px;
 }
 
 .pain-btn {
     flex: 1;
-    padding: 12px 4px;
-    border: none;
+    padding: 10px 3px;
+    border: 2px solid transparent;
     border-radius: var(--radius-sm);
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.pain-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
 }
 
 .pain-btn[data-level="1"],
 .pain-btn[data-level="2"],
-.pain-btn[data-level="3"] { background: #c8e6c9; color: #2e7d32; }
+.pain-btn[data-level="3"] { background: #c8e6c9; color: #1B5E20; }
 .pain-btn[data-level="4"],
 .pain-btn[data-level="5"],
-.pain-btn[data-level="6"] { background: #fff9c4; color: #f57f17; }
+.pain-btn[data-level="6"] { background: #fff9c4; color: #E65100; }
 .pain-btn[data-level="7"],
-.pain-btn[data-level="8"] { background: #ffccbc; color: #e65100; }
+.pain-btn[data-level="8"] { background: #ffccbc; color: #BF360C; }
 .pain-btn[data-level="9"],
-.pain-btn[data-level="10"] { background: #ffcdd2; color: #c62828; }
+.pain-btn[data-level="10"] { background: #ffcdd2; color: #B71C1C; }
 
 .pain-btn.selected {
-    transform: scale(1.15);
-    box-shadow: 0 0 0 3px var(--primary), 0 6px 12px rgba(0, 0, 0, 0.2);
+    transform: scale(1.12);
+    box-shadow: 0 0 0 3px var(--primary);
     z-index: 1;
 }
 
@@ -321,84 +287,6 @@ body.dark-mode .emergency-bar {
     color: var(--text-light);
 }
 
-/* ========== 추천 패널 ========== */
-.suggestion-panel {
-    position: fixed;
-    bottom: calc(var(--output-height) + var(--tabbar-height) + var(--safe-bottom) + 10px);
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 32px);
-    max-width: 468px;
-    background: var(--white);
-    border: 2px solid var(--primary);
-    border-radius: var(--radius);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-    z-index: 200;
-    animation: slideUpBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes slideUpBounce {
-    from { 
-        opacity: 0; 
-        transform: translateX(-50%) translateY(30px) scale(0.9);
-    }
-    to { 
-        opacity: 1; 
-        transform: translateX(-50%) translateY(0) scale(1);
-    }
-}
-
-.suggestion-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 16px;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-    color: white;
-    border-radius: var(--radius) var(--radius) 0 0;
-    font-weight: 600;
-}
-
-.suggestion-header i {
-    width: 18px;
-    height: 18px;
-    animation: sparkle 1.5s ease-in-out infinite;
-}
-
-.close-btn {
-    margin-left: auto;
-    width: 28px;
-    height: 28px;
-    background: rgba(255,255,255,0.2);
-    border: none;
-    border-radius: 50%;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.close-btn:hover {
-    background: rgba(255,255,255,0.3);
-    transform: rotate(90deg);
-}
-
-.close-btn i {
-    width: 16px;
-    height: 16px;
-}
-
-.suggestion-cards {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 12px;
-    max-height: 200px;
-    overflow-y: auto;
-}
-
 /* ========== 버튼 공통 ========== */
 .primary-btn {
     display: inline-flex;
@@ -406,30 +294,20 @@ body.dark-mode .emergency-bar {
     justify-content: center;
     gap: 8px;
     padding: 12px 20px;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    background: var(--primary);
     border: none;
     border-radius: var(--radius-sm);
     color: white;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 12px rgba(255, 120, 73, 0.3);
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow);
 }
 
-.primary-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 120, 73, 0.4);
-}
-
-.primary-btn:active {
-    transform: scale(0.97);
-}
-
-.primary-btn i {
-    width: 18px;
-    height: 18px;
-}
+.primary-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.primary-btn:active { transform: scale(0.97); }
+.primary-btn i { width: 18px; height: 18px; }
 
 .secondary-btn {
     display: inline-flex;
@@ -447,28 +325,15 @@ body.dark-mode .emergency-bar {
     transition: all 0.2s ease;
 }
 
-.secondary-btn:hover {
-    background: var(--white);
-    border-color: var(--primary-light);
-    color: var(--text-dark);
-}
+.secondary-btn:hover { background: var(--white); border-color: var(--primary-light); }
 
 .danger-btn {
     background: var(--danger);
     border: none;
     color: white;
-    box-shadow: 0 4px 12px rgba(232, 90, 90, 0.3);
 }
 
-.danger-btn:hover {
-    background: #c62828;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(232, 90, 90, 0.4);
-}
-
-.danger-btn:active {
-    transform: scale(0.97);
-}
+.danger-btn:hover { background: #9B2C2C; }
 
 .text-btn {
     background: none;
@@ -480,37 +345,14 @@ body.dark-mode .emergency-bar {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    transition: all 0.2s ease;
 }
 
-.text-btn:hover {
-    color: var(--primary-dark);
-    transform: translateX(2px);
-}
-
-.text-btn.danger {
-    color: var(--danger);
-}
-
-.text-btn.danger:hover {
-    color: #c62828;
-}
-
-.text-btn i {
-    width: 16px;
-    height: 16px;
-}
+.text-btn.danger { color: var(--danger); }
+.text-btn i { width: 16px; height: 16px; }
 
 /* ========== 폼 요소 ========== */
-.form-group {
-    margin-bottom: 16px;
-}
-
-.form-group label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 8px;
-}
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-weight: 600; margin-bottom: 8px; }
 
 .form-group input[type="text"] {
     width: 100%;
@@ -520,13 +362,12 @@ body.dark-mode .emergency-bar {
     font-size: 1rem;
     color: var(--text-dark);
     background: var(--white);
-    transition: all 0.2s ease;
 }
 
 .form-group input:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(255, 120, 73, 0.1);
+    box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.1);
 }
 
 /* ========== 아이콘 그리드 ========== */
@@ -551,25 +392,15 @@ body.dark-mode .emergency-bar {
     border-radius: var(--radius-sm);
     color: var(--text-medium);
     cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.icon-option:hover {
-    border-color: var(--primary-light);
-    transform: scale(1.1);
 }
 
 .icon-option.selected {
     background: var(--primary);
     border-color: var(--primary);
     color: white;
-    transform: scale(1.1);
 }
 
-.icon-option i {
-    width: 20px;
-    height: 20px;
-}
+.icon-option i { width: 20px; height: 20px; }
 
 /* ========== 카드 미리보기 ========== */
 .card-preview {
@@ -579,7 +410,7 @@ body.dark-mode .emergency-bar {
     gap: 8px;
     padding: 16px 24px;
     background: var(--white);
-    border: 2px solid var(--primary);
+    border: var(--card-border-width) solid var(--primary);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
 }
@@ -595,12 +426,5 @@ body.dark-mode .emergency-bar {
     color: var(--primary);
 }
 
-.card-preview .preview-icon i {
-    width: 22px;
-    height: 22px;
-}
-
-.card-preview .preview-text {
-    font-weight: 600;
-    color: var(--text-dark);
-}
+.card-preview .preview-icon i { width: 22px; height: 22px; }
+.card-preview .preview-text { font-weight: 600; color: var(--text-dark); }

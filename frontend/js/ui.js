@@ -1,5 +1,19 @@
 // ========================================
 // ui.js - 카드 렌더링, 모달, 슬라이드, UI
+//
+// [디스플레이 설계 근거]
+// - Light, Wilkinson, Thiessen et al. (2019). Designing Effective
+//   AAC Displays. AAC, 35(1), 42-55.
+//   : 그리드 디스플레이에서 색상 클러스터링/공간 단서가 시각 탐색 촉진
+// - Thistle & Wilkinson (2015). Building EBP in AAC Display
+//   Design for Young Children. AAC, 31(2), 124-136.
+//   : 배경색 사용, 심볼 크기, 운동 계획 지원 등 SLP 설문 분석
+// - Wilkinson et al. (2022). Judicious Arrangement of Symbols
+//   on AAC Display. JSLHR, 65(2), 710-726.
+//   : 시각적 군집(visual crowding) 방지를 위한 심볼 배열 연구
+// - Sowers & Wilkinson (2023). Demands of AAC in Relation to
+//   Alternative Access for Motor Impairments. AJSLP, 32(1), 37-54.
+//   : 운동 장애 사용자의 접근성 요구사항 분석
 // ========================================
 console.log('🎨 ui.js 로드됨');
 
@@ -8,11 +22,17 @@ console.log('🎨 ui.js 로드됨');
 // ========================================
 function vibrate(duration = 50) {
     const settings = JSON.parse(localStorage.getItem('aac_settings') || '{}');
-    const vibrationEnabled = settings.vibration !== false;
-    
-    if (vibrationEnabled && 'vibrate' in navigator) {
+    if (settings.vibration !== false && 'vibrate' in navigator) {
         navigator.vibrate(duration);
     }
+}
+
+// ========================================
+// 롱프레스 시간 가져오기
+// ========================================
+function getLongPressTime() {
+    const settings = JSON.parse(localStorage.getItem('aac_settings') || '{}');
+    return parseInt(settings.longPressTime) || 500;
 }
 
 // ========================================
@@ -30,7 +50,6 @@ function goToSlide(index) {
     });
     
     if (index === 1) renderHistory();
-    
     lucide.createIcons();
 }
 
@@ -79,22 +98,11 @@ function updateOutputBar() {
         clearBtn.disabled = false;
         State.currentMessage = sentence;
         
-        // 아이콘 결정 - 우선순위: predicate > need > food > place > person > time > 기본값
-        if (Selection.predicate && Selection.predicate.icon) {
-            State.currentIcon = Selection.predicate.icon;
-        } else if (Selection.need && Selection.need.icon) {
-            State.currentIcon = Selection.need.icon;
-        } else if (Selection.food && Selection.food.length > 0 && Selection.food[0].icon) {
-            State.currentIcon = Selection.food[0].icon;
-        } else if (Selection.place && Selection.place.length > 0 && Selection.place[0].icon) {
-            State.currentIcon = Selection.place[0].icon;
-        } else if (Selection.person && Selection.person.length > 0 && Selection.person[0].icon) {
-            State.currentIcon = Selection.person[0].icon;
-        } else if (Selection.time && Selection.time.icon) {
-            State.currentIcon = Selection.time.icon;
-        } else {
-            State.currentIcon = 'message-circle';
-        }
+        if (Selection.predicate?.icon) State.currentIcon = Selection.predicate.icon;
+        else if (Selection.need?.icon) State.currentIcon = Selection.need.icon;
+        else if (Selection.person?.length > 0) State.currentIcon = Selection.person[0].icon;
+        else if (Selection.time?.icon) State.currentIcon = Selection.time.icon;
+        else State.currentIcon = 'message-circle';
     } else {
         outputText.innerHTML = '<span class="placeholder">카드를 선택하세요</span>';
         outputText.classList.remove('has-message');
@@ -109,39 +117,14 @@ function updateOutputBar() {
 }
 
 function updateCardStyles() {
-    document.querySelectorAll('.card').forEach(card => {
-        card.classList.remove('selected');
-    });
+    document.querySelectorAll('.card').forEach(card => card.classList.remove('selected'));
     
     const allSelected = [];
-    
-    if (Selection.time) {
-        allSelected.push({ text: Selection.time.text, category: 'time' });
-    }
-    
-    if (Selection.place && Array.isArray(Selection.place)) {
-        Selection.place.forEach(item => {
-            allSelected.push({ text: item.text, category: 'place' });
-        });
-    }
-    
+    if (Selection.time) allSelected.push({ text: Selection.time.text, category: 'time' });
     if (Selection.person && Array.isArray(Selection.person)) {
-        Selection.person.forEach(item => {
-            allSelected.push({ text: item.text, category: 'person' });
-        });
+        Selection.person.forEach(item => allSelected.push({ text: item.text, category: 'person' }));
     }
-    
-    if (Selection.food && Array.isArray(Selection.food)) {
-        Selection.food.forEach(item => {
-            allSelected.push({ text: item.text, category: 'food' });
-        });
-    }
-    
-    if (Selection.need) {
-        allSelected.push({ text: Selection.need.text, category: 'need' });
-    }
-    
-    // predicate는 원본 텍스트로 비교 (pain 카테고리의 경우 originalText 사용)
+    if (Selection.need) allSelected.push({ text: Selection.need.text, category: 'need' });
     if (Selection.predicate) {
         const originalText = Selection.predicate.originalText || Selection.predicate.text;
         allSelected.push({ text: originalText, category: Selection.predicate.category });
@@ -149,10 +132,7 @@ function updateCardStyles() {
     
     allSelected.forEach(item => {
         document.querySelectorAll('.card').forEach(card => {
-            const cardText = card.dataset.text;
-            const cardCategory = card.dataset.category;
-            
-            if (cardText === item.text && cardCategory === item.category) {
+            if (card.dataset.text === item.text && card.dataset.category === item.category) {
                 card.classList.add('selected');
             }
         });
@@ -160,97 +140,11 @@ function updateCardStyles() {
 }
 
 // ========================================
-// 추천 탭 관리
+// [제거됨] 추천 탭 시스템
+// Light et al. (2019): 갑작스러운 화면 전환 = 인지적 부담 증가
+// 사용자가 의도치 않게 현재 작업 맥락을 잃음
+// → 단순한 카테고리 탐색이 더 효과적
 // ========================================
-function showSuggestionTab(predicateText) {
-    const suggestion = VERB_SUGGESTIONS[predicateText];
-    
-    if (!suggestion || !suggestion.show) {
-        hideSuggestionTab();
-        return;
-    }
-    
-    State.showSuggestions = true;
-    State.currentPredicate = predicateText;
-    
-    const categoryTabs = document.querySelector('.category-tabs');
-    let suggestionTab = document.getElementById('suggestionTab');
-    
-    if (!suggestionTab) {
-        suggestionTab = document.createElement('button');
-        suggestionTab.id = 'suggestionTab';
-        suggestionTab.className = 'tab-btn suggestion-tab';
-        suggestionTab.dataset.category = 'suggestion';
-        suggestionTab.innerHTML = `<i data-lucide="sparkles"></i><span>추천</span>`;
-        suggestionTab.addEventListener('click', () => {
-            vibrate();
-            document.querySelectorAll('.category-tabs .tab-btn').forEach(b => b.classList.remove('active'));
-            suggestionTab.classList.add('active');
-            renderSuggestionCards(predicateText);
-        });
-        categoryTabs.insertBefore(suggestionTab, categoryTabs.firstChild);
-    }
-    
-    document.querySelectorAll('.category-tabs .tab-btn').forEach(b => b.classList.remove('active'));
-    suggestionTab.classList.add('active');
-    renderSuggestionCards(predicateText);
-    
-    suggestionTab.scrollIntoView({ behavior: 'smooth', inline: 'start' });
-    
-    lucide.createIcons();
-}
-
-function hideSuggestionTab() {
-    State.showSuggestions = false;
-    State.currentPredicate = null;
-    const suggestionTab = document.getElementById('suggestionTab');
-    if (suggestionTab) {
-        suggestionTab.remove();
-    }
-}
-
-function renderSuggestionCards(predicateText) {
-    const container = document.getElementById('cardsContainer');
-    if (!container) return;
-    
-    const suggestion = VERB_SUGGESTIONS[predicateText];
-    if (!suggestion || !suggestion.show) return;
-    
-    container.innerHTML = '';
-    
-    suggestion.categories.forEach(category => {
-        let allCards = getCardData(category);
-        
-        if (category === 'food' && suggestion.foodFilter) {
-            allCards = allCards.filter(card => card.type === suggestion.foodFilter);
-        }
-        
-        allCards.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'card suggestion-card';
-            card.dataset.text = item.text;
-            card.dataset.category = category;
-            card.dataset.icon = item.icon;
-            card.innerHTML = `
-                <div class="card-icon"><i data-lucide="${item.icon}"></i></div>
-                <div class="card-text">${item.text}</div>
-            `;
-            
-            card.addEventListener('click', () => {
-                vibrate();
-                handleCardSelect(category, item, item.text);
-            });
-            
-            container.appendChild(card);
-        });
-    });
-    
-    const painScale = document.getElementById('painScale');
-    if (painScale) painScale.classList.add('hidden');
-    
-    lucide.createIcons();
-    updateCardStyles();
-}
 
 // ========================================
 // 카드 렌더링
@@ -268,7 +162,6 @@ function renderCards(category) {
     cards.forEach(item => {
         let displayText = item.text;
         
-        // pain 카테고리 텍스트 변환
         if (category === 'pain') {
             if (!['어지러움', '토할 것 같음', '추움', '열남'].includes(item.text)) {
                 displayText = item.text + ' 아파요';
@@ -282,7 +175,7 @@ function renderCards(category) {
         
         const card = document.createElement('div');
         card.className = `card${isUserCard ? ' user-card' : ''}`;
-        card.dataset.text = item.text;  // 원본 텍스트 저장 (비교용)
+        card.dataset.text = item.text;
         card.dataset.category = category;
         card.dataset.icon = item.icon;
         card.innerHTML = `
@@ -294,8 +187,6 @@ function renderCards(category) {
         card.addEventListener('click', (e) => {
             if (e.target.closest('.delete-btn')) return;
             vibrate();
-            
-            // pain 카테고리는 originalText를 함께 전달
             if (category === 'pain') {
                 handleCardSelect(category, { ...item, originalText: item.text, displayText }, displayText);
             } else {
@@ -312,10 +203,10 @@ function renderCards(category) {
         }
         
         setupLongPress(card, displayText, item.icon);
-        
         container.appendChild(card);
     });
     
+    // 카드 추가 버튼
     const addBtn = document.createElement('div');
     addBtn.className = 'add-card-btn';
     addBtn.innerHTML = `<i data-lucide="plus"></i><span>추가</span>`;
@@ -333,12 +224,11 @@ function renderCards(category) {
 }
 
 // ========================================
-// 통증 버튼 생성
+// 통증 버튼
 // ========================================
 function createPainButtons() {
     const container = document.getElementById('painButtons');
     if (!container) return;
-    
     container.innerHTML = '';
     
     for (let i = 1; i <= 10; i++) {
@@ -346,7 +236,6 @@ function createPainButtons() {
         btn.className = 'pain-btn';
         btn.dataset.level = i;
         btn.textContent = i;
-        
         btn.addEventListener('click', () => {
             vibrate();
             document.querySelectorAll('.pain-btn').forEach(b => b.classList.remove('selected'));
@@ -354,7 +243,6 @@ function createPainButtons() {
             State.selectedPainLevel = i;
             updatePainMessage();
         });
-        
         container.appendChild(btn);
     }
 }
@@ -401,11 +289,11 @@ let longPressTimer = null;
 function setupLongPress(card, text, icon) {
     const startPress = (e) => {
         if (e.target.closest('.delete-btn')) return;
-        
+        const pressTime = getLongPressTime();
         longPressTimer = setTimeout(() => {
             vibrate(100);
             showLongPressMenu(text, icon, e);
-        }, 500);
+        }, pressTime);
     };
     
     const endPress = () => clearTimeout(longPressTimer);
@@ -452,8 +340,7 @@ function showLongPressMenu(text, icon, e) {
     menu.querySelectorAll('.longpress-menu-item').forEach(item => {
         item.addEventListener('click', () => {
             vibrate();
-            const itemIcon = item.dataset.icon || icon;
-            Selection.predicate = { text: item.dataset.text, icon: itemIcon, displayText: item.dataset.text, category: 'action' };
+            Selection.predicate = { text: item.dataset.text, icon: item.dataset.icon || icon, displayText: item.dataset.text, category: 'action' };
             updateOutputBar();
             closeLongPressMenu();
         });
@@ -475,36 +362,20 @@ function showListenerModal(text, icon, isEmergency = false) {
     const iconEl = document.getElementById('listenerIcon');
     const textEl = document.getElementById('listenerText');
     
-    if (!modal || !iconEl || !textEl) {
-        console.error('청자 모달 요소를 찾을 수 없음');
-        return;
-    }
+    if (!modal || !iconEl || !textEl) return;
     
-    // 기존 모드 클래스 제거
     modal.classList.remove('normal-mode', 'emergency-mode');
+    modal.classList.add(isEmergency ? 'emergency-mode' : 'normal-mode');
     
-    // 긴급 여부에 따라 클래스 추가
-    if (isEmergency) {
-        modal.classList.add('emergency-mode');
-    } else {
-        modal.classList.add('normal-mode');
-    }
-    
-    // 아이콘이 없거나 기본값이면 State.currentIcon 사용
     const displayIcon = icon && icon !== 'message-circle' ? icon : State.currentIcon;
-    
-    // 아이콘 크기 크게 설정
     iconEl.innerHTML = `<i data-lucide="${displayIcon}" style="width: 120px; height: 120px; stroke-width: 1.5;"></i>`;
     textEl.textContent = text;
     modal.classList.remove('hidden');
-    
     lucide.createIcons();
 }
 
 function closeListenerModal() {
     document.getElementById('listenerModal')?.classList.add('hidden');
-    
-    // 선택 초기화
     clearSelection();
     State.currentMessage = '';
     State.currentIcon = 'message-circle';
@@ -516,7 +387,7 @@ function closeListenerModal() {
 // ========================================
 // 카드 추가 모달
 // ========================================
-let addingToCategory = 'action';
+let addingToCategory = 'core';
 let selectedIconForNewCard = 'message-circle';
 
 function openAddCardModal(category) {
@@ -557,7 +428,6 @@ function closeAddCardModal() {
 function updateCardPreview() {
     const preview = document.getElementById('cardPreview');
     const text = document.getElementById('newCardText')?.value || '새 카드';
-    
     preview.innerHTML = `
         <div class="preview-icon"><i data-lucide="${selectedIconForNewCard}"></i></div>
         <span class="preview-text">${text}</span>
@@ -567,101 +437,53 @@ function updateCardPreview() {
 
 function confirmAddCard() {
     const text = document.getElementById('newCardText')?.value.trim();
-    
-    if (!text) {
-        alert('카드 텍스트를 입력해주세요');
-        return;
-    }
+    if (!text) { alert('카드 텍스트를 입력해주세요'); return; }
     
     const existing = getCardData(addingToCategory);
-    if (existing.some(c => c.text === text)) {
-        alert('이미 같은 이름의 카드가 있습니다');
-        return;
-    }
+    if (existing.some(c => c.text === text)) { alert('이미 같은 이름의 카드가 있습니다'); return; }
     
-    if (!State.userCards[addingToCategory]) {
-        State.userCards[addingToCategory] = [];
-    }
-    
-    State.userCards[addingToCategory].push({
-        icon: selectedIconForNewCard,
-        text: text
-    });
+    if (!State.userCards[addingToCategory]) State.userCards[addingToCategory] = [];
+    State.userCards[addingToCategory].push({ icon: selectedIconForNewCard, text });
     
     saveUserCards();
     closeAddCardModal();
     renderCards(addingToCategory);
-    
     alert(`"${text}" 카드가 추가되었습니다`);
 }
 
 // ========================================
-// 확인 모달 (커스텀 confirm)
+// 확인 모달
 // ========================================
 let confirmResolve = null;
 
 function showConfirmModal(message) {
     return new Promise((resolve) => {
         confirmResolve = resolve;
-        
         const modal = document.getElementById('confirmModal');
         const messageEl = document.getElementById('confirmMessage');
-        
-        if (!modal || !messageEl) {
-            resolve(confirm(message));
-            return;
-        }
-        
+        if (!modal || !messageEl) { resolve(confirm(message)); return; }
         messageEl.textContent = message;
         modal.classList.remove('hidden');
-        
         lucide.createIcons();
     });
 }
 
 function closeConfirmModal(result) {
-    const modal = document.getElementById('confirmModal');
-    if (modal) {
-        modal.classList.add('hidden');
-    }
-    
-    if (confirmResolve) {
-        confirmResolve(result);
-        confirmResolve = null;
-    }
+    document.getElementById('confirmModal')?.classList.add('hidden');
+    if (confirmResolve) { confirmResolve(result); confirmResolve = null; }
 }
 
 // ========================================
 // 폰트 크기 적용
 // ========================================
 function applyFontSize(size) {
-    const sizeMap = {
-        'small': '14px',
-        'medium': '18px',
-        'large': '24px'
-    };
+    const rootMap = { 'small': '14px', 'medium': '18px', 'large': '24px' };
+    const cardMap = { 'small': '0.8rem', 'medium': '1rem', 'large': '1.3rem' };
+    const tabMap = { 'small': '0.7rem', 'medium': '0.85rem', 'large': '1.1rem' };
+    const menuMap = { 'small': '0.85rem', 'medium': '1rem', 'large': '1.3rem' };
     
-    const rootSize = sizeMap[size] || '18px';
-    document.documentElement.style.setProperty('--base-font-size', rootSize);
-    
-    const cardSizeMap = {
-        'small': '0.8rem',
-        'medium': '1rem',
-        'large': '1.3rem'
-    };
-    document.documentElement.style.setProperty('--card-text-size', cardSizeMap[size] || '1rem');
-    
-    const tabSizeMap = {
-        'small': '0.7rem',
-        'medium': '0.85rem',
-        'large': '1.1rem'
-    };
-    document.documentElement.style.setProperty('--tab-text-size', tabSizeMap[size] || '0.85rem');
-    
-    const menuSizeMap = {
-        'small': '0.85rem',
-        'medium': '1rem',
-        'large': '1.3rem'
-    };
-    document.documentElement.style.setProperty('--menu-text-size', menuSizeMap[size] || '1rem');
+    document.documentElement.style.setProperty('--base-font-size', rootMap[size] || '18px');
+    document.documentElement.style.setProperty('--card-text-size', cardMap[size] || '1rem');
+    document.documentElement.style.setProperty('--tab-text-size', tabMap[size] || '0.85rem');
+    document.documentElement.style.setProperty('--menu-text-size', menuMap[size] || '1rem');
 }

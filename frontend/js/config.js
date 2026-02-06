@@ -1,126 +1,47 @@
 // ========================================
 // config.js - 규칙, 설정
+//
+// [설계 원칙: "과하면 독" — 인지적 부담 최소화]
+// Light, Wilkinson et al. (2019). Designing Effective AAC Displays.
+// AAC, 35(1), 42-55. PMID: 30663899
+// → "인지적 부담을 최소화하는 디스플레이 설계가 핵심"
+// → "시각장면디스플레이(VSD)는 작업기억/정신적 유연성 부담 감소"
+//
+// Thistle & Wilkinson (2017). AAC, 33(3), 160-169. PMID: 28617614
+// → "24개 미만 소규모 그리드에서 배경색이 오히려 탐색을 방해"
+// → "심볼 수를 적절히 제한하고, 불필요한 시각적 복잡성 배제"
+//
+// [핵심어휘 이중 접근법]
+// Beukelman & Light (2020). AAC (5th ed.). Brookes.
+// → 핵심어휘(core) + 개인 부수어휘(fringe) 병행
+//
+// [한국어 특수성]
+// 신상은 (2017). 한국어 핵심어휘 분석.
+// → 용언 활용(시제/존댓말)으로 영어보다 핵심어휘 수 多
 // ========================================
 console.log('⚙️ config.js 로드됨');
-
-// ========================================
-// 동사별 추천 설정
-// ========================================
-const VERB_SUGGESTIONS = {
-    '가요': {
-        show: true,
-        categories: ['place', 'person', 'time']
-    },
-    '와요': {
-        show: true,
-        categories: ['place', 'person', 'time']
-    },
-    '먹어요': {
-        show: true,
-        categories: ['food', 'place', 'time']
-    },
-    '마셔요': {
-        show: true,
-        categories: ['food', 'place', 'time']
-    },
-    '봐요': {
-        show: true,
-        categories: ['person', 'place', 'time']
-    },
-    '만나요': {
-        show: true,
-        categories: ['person', 'place', 'time']
-    },
-    '기다려요': {
-        show: true,
-        categories: ['person', 'place', 'time']
-    },
-    '전화해요': {
-        show: true,
-        categories: ['person', 'time']
-    },
-    '좋아요': {
-        show: true,
-        categories: ['food', 'person']
-    },
-    // 추천 없는 동사들 (완성형)
-    '화장실 가요': { show: false },
-    '자요': { show: false },
-    '멈춰요': { show: false },
-    '들어요': { show: false },
-    '써요': { show: false },
-    '슬퍼요': { show: false },
-    '화나요': { show: false },
-    '무서워요': { show: false },
-    '피곤해요': { show: false },
-    '답답해요': { show: false },
-    '행복해요': { show: false },
-    '우울해요': { show: false },
-    '놀랐어요': { show: false },
-    '그냥 그래요': { show: false },
-    '기분 좋아요': { show: false },
-    '기분 나빠요': { show: false },
-    '도와주세요': { show: false },
-    '약 주세요': { show: false },
-    '물 주세요': { show: false },
-    '밥 주세요': { show: false },
-    '전화해주세요': { show: false },
-    '의사 불러주세요': { show: false },
-    '조용히 해주세요': { show: false },
-    '다시 말해주세요': { show: false },
-    '옷 갈아입을래요': { show: false },
-    '환기해주세요': { show: false },
-    '불 켜주세요': { show: false },
-    '불 꺼주세요': { show: false }
-};
 
 // ========================================
 // 카테고리 규칙
 // ========================================
 const CATEGORY_RULES = {
-    single: ['action', 'feeling', 'pain', 'time', 'need'],  // need를 single로 이동
-    multiple: ['food', 'place', 'person']
+    single: ['core', 'action', 'feeling', 'pain', 'time', 'need'],
+    multiple: ['person']
 };
 
-// need 제거 - need는 single로 처리
-const PREDICATE_CATEGORIES = ['action', 'feeling', 'pain'];
+// 서술어 카테고리 (단일 선택, 상호 배타적)
+const PREDICATE_CATEGORIES = ['core', 'action', 'feeling', 'pain'];
 
 // ========================================
-// 문장 생성 (단순 연결) - need도 다른 선택과 함께 표시
+// 문장 생성 (단순 연결)
 // ========================================
 function buildSentence() {
     const parts = [];
     
-    // 시간
-    if (Selection.time) {
-        parts.push(Selection.time.text);
-    }
-    
-    // 장소들
-    Selection.place.forEach(item => {
-        parts.push(item.text);
-    });
-    
-    // 사람들
-    Selection.person.forEach(item => {
-        parts.push(item.text);
-    });
-    
-    // 음식들
-    Selection.food.forEach(item => {
-        parts.push(item.text);
-    });
-    
-    // 서술어 (action, feeling, pain)
-    if (Selection.predicate) {
-        parts.push(Selection.predicate.text);
-    }
-    
-    // 요청 (need) - 맨 마지막에 추가
-    if (Selection.need) {
-        parts.push(Selection.need.text);
-    }
+    if (Selection.time) parts.push(Selection.time.text);
+    Selection.person.forEach(item => parts.push(item.text));
+    if (Selection.predicate) parts.push(Selection.predicate.text);
+    if (Selection.need) parts.push(Selection.need.text);
     
     return parts.join(' ');
 }
-// buildNeedSentence 제거 - 더 이상 필요 없음
