@@ -1,0 +1,210 @@
+/* ========================================
+   card.css - AAC 카드
+======================================== */
+
+/* 카드 기본 스타일 */
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
+    padding: var(--spacing-sm);
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    border-radius: var(--card-radius);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    min-width: 0;
+}
+
+.card:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-md);
+}
+
+.card:active {
+    opacity: 0.9;
+}
+
+/* 카드 선택됨 */
+.card.selected {
+    border-color: var(--color-primary);
+    border-width: 3px;
+    background: var(--color-primary-bg);
+    box-shadow: var(--shadow-md), 0 0 0 3px var(--color-primary-bg);
+}
+
+/* 연석정(2017) 권장: 선택 시 시각적 피드백 - 크기 유지 */
+@keyframes cardSelected {
+    0% { box-shadow: var(--shadow-md), 0 0 0 0px var(--color-primary); }
+    50% { box-shadow: var(--shadow-md), 0 0 0 6px var(--color-primary-bg); }
+    100% { box-shadow: var(--shadow-md), 0 0 0 3px var(--color-primary-bg); }
+}
+
+/* 긴급 카드 */
+.card.emergency {
+    border-color: var(--color-border);
+    background: var(--color-surface);
+}
+
+.card.emergency:hover {
+    border-color: var(--color-danger);
+    background: var(--color-danger-bg);
+}
+
+.card.emergency.selected {
+    border-color: var(--color-danger);
+    background: var(--color-danger-bg);
+    box-shadow: var(--shadow-md), 0 0 0 3px var(--color-danger-bg);
+}
+
+/* 픽토그램 - 오버플로우 방지 */
+.card-pictogram {
+    width: 50%;
+    height: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--spacing-xs);
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.card-pictogram svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* 카드 텍스트 - 오버플로우 방지 */
+.card-text {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    text-align: center;
+    line-height: 1.2;
+    word-break: keep-all;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    padding: 0 2px;
+}
+
+/* 카드 추가 버튼 */
+.card-add {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
+    background: transparent;
+    border: 2px dashed var(--color-border);
+    border-radius: var(--card-radius);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.card-add svg {
+    width: 28px;
+    height: 28px;
+    margin-bottom: var(--spacing-xs);
+}
+
+.card-add span {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.card-add:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-bg);
+}
+
+/* ===== 편집 모드 ===== */
+.card-drag-handle {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 20px;
+    height: 20px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-muted);
+    cursor: grab;
+    z-index: 5;
+}
+
+.card-drag-handle svg {
+    width: 14px;
+    height: 14px;
+}
+
+.card-delete-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-danger);
+    border-radius: 50%;
+    color: white;
+    z-index: 10;
+    box-shadow: var(--shadow-md);
+}
+
+.card-delete-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* 편집 모드 활성화 시 */
+.cards-area.edit-mode .card-drag-handle {
+    display: flex;
+}
+
+.cards-area.edit-mode .card.user-card .card-delete-btn {
+    display: flex;
+}
+
+.cards-area.edit-mode .card {
+    animation: shake 0.4s ease-in-out infinite;
+}
+
+@keyframes shake {
+    0%, 100% { transform: rotate(-0.5deg); }
+    50% { transform: rotate(0.5deg); }
+}
+
+.cards-area.edit-mode .card:hover {
+    animation: none;
+}
+
+/* 드래그 앤 드롭 */
+.card.dragging {
+    opacity: 0.5;
+    z-index: 1000;
+}
+
+.card.drag-over {
+    border-color: var(--color-primary);
+    border-style: dashed;
+}
+
+.card-placeholder {
+    background: var(--color-primary-bg);
+    border: 2px dashed var(--color-primary);
+    border-radius: var(--card-radius);
+    aspect-ratio: 1;
+}

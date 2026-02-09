@@ -1,0 +1,269 @@
+/* ========================================
+   layout.css - 전체 레이아웃
+======================================== */
+
+.app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    max-width: 100vw;
+    overflow: hidden;
+    background: var(--color-bg);
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+.slide-container {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+}
+
+.slide-wrapper {
+    display: flex;
+    height: 100%;
+    transition: transform var(--transition-normal);
+}
+
+.slide {
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* 카드 영역 - overflow 수정 */
+.cards-area {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: var(--spacing-md);
+    -webkit-overflow-scrolling: touch;
+    min-width: 0;
+}
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--card-columns), 1fr);
+    gap: var(--card-gap);
+    padding-bottom: var(--spacing-md);
+    width: 100%;
+    min-width: 0;
+}
+
+/* 카드 균일 크기 보장 */
+.cards-grid > * {
+    width: 100%;
+    max-width: 100%;
+}
+
+.scroll-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-md);
+    -webkit-overflow-scrolling: touch;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md);
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.page-header h2 {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xl) var(--spacing-md);
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+.empty-state svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: var(--spacing-md);
+    opacity: 0.5;
+}
+
+.section-title {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    padding: var(--spacing-sm) 0;
+    margin-top: var(--spacing-md);
+}
+
+.section-title:first-child {
+    margin-top: 0;
+}
+
+/* ===== 추천 바 ===== */
+.suggestion-bar {
+    display: none;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-primary-bg);
+    border-bottom: 1px solid var(--color-border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.suggestion-bar.active {
+    display: flex;
+}
+
+.suggestion-bar::-webkit-scrollbar {
+    display: none;
+}
+
+.suggestion-label {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-primary);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.suggestion-label svg {
+    width: 16px;
+    height: 16px;
+}
+
+.suggestion-chips {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.suggestion-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-primary);
+    border-radius: 20px;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--color-primary);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.suggestion-chip:hover {
+    background: var(--color-primary);
+    color: var(--color-text-inverse);
+}
+
+.suggestion-chip:active {
+    transform: scale(0.95);
+}
+
+.suggestion-chip svg {
+    width: 14px;
+    height: 14px;
+}
+
+.suggestion-close {
+    margin-left: auto;
+    padding: 4px;
+    color: var(--color-text-muted);
+    cursor: pointer;
+}
+
+.suggestion-close:hover {
+    color: var(--color-text-primary);
+}
+
+/* ===== 긴급 바 ===== */
+.emergency-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+}
+
+.emergency-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-danger);
+    white-space: nowrap;
+}
+
+.emergency-label svg {
+    width: 16px;
+    height: 16px;
+}
+
+.emergency-chips {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex: 1;
+}
+
+.emergency-chip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    border-radius: 20px;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.emergency-chip:hover {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+}
+
+.emergency-chip:active {
+    transform: scale(0.95);
+}
+
+.emergency-chip.selected {
+    background: var(--color-danger);
+    border-color: var(--color-danger);
+    color: white;
+}
+
+.emergency-chip svg {
+    width: 16px;
+    height: 16px;
+}

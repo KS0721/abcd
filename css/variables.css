@@ -1,0 +1,292 @@
+/* ========================================
+   variables.css - 디자인 시스템 변수
+   Modified Fitzgerald Key 국제 AAC 색상 표준 적용
+   WCAG AAA 7:1+ 대비율 준수
+   
+   [Modified Fitzgerald Key 색상 표준]
+   - Yellow: 대명사 (Pronouns)
+   - Green: 동사 (Verbs)  
+   - Orange: 명사 (Nouns)
+   - Blue: 형용사/묘사어 (Adjectives/Descriptors)
+   - Pink: 사회어/전치사 (Social words/Prepositions)
+   - Purple: 질문 (Questions)
+   - Brown: 부사 (Adverbs)
+   - Red: 긴급/부정/중요 기능어 (Emergency/Negation)
+   - White/Gray: 접속사/한정사 (Conjunctions/Determiners)
+======================================== */
+
+:root {
+    /* ===== 기본 색상 (라이트 모드) ===== */
+    --color-bg: #FAFAFA;
+    --color-surface: #FFFFFF;
+    --color-surface-elevated: #FFFFFF;
+    --color-border: #E5E5E5;
+    --color-border-light: #F0F0F0;
+    
+    /* 텍스트 (7:1+ 대비율) */
+    --color-text-primary: #1A1A1A;
+    --color-text-secondary: #505050;
+    --color-text-muted: #888888;
+    --color-text-inverse: #FFFFFF;
+    
+    /* 브랜드 색상 (청록 계열) */
+    --color-primary: #0891B2;
+    --color-primary-light: #22D3EE;
+    --color-primary-dark: #0E7490;
+    --color-primary-bg: #ECFEFF;
+    
+    /* 상태 색상 */
+    --color-success: #059669;
+    --color-success-bg: #D1FAE5;
+    --color-warning: #D97706;
+    --color-warning-bg: #FEF3C7;
+    --color-danger: #DC2626;
+    --color-danger-bg: #FEE2E2;
+    --color-info: #2563EB;
+    --color-info-bg: #DBEAFE;
+    
+    /* ===== Modified Fitzgerald Key 문법별 색상 ===== */
+    
+    /* 🟢 GREEN: 동사/활동 (Verbs/Actions) */
+    --cat-verb: #16A34A;
+    --cat-verb-light: #22C55E;
+    --cat-verb-bg: #F0FDF4;
+    --cat-verb-border: #16A34A;
+    
+    /* 🟠 ORANGE: 명사/사물/음식 (Nouns/Things/Food) */
+    --cat-noun: #EA580C;
+    --cat-noun-light: #F97316;
+    --cat-noun-bg: #FFF7ED;
+    --cat-noun-border: #EA580C;
+    
+    /* 🟡 YELLOW: 대명사/핵심어 (Pronouns/Core) */
+    --cat-pronoun: #CA8A04;
+    --cat-pronoun-light: #EAB308;
+    --cat-pronoun-bg: #FEFCE8;
+    --cat-pronoun-border: #CA8A04;
+    
+    /* 🔵 BLUE: 형용사/묘사어/감정 (Adjectives/Descriptors/Feelings) */
+    --cat-adjective: #2563EB;
+    --cat-adjective-light: #3B82F6;
+    --cat-adjective-bg: #EFF6FF;
+    --cat-adjective-border: #2563EB;
+    
+    /* 💖 PINK: 사회어/인사 (Social words/Greetings) */
+    --cat-social: #DB2777;
+    --cat-social-light: #EC4899;
+    --cat-social-bg: #FDF2F8;
+    --cat-social-border: #DB2777;
+    
+    /* 💜 PURPLE: 질문 (Questions) */
+    --cat-question: #7C3AED;
+    --cat-question-light: #8B5CF6;
+    --cat-question-bg: #F5F3FF;
+    --cat-question-border: #7C3AED;
+    
+    /* 🟤 BROWN/TAN: 부사/시간 (Adverbs/Time) */
+    --cat-adverb: #A16207;
+    --cat-adverb-light: #CA8A04;
+    --cat-adverb-bg: #FEF9C3;
+    --cat-adverb-border: #A16207;
+    
+    /* 🔴 RED: 긴급/부정/중요 (Emergency/Negation/Important) */
+    --cat-emergency: #DC2626;
+    --cat-emergency-light: #EF4444;
+    --cat-emergency-bg: #FEF2F2;
+    --cat-emergency-border: #DC2626;
+    
+    /* ⬜ WHITE/GRAY: 접속사/응답 (Conjunctions/Responses) */
+    --cat-misc: #6B7280;
+    --cat-misc-light: #9CA3AF;
+    --cat-misc-bg: #F9FAFB;
+    --cat-misc-border: #6B7280;
+    
+    /* 🟣 PURPLE-PINK: 사람 (People - 특별 카테고리) */
+    --cat-person: #9333EA;
+    --cat-person-light: #A855F7;
+    --cat-person-bg: #FAF5FF;
+    --cat-person-border: #9333EA;
+    
+    /* 🩵 CYAN: 장소 (Places - 특별 카테고리) */
+    --cat-place: #0891B2;
+    --cat-place-light: #06B6D4;
+    --cat-place-bg: #ECFEFF;
+    --cat-place-border: #0891B2;
+    
+    /* ===== 레거시 호환 (기존 카테고리명 매핑) ===== */
+    --cat-core: var(--cat-pronoun);
+    --cat-core-light: var(--cat-pronoun-light);
+    --cat-core-bg: var(--cat-pronoun-bg);
+    
+    --cat-greeting: var(--cat-social);
+    --cat-greeting-light: var(--cat-social-light);
+    --cat-greeting-bg: var(--cat-social-bg);
+    
+    --cat-feeling: var(--cat-adjective);
+    --cat-feeling-light: var(--cat-adjective-light);
+    --cat-feeling-bg: var(--cat-adjective-bg);
+    
+    --cat-action: var(--cat-verb);
+    --cat-action-light: var(--cat-verb-light);
+    --cat-action-bg: var(--cat-verb-bg);
+    
+    --cat-food: var(--cat-noun);
+    --cat-food-light: var(--cat-noun-light);
+    --cat-food-bg: var(--cat-noun-bg);
+    
+    --cat-thing: var(--cat-noun);
+    --cat-thing-light: var(--cat-noun-light);
+    --cat-thing-bg: var(--cat-noun-bg);
+    
+    --cat-time: var(--cat-adverb);
+    --cat-time-light: var(--cat-adverb-light);
+    --cat-time-bg: var(--cat-adverb-bg);
+    
+    --cat-need: var(--cat-emergency);
+    --cat-need-light: var(--cat-emergency-light);
+    --cat-need-bg: var(--cat-emergency-bg);
+    
+    --cat-pain: var(--cat-emergency);
+    --cat-pain-light: var(--cat-emergency-light);
+    --cat-pain-bg: var(--cat-emergency-bg);
+    
+    /* ===== 타이포그래피 ===== */
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 2rem;
+    
+    /* ===== 간격 ===== */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    
+    /* ===== 레이아웃 ===== */
+    --header-height: 56px;
+    --output-bar-height: 72px;
+    --tab-bar-height: 64px;
+    --category-bar-height: 52px;
+    --suggestion-bar-height: 48px;
+    
+    /* ===== 카드 ===== */
+    --card-columns: 4;
+    --card-gap: 10px;
+    --card-radius: 16px;
+    --card-scale: 1;
+    
+    /* ===== 그림자 ===== */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    
+    /* ===== 애니메이션 ===== */
+    --transition-fast: 150ms ease;
+    --transition-normal: 200ms ease;
+    --transition-slow: 300ms ease;
+}
+
+/* ===== 다크 모드 ===== */
+[data-theme="dark"] {
+    --color-bg: #0F172A;
+    --color-surface: #1E293B;
+    --color-surface-elevated: #334155;
+    --color-border: #334155;
+    --color-border-light: #475569;
+    
+    --color-text-primary: #F1F5F9;
+    --color-text-secondary: #CBD5E1;
+    --color-text-muted: #94A3B8;
+    --color-text-inverse: #0F172A;
+    
+    --color-primary: #22D3EE;
+    --color-primary-light: #67E8F9;
+    --color-primary-dark: #06B6D4;
+    --color-primary-bg: #164E63;
+    
+    --color-success-bg: #064E3B;
+    --color-warning-bg: #78350F;
+    --color-danger-bg: #7F1D1D;
+    --color-info-bg: #1E3A8A;
+    
+    /* Modified Fitzgerald Key 다크모드 */
+    --cat-verb: #4ADE80;
+    --cat-verb-light: #86EFAC;
+    --cat-verb-bg: #14532D;
+    
+    --cat-noun: #FB923C;
+    --cat-noun-light: #FDBA74;
+    --cat-noun-bg: #7C2D12;
+    
+    --cat-pronoun: #FACC15;
+    --cat-pronoun-light: #FDE047;
+    --cat-pronoun-bg: #713F12;
+    
+    --cat-adjective: #60A5FA;
+    --cat-adjective-light: #93C5FD;
+    --cat-adjective-bg: #1E3A8A;
+    
+    --cat-social: #F472B6;
+    --cat-social-light: #F9A8D4;
+    --cat-social-bg: #831843;
+    
+    --cat-question: #A78BFA;
+    --cat-question-light: #C4B5FD;
+    --cat-question-bg: #4C1D95;
+    
+    --cat-adverb: #FCD34D;
+    --cat-adverb-light: #FDE68A;
+    --cat-adverb-bg: #78350F;
+    
+    --cat-emergency: #F87171;
+    --cat-emergency-light: #FCA5A5;
+    --cat-emergency-bg: #7F1D1D;
+    
+    --cat-misc: #9CA3AF;
+    --cat-misc-light: #D1D5DB;
+    --cat-misc-bg: #374151;
+    
+    --cat-person: #C084FC;
+    --cat-person-light: #D8B4FE;
+    --cat-person-bg: #581C87;
+    
+    --cat-place: #22D3EE;
+    --cat-place-light: #67E8F9;
+    --cat-place-bg: #164E63;
+    
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+}
+
+/* ===== 고대비 모드 ===== */
+[data-contrast="high"] {
+    --color-text-primary: #000000;
+    --color-text-secondary: #1A1A1A;
+    --color-border: #000000;
+}
+
+[data-theme="dark"][data-contrast="high"] {
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #F0F0F0;
+    --color-border: #FFFFFF;
+}
+
+/* ===== 글자 크기 설정 ===== */
+/* 보통: 18px (기본값, 이전 크게) */
+/* 크게: 20px (이전 아주크게) */
+/* 아주 크게: 24px (새로 추가) */
+[data-font-size="medium"] { 
+    font-size: 18px; 
+}
+[data-font-size="large"] { 
+    font-size: 20px; 
+}
+[data-font-size="xlarge"] { 
+    font-size: 24px; 
+}

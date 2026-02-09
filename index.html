@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#D45A00">
+    <meta name="description" content="의사소통 약자를 위한 동사 중심 AAC 앱">
+    
+    <title>올인원 AAC 3.0</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components/splash.css">
+    <link rel="stylesheet" href="css/components/header.css">
+    <link rel="stylesheet" href="css/components/category.css">
+    <link rel="stylesheet" href="css/components/card.css">
+    <link rel="stylesheet" href="css/components/output-bar.css">
+    <link rel="stylesheet" href="css/components/modal.css">
+    <link rel="stylesheet" href="css/components/settings.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <!-- ========== 스플래시 스크린 ========== -->
+    <div id="splashScreen" class="splash-screen">
+        <div class="splash-content">
+            <div class="splash-logo">
+                <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- 배경 원 (글로우 효과) -->
+                    <circle cx="60" cy="60" r="55" fill="rgba(255,255,255,0.1)"/>
+                    
+                    <!-- 메인 말풍선 -->
+                    <path d="M30 35 C30 25, 40 18, 60 18 C80 18, 90 25, 90 35 L90 60 C90 70, 80 77, 60 77 L45 77 L35 90 L38 77 C35 77, 30 70, 30 60 Z" 
+                          fill="white" 
+                          filter="drop-shadow(0 4px 12px rgba(0,0,0,0.15))"/>
+                    
+                    <!-- 하트 아이콘 (의사소통의 따뜻함) -->
+                    <path d="M60 58 C60 58, 48 48, 48 42 C48 36, 54 33, 60 40 C66 33, 72 36, 72 42 C72 48, 60 58, 60 58 Z" 
+                          fill="#FF6B9D"/>
+                    
+                    <!-- 작은 말풍선들 (소통 표현) -->
+                    <circle cx="85" cy="30" r="8" fill="rgba(255,255,255,0.6)"/>
+                    <circle cx="95" cy="45" r="5" fill="rgba(255,255,255,0.4)"/>
+                </svg>
+            </div>
+            <h1 class="splash-title">올인원<span>AAC</span></h1>
+            <p class="splash-subtitle">마음을 전하는 소통의 시작</p>
+            <div class="splash-loader">
+                <div class="splash-loader-bar"></div>
+            </div>
+        </div>
+        <p class="splash-version">v3.0.0</p>
+    </div>
+    
+    <div id="app" class="app" style="display: none;">
+        
+        <!-- 스캐닝 모드 인디케이터 -->
+        <div class="scanning-indicator" id="scanningIndicator">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+            스캐닝 모드 (스페이스바/엔터로 선택)
+        </div>
+        
+        <!-- ========== 헤더 ========== -->
+        <header class="app-header" id="appHeader">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- 배경 원 -->
+                    <circle cx="60" cy="60" r="50" fill="#0891B2" opacity="0.15"/>
+                    <!-- 메인 말풍선 -->
+                    <path d="M30 35 C30 25, 40 18, 60 18 C80 18, 90 25, 90 35 L90 60 C90 70, 80 77, 60 77 L45 77 L35 90 L38 77 C35 77, 30 70, 30 60 Z" 
+                          fill="white" 
+                          stroke="#0891B2"
+                          stroke-width="3"/>
+                    <!-- 하트 -->
+                    <path d="M60 58 C60 58, 48 48, 48 42 C48 36, 54 33, 60 40 C66 33, 72 36, 72 42 C72 48, 60 58, 60 58 Z" 
+                          fill="#FF6B9D"/>
+                    <!-- 작은 말풍선 -->
+                    <circle cx="85" cy="30" r="6" fill="#0891B2" opacity="0.3"/>
+                    <circle cx="95" cy="42" r="4" fill="#0891B2" opacity="0.2"/>
+                </svg>
+                <span class="logo-text">올인원<span>AAC</span></span>
+            </div>
+            <span class="edit-mode-badge">편집 모드</span>
+            <div class="header-actions">
+                <button class="header-btn" id="editModeBtn" aria-label="편집 모드">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+        
+        <!-- ========== 메인 콘텐츠 ========== -->
+        <main class="main-content">
+            <div class="slide-container">
+                <div class="slide-wrapper" id="slideWrapper">
+                    
+                    <!-- 슬라이드 1: 말하기 -->
+                    <section class="slide" id="slideSpeak">
+                        <!-- 긴급 바 -->
+                        <div class="emergency-bar" id="emergencyBar">
+                            <span class="emergency-label">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                                    <line x1="12" y1="9" x2="12" y2="13"/>
+                                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                                </svg>
+                                긴급
+                            </span>
+                            <div class="emergency-chips" id="emergencyChips"></div>
+                        </div>
+                        
+                        <!-- 추천 바 -->
+                        <div class="suggestion-bar" id="suggestionBar">
+                            <span class="suggestion-label">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                </svg>
+                                추천
+                            </span>
+                            <div class="suggestion-chips" id="suggestionChips"></div>
+                            <button class="suggestion-close" id="closeSuggestion" aria-label="추천 닫기">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                                    <line x1="18" y1="6" x2="6" y2="18"/>
+                                    <line x1="6" y1="6" x2="18" y2="18"/>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <!-- 상황별 어휘판 바 (새로 추가) -->
+                        <div class="situation-bar" id="situationBar">
+                            <span class="situation-label">상황:</span>
+                            <div class="situation-chips" id="situationChips">
+                                <button class="situation-chip active" data-situation="">전체</button>
+                                <button class="situation-chip" data-situation="home">🏠 집</button>
+                                <button class="situation-chip" data-situation="hospital">🏥 병원</button>
+                                <button class="situation-chip" data-situation="restaurant">🍽️ 식당</button>
+                                <button class="situation-chip" data-situation="daycare">🏫 어린이집</button>
+                                <button class="situation-chip" data-situation="car">🚗 차</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 카테고리 탭 -->
+                        <div class="category-bar" id="categoryBar"></div>
+                        
+                        <!-- 카드 그리드 -->
+                        <div class="cards-area">
+                            <div class="cards-grid" id="cardsGrid"></div>
+                        </div>
+                    </section>
+                    
+                    <!-- 슬라이드 2: 기록 -->
+                    <section class="slide" id="slideHistory">
+                        <div class="page-header">
+                            <h2>사용 기록</h2>
+                            <button class="btn btn-text danger" id="clearHistoryBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                                    <polyline points="3 6 5 6 21 6"/>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                </svg>
+                                전체 삭제
+                            </button>
+                        </div>
+                        <div class="scroll-content" id="historyContainer"></div>
+                    </section>
+                    
+                    <!-- 슬라이드 3: 검색 -->
+                    <section class="slide" id="slideSearch">
+                        <div class="search-box">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                                <circle cx="11" cy="11" r="8"/>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            </svg>
+                            <input type="text" id="searchInput" placeholder="카드 검색...">
+                        </div>
+                        <div class="scroll-content" id="searchResults"></div>
+                    </section>
+                    
+                    <!-- 슬라이드 4: 설정 -->
+                    <section class="slide" id="slideSettings">
+                        <div class="scroll-content">
+                            <div class="settings-content">
+                                
+                                <!-- 화면 설정 -->
+                                <div class="settings-section">
+                                    <div class="settings-section-header">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                                            <line x1="8" y1="21" x2="16" y2="21"/>
+                                            <line x1="12" y1="17" x2="12" y2="21"/>
+                                        </svg>
+                                        화면
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="5"/>
+                                                <line x1="12" y1="1" x2="12" y2="3"/>
+                                                <line x1="12" y1="21" x2="12" y2="23"/>
+                                                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                                                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                                                <line x1="1" y1="12" x2="3" y2="12"/>
+                                                <line x1="21" y1="12" x2="23" y2="12"/>
+                                                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                                                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                                            </svg>
+                                            고대비 모드
+                                        </label>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="highContrastToggle">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                                            </svg>
+                                            다크 모드
+                                        </label>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="darkModeToggle">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <polyline points="4 7 4 4 20 4 20 7"/>
+                                                <line x1="9" y1="20" x2="15" y2="20"/>
+                                                <line x1="12" y1="4" x2="12" y2="20"/>
+                                            </svg>
+                                            글자 크기
+                                        </label>
+                                        <select id="fontSizeSelect">
+                                            <option value="medium" selected>보통</option>
+                                            <option value="large">크게</option>
+                                            <option value="xlarge">아주 크게</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <!-- 소리 및 피드백 -->
+                                <div class="settings-section">
+                                    <div class="settings-section-header">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                                        </svg>
+                                        소리 및 피드백
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                                            </svg>
+                                            진동 피드백
+                                        </label>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="vibrationToggle" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>음성 속도</label>
+                                        <select id="speechRateSelect">
+                                            <option value="0.5">매우 느림</option>
+                                            <option value="0.7">느림</option>
+                                            <option value="0.9" selected>보통</option>
+                                            <option value="1.1">빠름</option>
+                                            <option value="1.3">매우 빠름</option>
+                                        </select>
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>음성 높낮이</label>
+                                        <select id="speechPitchSelect">
+                                            <option value="0.7">낮음</option>
+                                            <option value="1" selected>보통</option>
+                                            <option value="1.3">높음</option>
+                                        </select>
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>음성 볼륨</label>
+                                        <select id="speechVolumeSelect">
+                                            <option value="0.5">작게</option>
+                                            <option value="0.75">보통</option>
+                                            <option value="1" selected>크게</option>
+                                        </select>
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>한국어 음성</label>
+                                        <select id="speechVoiceSelect">
+                                            <option value="">자동 선택</option>
+                                        </select>
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>카드 터치시 소리</label>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="cardSpeakToggle" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>크게보기 반복 재생</label>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="repeatOnShowToggle" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <!-- 스캐닝 설정 (연석정 2017 권장) -->
+                                <div class="settings-section">
+                                    <div class="settings-section-header">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                                            <line x1="8" y1="21" x2="16" y2="21"/>
+                                            <line x1="12" y1="17" x2="12" y2="21"/>
+                                        </svg>
+                                        스캐닝 (운동 장애 지원)
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>스캐닝 모드</label>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="scanningToggle">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="setting-item" id="scanSpeedItem" style="display:none;">
+                                        <label>스캔 속도</label>
+                                        <select id="scanSpeedSelect">
+                                            <option value="3000">3초 (느림)</option>
+                                            <option value="2000" selected>2초 (보통)</option>
+                                            <option value="1500">1.5초 (빠름)</option>
+                                            <option value="1000">1초 (매우 빠름)</option>
+                                        </select>
+                                    </div>
+                                    <div class="setting-item" id="scanMethodItem" style="display:none;">
+                                        <label>스캔 방식</label>
+                                        <select id="scanMethodSelect">
+                                            <option value="auto" selected>자동 스캔</option>
+                                            <option value="step">단계별 (스페이스바)</option>
+                                        </select>
+                                    </div>
+                                    <div class="setting-item" id="scanColorItem" style="display:none;">
+                                        <label>강조 색상</label>
+                                        <select id="scanColorSelect">
+                                            <option value="#FF6B00" selected>주황색</option>
+                                            <option value="#2563EB">파란색</option>
+                                            <option value="#16A34A">초록색</option>
+                                            <option value="#DC2626">빨간색</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <!-- 사진 카드 만들기 -->
+                                <div class="settings-section">
+                                    <div class="settings-section-header">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                                            <polyline points="21 15 16 10 5 21"/>
+                                        </svg>
+                                        사진 카드 만들기
+                                    </div>
+                                    <div class="setting-item" style="flex-direction: column; align-items: stretch; gap: 12px;">
+                                        <input type="file" id="photoUpload" accept="image/*" style="display:none;">
+                                        <button class="photo-upload-btn" id="photoUploadBtn">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                <polyline points="17 8 12 3 7 8"/>
+                                                <line x1="12" y1="3" x2="12" y2="15"/>
+                                            </svg>
+                                            사진 업로드
+                                        </button>
+                                        <div id="photoPreview" style="display:none;"></div>
+                                        <input type="text" id="photoCardName" placeholder="카드 이름 (예: 엄마)" style="padding: 10px; border: 2px solid var(--color-border); border-radius: 8px; display:none;">
+                                        <select id="photoCardCategory" style="padding: 10px; border: 2px solid var(--color-border); border-radius: 8px; display:none;">
+                                            <option value="person">사람</option>
+                                            <option value="place">장소</option>
+                                            <option value="thing">물건</option>
+                                            <option value="food">음식</option>
+                                        </select>
+                                        <button id="savePhotoCard" class="photo-save-btn" style="display:none;">카드 저장</button>
+                                    </div>
+                                    <div id="customCardsList" style="padding: 12px;"></div>
+                                </div>
+                                
+                                <!-- 사용법 -->
+                                <div class="settings-section guide-section">
+                                    <div class="settings-section-header">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                                        </svg>
+                                        사용 가이드
+                                    </div>
+                                    <div class="guide-list">
+                                        <div class="guide-item">
+                                            <div class="guide-icon">🎯</div>
+                                            <div class="guide-content">
+                                                <strong>카테고리 선택</strong>
+                                                <p>상단 탭에서 원하는 카테고리를 터치하세요</p>
+                                            </div>
+                                        </div>
+                                        <div class="guide-item">
+                                            <div class="guide-icon">👆</div>
+                                            <div class="guide-content">
+                                                <strong>카드로 문장 만들기</strong>
+                                                <p>카드를 순서대로 터치하면 문장이 완성돼요</p>
+                                            </div>
+                                        </div>
+                                        <div class="guide-item">
+                                            <div class="guide-icon">🔊</div>
+                                            <div class="guide-content">
+                                                <strong>소리 내기</strong>
+                                                <p>스피커 버튼을 누르면 문장을 읽어줘요</p>
+                                            </div>
+                                        </div>
+                                        <div class="guide-item">
+                                            <div class="guide-icon">📺</div>
+                                            <div class="guide-content">
+                                                <strong>크게 보여주기</strong>
+                                                <p>확대 버튼을 누르면 상대방에게 크게 보여줘요</p>
+                                            </div>
+                                        </div>
+                                        <div class="guide-item">
+                                            <div class="guide-icon">⚡</div>
+                                            <div class="guide-content">
+                                                <strong>긴급 상황</strong>
+                                                <p>빨간 긴급 버튼은 바로 크게 표시돼요</p>
+                                            </div>
+                                        </div>
+                                        <div class="guide-item">
+                                            <div class="guide-icon">🎹</div>
+                                            <div class="guide-content">
+                                                <strong>스캐닝 모드</strong>
+                                                <p>스페이스바로 이동, 엔터로 선택해요</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 앱 정보 -->
+                                <div class="settings-section info">
+                                    <div class="settings-section-header">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                        </svg>
+                                        올인원 AAC
+                                    </div>
+                                    <p>버전 3.0.0</p>
+                                    <p>마음을 전하는 소통의 시작</p>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </section>
+                    
+                </div>
+            </div>
+        </main>
+        
+        <!-- ========== 출력 바 ========== -->
+        <div class="output-bar">
+            <div class="output-text empty" id="outputText">
+                카드를 선택하세요
+            </div>
+            <div class="output-actions">
+                <button class="output-btn speak" id="speakBtn" disabled aria-label="읽기">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                    </svg>
+                </button>
+                <button class="output-btn show" id="showBtn" disabled aria-label="크게 보기">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 3 21 3 21 9"/>
+                        <polyline points="9 21 3 21 3 15"/>
+                        <line x1="21" y1="3" x2="14" y2="10"/>
+                        <line x1="3" y1="21" x2="10" y2="14"/>
+                    </svg>
+                </button>
+                <button class="output-btn clear" id="clearBtn" disabled aria-label="지우기">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- ========== 하단 탭 바 ========== -->
+        <nav class="tab-bar">
+            <button class="tab-bar-btn active" data-slide="0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span>말하기</span>
+            </button>
+            <button class="tab-bar-btn" data-slide="1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>기록</span>
+            </button>
+            <button class="tab-bar-btn" data-slide="2">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <span>검색</span>
+            </button>
+            <button class="tab-bar-btn" data-slide="3">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+                <span>설정</span>
+            </button>
+        </nav>
+    </div>
+    
+    <!-- ========== 청자 모드 모달 ========== -->
+    <div class="modal-fullscreen" id="listenerModal">
+        <button class="close-btn" id="closeListenerModal" aria-label="닫기">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+        </button>
+        <div class="listener-content">
+            <div class="listener-pictograms" id="listenerPictograms"></div>
+            <div class="listener-text" id="listenerText">메시지</div>
+        </div>
+    </div>
+    
+    <!-- ========== 확인 모달 ========== -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal modal-confirm">
+            <div class="modal-body">
+                <div class="confirm-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                </div>
+                <p class="confirm-message" id="confirmMessage">확인하시겠습니까?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="confirmCancel">취소</button>
+                <button class="btn btn-danger" id="confirmOk">확인</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ========== 카드 추가 모달 ========== -->
+    <div class="modal-overlay" id="addCardModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    새 카드 추가
+                </h3>
+                <button class="modal-close" id="closeAddCardModal" aria-label="닫기">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>카드에 표시할 텍스트</label>
+                    <input type="text" id="newCardText" placeholder="예: 사랑해요" maxlength="20">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelAddCard">취소</button>
+                <button class="btn btn-primary" id="confirmAddCard">추가</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JS 모듈 -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
