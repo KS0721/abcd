@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#D45A00">
     <meta name="description" content="의사소통 약자를 위한 동사 중심 AAC 앱">
     
-    <title>올인원 AAC 3.0</title>
+    <title>올인원 AAC 3.2</title>
     
     <!-- CSS -->
     <link rel="stylesheet" href="css/variables.css">
@@ -53,7 +53,50 @@
                 <div class="splash-loader-bar"></div>
             </div>
         </div>
-        <p class="splash-version">v3.0.0</p>
+        <p class="splash-version">v3.2.0</p>
+    </div>
+    
+    <!-- ========== 메인 메뉴 화면 ========== -->
+    <div id="mainMenu" class="main-menu-screen" style="display: none;">
+        <div class="menu-header">
+            <svg class="menu-logo" viewBox="0 0 120 120" fill="none">
+                <circle cx="60" cy="60" r="50" fill="#0891B2" opacity="0.15"/>
+                <path d="M30 35 C30 25, 40 18, 60 18 C80 18, 90 25, 90 35 L90 60 C90 70, 80 77, 60 77 L45 77 L35 90 L38 77 C35 77, 30 70, 30 60 Z" fill="white" stroke="#0891B2" stroke-width="3"/>
+                <path d="M60 58 C60 58, 48 48, 48 42 C48 36, 54 33, 60 40 C66 33, 72 36, 72 42 C72 48, 60 58, 60 58 Z" fill="#FF6B9D"/>
+            </svg>
+            <h1 class="menu-title">올인원<span>AAC</span></h1>
+        </div>
+        <div class="menu-grid">
+            <button class="menu-tile" data-target="speak">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span>말하기</span>
+            </button>
+            <button class="menu-tile" data-target="situation">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                </svg>
+                <span>상황</span>
+            </button>
+            <button class="menu-tile" data-target="history">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>기록</span>
+            </button>
+            <button class="menu-tile" data-target="settings">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.32 9c.3.56.84.96 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+                <span>설정</span>
+            </button>
+        </div>
     </div>
     
     <div id="app" class="app" style="display: none;">
@@ -65,7 +108,7 @@
                 <line x1="8" y1="21" x2="16" y2="21"/>
                 <line x1="12" y1="17" x2="12" y2="21"/>
             </svg>
-            스캐닝 모드 (스페이스바/엔터로 선택)
+            스캐닝 모드
         </div>
         
         <!-- ========== 헤더 ========== -->
@@ -90,6 +133,12 @@
             </div>
             <span class="edit-mode-badge">편집 모드</span>
             <div class="header-actions">
+                <button class="header-btn" id="searchBtn" aria-label="검색">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                </button>
                 <button class="header-btn" id="editModeBtn" aria-label="편집 모드">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -104,7 +153,7 @@
             <div class="slide-container">
                 <div class="slide-wrapper" id="slideWrapper">
                     
-                    <!-- 슬라이드 1: 말하기 -->
+                    <!-- 슬라이드 0: 말하기 -->
                     <section class="slide" id="slideSpeak">
                         <!-- 긴급 바 -->
                         <div class="emergency-bar" id="emergencyBar">
@@ -136,25 +185,65 @@
                             </button>
                         </div>
                         
-                        <!-- 상황별 어휘판 바 (새로 추가) -->
-                        <div class="situation-bar" id="situationBar">
-                            <span class="situation-label">상황:</span>
-                            <div class="situation-chips" id="situationChips">
-                                <button class="situation-chip active" data-situation="">전체</button>
-                                <button class="situation-chip" data-situation="home">🏠 집</button>
-                                <button class="situation-chip" data-situation="hospital">🏥 병원</button>
-                                <button class="situation-chip" data-situation="restaurant">🍽️ 식당</button>
-                                <button class="situation-chip" data-situation="daycare">🏫 어린이집</button>
-                                <button class="situation-chip" data-situation="car">🚗 차</button>
-                            </div>
-                        </div>
-                        
                         <!-- 카테고리 탭 -->
                         <div class="category-bar" id="categoryBar"></div>
                         
                         <!-- 카드 그리드 -->
                         <div class="cards-area">
                             <div class="cards-grid" id="cardsGrid"></div>
+                        </div>
+                    </section>
+                    
+                    <!-- 슬라이드 1: 상황판 -->
+                    <section class="slide" id="slideSituation">
+                        <div class="page-header">
+                            <h2>상황별 어휘판</h2>
+                        </div>
+                        <div class="situation-grid" id="situationGrid">
+                            <button class="situation-card" data-situation="home">
+                                <span class="situation-emoji">🏠</span>
+                                <span class="situation-name">집</span>
+                            </button>
+                            <button class="situation-card" data-situation="hospital">
+                                <span class="situation-emoji">🏥</span>
+                                <span class="situation-name">병원</span>
+                            </button>
+                            <button class="situation-card" data-situation="restaurant">
+                                <span class="situation-emoji">🍽️</span>
+                                <span class="situation-name">식당</span>
+                            </button>
+                            <button class="situation-card" data-situation="school">
+                                <span class="situation-emoji">🏫</span>
+                                <span class="situation-name">학교</span>
+                            </button>
+                            <button class="situation-card" data-situation="daycare">
+                                <span class="situation-emoji">🧒</span>
+                                <span class="situation-name">어린이집</span>
+                            </button>
+                            <button class="situation-card" data-situation="car">
+                                <span class="situation-emoji">🚗</span>
+                                <span class="situation-name">차</span>
+                            </button>
+                            <button class="situation-card" data-situation="park">
+                                <span class="situation-emoji">🌳</span>
+                                <span class="situation-name">공원</span>
+                            </button>
+                            <button class="situation-card" data-situation="mart">
+                                <span class="situation-emoji">🛒</span>
+                                <span class="situation-name">마트</span>
+                            </button>
+                            <button class="situation-card" data-situation="bath">
+                                <span class="situation-emoji">🛁</span>
+                                <span class="situation-name">목욕</span>
+                            </button>
+                        </div>
+                        <!-- 상황판 카드 표시 영역 -->
+                        <div class="situation-cards-area" id="situationCardsArea" style="display:none;">
+                            <div class="situation-cards-header">
+                                <button class="btn btn-text" id="situationBackBtn">← 돌아가기</button>
+                                <h3 id="situationTitle"></h3>
+                            </div>
+                            <div class="cards-grid" id="situationCardsGrid"></div>
                         </div>
                     </section>
                     
@@ -170,22 +259,16 @@
                                 전체 삭제
                             </button>
                         </div>
+                        <!-- 빈도 그래프 -->
+                        <div class="stats-section" id="statsSection">
+                            <h3 class="stats-title">📊 의사소통 빈도</h3>
+                            <div class="stats-chart" id="statsChart"></div>
+                            <div class="stats-summary" id="statsSummary"></div>
+                        </div>
                         <div class="scroll-content" id="historyContainer"></div>
                     </section>
                     
-                    <!-- 슬라이드 3: 검색 -->
-                    <section class="slide" id="slideSearch">
-                        <div class="search-box">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-                                <circle cx="11" cy="11" r="8"/>
-                                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                            </svg>
-                            <input type="text" id="searchInput" placeholder="카드 검색...">
-                        </div>
-                        <div class="scroll-content" id="searchResults"></div>
-                    </section>
-                    
-                    <!-- 슬라이드 4: 설정 -->
+                    <!-- 슬라이드 3: 설정 -->
                     <section class="slide" id="slideSettings">
                         <div class="scroll-content">
                             <div class="settings-content">
@@ -347,8 +430,8 @@
                                     <div class="setting-item" id="scanMethodItem" style="display:none;">
                                         <label>스캔 방식</label>
                                         <select id="scanMethodSelect">
-                                            <option value="auto" selected>자동 스캔</option>
-                                            <option value="step">단계별 (스페이스바)</option>
+                                            <option value="auto" selected>자동 스캔 (터치/키보드로 선택)</option>
+                                            <option value="step">단계별 (터치/키보드로 이동+선택)</option>
                                         </select>
                                     </div>
                                     <div class="setting-item" id="scanColorItem" style="display:none;">
@@ -445,7 +528,7 @@
                                             <div class="guide-icon">🎹</div>
                                             <div class="guide-content">
                                                 <strong>스캐닝 모드</strong>
-                                                <p>스페이스바로 이동, 엔터로 선택해요</p>
+                                                <p>화면 아래 버튼을 터치하거나, 스페이스바/엔터로 선택해요</p>
                                             </div>
                                         </div>
                                     </div>
@@ -459,7 +542,7 @@
                                         </svg>
                                         올인원 AAC
                                     </div>
-                                    <p>버전 3.0.0</p>
+                                    <p>버전 3.2.0</p>
                                     <p>마음을 전하는 소통의 시작</p>
                                 </div>
                                 
@@ -510,17 +593,19 @@
             </button>
             <button class="tab-bar-btn" data-slide="1">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                </svg>
+                <span>상황</span>
+            </button>
+            <button class="tab-bar-btn" data-slide="2">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="10"/>
                     <polyline points="12 6 12 12 16 14"/>
                 </svg>
                 <span>기록</span>
-            </button>
-            <button class="tab-bar-btn" data-slide="2">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"/>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-                <span>검색</span>
             </button>
             <button class="tab-bar-btn" data-slide="3">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -530,6 +615,21 @@
                 <span>설정</span>
             </button>
         </nav>
+        
+        <!-- ========== 검색 팝업 ========== -->
+        <div class="search-popup" id="searchPopup" style="display:none;">
+            <div class="search-popup-content">
+                <div class="search-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="text" id="searchInput" placeholder="카드 검색...">
+                    <button class="search-close-btn" id="searchCloseBtn">✕</button>
+                </div>
+                <div class="scroll-content" id="searchResults"></div>
+            </div>
+        </div>
     </div>
     
     <!-- ========== 청자 모드 모달 ========== -->

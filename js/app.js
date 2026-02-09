@@ -403,8 +403,9 @@ function handleCardClick(cardId) {
         hideSuggestions();
     } else {
         selectCard(card);
-        speakCard(card.text);  // 카드 선택시 개별 발화
+        speakCard(card.text);
         showSuggestions(cardId);
+        trackCardUsage(card.text);
     }
     
     updateOutputBar();
@@ -583,12 +584,15 @@ function setupEventListeners() {
     document.getElementById('clearHistoryBtn')?.addEventListener('click', async () => {
         vibrate();
         const state = getState();
-        if (state.history.length === 0) return;
+        const hasFreq = localStorage.getItem('aac_card_freq');
+        if (state.history.length === 0 && !hasFreq) return;
         
-        const confirmed = await showConfirmModal('모든 기록을 삭제할까요?');
+        const confirmed = await showConfirmModal('모든 기록과 통계를 삭제할까요?');
         if (confirmed) {
             clearHistory();
+            try { localStorage.removeItem('aac_card_freq'); } catch(e) {}
             renderHistory();
+            renderStats();
         }
     });
     
@@ -648,24 +652,6 @@ function setupEventListeners() {
         handleSearch(e.target.value);
     }, 300));
     
-    // ★ 상황별 어휘판 선택 (새로 추가)
-    document.querySelectorAll('.situation-chip').forEach(chip => {
-        chip.addEventListener('click', () => {
-            vibrate();
-            // 활성화 상태 토글
-            document.querySelectorAll('.situation-chip').forEach(c => c.classList.remove('active'));
-            chip.classList.add('active');
-            
-            const situation = chip.dataset.situation;
-            if (situation) {
-                applySituationBoard(situation);
-            } else {
-                // '전체' 선택시 일반 모드로 복귀
-                renderCards();
-            }
-        });
-    });
-    
     // 모달 배경 클릭으로 닫기
     initModalBackdropClose();
     
@@ -684,8 +670,27 @@ function goToSlide(index) {
         btn.classList.toggle('active', i === index);
     });
     
-    if (index === 1) {
+    if (index === 2) {
         renderHistory();
+        renderStats();
+    }
+    
+    // 헤더: 말하기 화면에서만 편집/검색 표시
+    const header = document.getElementById('appHeader');
+    if (header) {
+        header.style.display = (index === 0) ? '' : 'flex';
+    }
+    
+    // 출력바: 말하기/상황에서만
+    const outputBar = document.querySelector('.output-bar');
+    if (outputBar) {
+        outputBar.style.display = (index <= 1) ? '' : 'none';
+    }
+    
+    // 스캐닝 터치 버튼: 말하기(0) + 상황판(1)에서 표시
+    const touchOverlay = document.getElementById('scanTouchOverlay');
+    if (touchOverlay) {
+        touchOverlay.style.display = (index <= 1) ? 'flex' : 'none';
     }
 }
 
@@ -807,10 +812,30 @@ function handleSearch(query) {
     container.querySelectorAll('.search-result').forEach(item => {
         item.addEventListener('click', () => {
             vibrate();
+            const cardId = item.dataset.id;
             setCurrentCategory(item.dataset.category);
+            
+            // 검색 팝업 닫기
+            const popup = document.getElementById('searchPopup');
+            if (popup) popup.style.display = 'none';
+            const input = document.getElementById('searchInput');
+            if (input) input.value = '';
+            const results = document.getElementById('searchResults');
+            if (results) results.innerHTML = '';
+            
             goToSlide(0);
             renderCategories();
             renderCards();
+            
+            // 해당 카드에 발광 효과
+            setTimeout(() => {
+                const cardEl = document.querySelector(`.card[data-id="${cardId}"]`);
+                if (cardEl) {
+                    cardEl.classList.add('search-highlight');
+                    cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => cardEl.classList.remove('search-highlight'), 2000);
+                }
+            }, 150);
         });
     });
 }
@@ -833,6 +858,127 @@ function syncSettingsUI() {
 // ========================================
 // 앱 초기화
 // ========================================
+// ========================================
+// 빈도 그래프
+// ========================================
+function renderStats() {
+    const chart = document.getElementById('statsChart');
+    const summary = document.getElementById('statsSummary');
+    if (!chart) return;
+    
+    // 카드 사용 빈도 계산 (localStorage에서)
+    const freq = JSON.parse(localStorage.getItem('aac_card_freq') || '{}');
+    const entries = Object.entries(freq).sort((a,b) => b[1] - a[1]).slice(0, 8);
+    
+    if (entries.length === 0) {
+        chart.innerHTML = '<div class="empty-state" style="font-size:13px;color:#9CA3AF;text-align:center;width:100%;padding:20px 0;">아직 데이터가 없습니다</div>';
+        if (summary) summary.textContent = '';
+        return;
+    }
+    
+    const maxCount = entries[0][1];
+    const colors = ['#3B82F6','#10B981','#F59E0B','#EF4444','#8B5CF6','#EC4899','#06B6D4','#84CC16'];
+    
+    chart.innerHTML = entries.map(([text, count], i) => {
+        const h = Math.max(8, (count / maxCount) * 80);
+        return `<div class="chart-bar-wrapper">
+            <span class="chart-count">${count}</span>
+            <div class="chart-bar" style="height:${h}px;background:${colors[i % colors.length]}"></div>
+            <span class="chart-label">${text}</span>
+        </div>`;
+    }).join('');
+    
+    const totalUses = Object.values(freq).reduce((a,b) => a+b, 0);
+    const totalWords = Object.keys(freq).length;
+    if (summary) {
+        summary.textContent = `총 ${totalUses}회 사용 · ${totalWords}개 단어 · 가장 많이: "${entries[0][0]}" (${entries[0][1]}회)`;
+    }
+}
+
+function trackCardUsage(cardText) {
+    const freq = JSON.parse(localStorage.getItem('aac_card_freq') || '{}');
+    freq[cardText] = (freq[cardText] || 0) + 1;
+    localStorage.setItem('aac_card_freq', JSON.stringify(freq));
+}
+
+// ========================================
+// 상황판 렌더링 (슬라이드 1)
+// ========================================
+function setupSituationBoard() {
+    document.querySelectorAll('.situation-card').forEach(card => {
+        card.addEventListener('click', () => {
+            vibrate();
+            const situation = card.dataset.situation;
+            showSituationCards(situation);
+        });
+    });
+    
+    document.getElementById('situationBackBtn')?.addEventListener('click', () => {
+        vibrate();
+        hideSituationCards();
+    });
+}
+
+function showSituationCards(situation) {
+    const board = SITUATION_BOARDS[situation];
+    if (!board) return;
+    
+    document.getElementById('situationGrid').style.display = 'none';
+    const area = document.getElementById('situationCardsArea');
+    area.style.display = 'block';
+    document.getElementById('situationTitle').textContent = board.name;
+    
+    const grid = document.getElementById('situationCardsGrid');
+    const state = getState();
+    const allCards = [];
+    Object.values(state.cards).forEach(cc => { if (Array.isArray(cc)) allCards.push(...cc); });
+    
+    const situationCards = board.cards.map(id => allCards.find(c => c.id === id)).filter(Boolean);
+    
+    grid.innerHTML = situationCards.map(card => {
+        const isSelected = state.selectedCards.some(c => c.id === card.id);
+        return `<div class="card ${isSelected ? 'selected' : ''}" data-id="${card.id}" data-situation="${situation}">
+            <div class="card-pictogram">${getPictogramSVG(card.pictogram)}</div>
+            <span class="card-text">${card.text}</span>
+        </div>`;
+    }).join('');
+    
+    bindCardEvents(grid);
+}
+
+function hideSituationCards() {
+    document.getElementById('situationGrid').style.display = 'grid';
+    document.getElementById('situationCardsArea').style.display = 'none';
+}
+
+// ========================================
+// 검색 팝업
+// ========================================
+function setupSearchPopup() {
+    const popup = document.getElementById('searchPopup');
+    const btn = document.getElementById('searchBtn');
+    const closeBtn = document.getElementById('searchCloseBtn');
+    const input = document.getElementById('searchInput');
+    
+    btn?.addEventListener('click', () => {
+        popup.style.display = 'flex';
+        setTimeout(() => input?.focus(), 100);
+    });
+    
+    closeBtn?.addEventListener('click', () => {
+        popup.style.display = 'none';
+        if (input) input.value = '';
+        const results = document.getElementById('searchResults');
+        if (results) results.innerHTML = '';
+    });
+    
+    popup?.addEventListener('click', (e) => {
+        if (e.target === popup) {
+            popup.style.display = 'none';
+        }
+    });
+}
+
 function init() {
     console.log('🚀 AAC 3.0 초기화 중...');
     
@@ -862,6 +1008,10 @@ function init() {
     renderCards();
     updateOutputBar();
     syncSettingsUI();
+    setupSituationBoard();
+    setupSearchPopup();
+    setupMainMenu();
+    setupHomeButton();
     
     console.log('✅ AAC 3.0 초기화 완료');
     
@@ -869,26 +1019,58 @@ function init() {
     hideSplashScreen();
 }
 
-// 스플래시 스크린 숨기기
+// 스플래시 스크린 → 메인 메뉴 표시
 function hideSplashScreen() {
     const splash = document.getElementById('splashScreen');
-    const app = document.getElementById('app');
+    const menu = document.getElementById('mainMenu');
     
-    if (!splash || !app) return;
+    if (!splash || !menu) return;
     
-    // 로딩 애니메이션 완료 대기 (2초)
     setTimeout(() => {
-        // 앱 표시
-        app.style.display = 'flex';
-        
-        // 스플래시 페이드아웃
+        menu.style.display = 'flex';
         splash.classList.add('hidden');
         
-        // 완전히 숨긴 후 DOM에서 제거
-        setTimeout(() => {
-            splash.remove();
-        }, 500);
+        setTimeout(() => splash.remove(), 500);
     }, 2000);
+}
+
+// 메인 메뉴 → 앱 진입
+function setupMainMenu() {
+    const menu = document.getElementById('mainMenu');
+    const app = document.getElementById('app');
+    if (!menu) return;
+    
+    const slideMap = { speak: 0, situation: 1, history: 2, settings: 3 };
+    
+    menu.querySelectorAll('.menu-tile').forEach(tile => {
+        tile.addEventListener('click', () => {
+            const target = tile.dataset.target;
+            const slideIndex = slideMap[target] ?? 0;
+            
+            // 메뉴 숨기고 앱 표시
+            menu.style.display = 'none';
+            app.style.display = 'flex';
+            
+            // 해당 슬라이드로 이동
+            goToSlide(slideIndex);
+        });
+    });
+}
+
+// 홈 버튼 (로고 클릭) → 메인 메뉴로 돌아가기
+function setupHomeButton() {
+    const logo = document.querySelector('.logo');
+    if (logo) {
+        logo.style.cursor = 'pointer';
+        logo.addEventListener('click', () => {
+            const menu = document.getElementById('mainMenu');
+            const app = document.getElementById('app');
+            if (menu && app) {
+                app.style.display = 'none';
+                menu.style.display = 'flex';
+            }
+        });
+    }
 }
 
 if (document.readyState === 'loading') {

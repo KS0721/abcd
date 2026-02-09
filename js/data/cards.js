@@ -236,7 +236,19 @@ export const DEFAULT_CARDS = {
         { id: 'c_sure', text: '당연', pictogram: 'sure', grammarType: 'response' },
         { id: 'c_right', text: '맞아', pictogram: 'right', grammarType: 'response' },
         { id: 'c_wow', text: '와', pictogram: 'wow', grammarType: 'response' },
-        { id: 'c_oops', text: '앗', pictogram: 'oops', grammarType: 'response' }
+        { id: 'c_oops', text: '앗', pictogram: 'oops', grammarType: 'response' },
+        { id: 'give-me', text: '주세요', pictogram: 'give-me', category: 'core', grammarType: 'verb' },
+        { id: 'dont-want', text: '싫어요', pictogram: 'dont-want', category: 'core', grammarType: 'adjective' },
+        { id: 'like-it', text: '좋아요', pictogram: 'like-it', category: 'core', grammarType: 'adjective' },
+        { id: 'lets-do', text: '하자', pictogram: 'lets-do', category: 'core', grammarType: 'verb' },
+        { id: 'stop-it', text: '그만', pictogram: 'stop-it', category: 'core', grammarType: 'adverb' },
+        { id: 'wait-core', text: '기다려', pictogram: 'wait-core', category: 'core', grammarType: 'verb' },
+        { id: 'need-it', text: '필요해요', pictogram: 'need-it', category: 'core', grammarType: 'adjective' },
+        { id: 'finished', text: '다 했어요', pictogram: 'finished', category: 'core', grammarType: 'verb' },
+        { id: 'help-core', text: '도와줘', pictogram: 'help-core', category: 'core', grammarType: 'verb' },
+        { id: 'go-there', text: '가자', pictogram: 'go-there', category: 'core', grammarType: 'verb' },
+        { id: 'together', text: '같이', pictogram: 'together', category: 'core', grammarType: 'adverb' },
+        { id: 'alone', text: '혼자', pictogram: 'alone', category: 'core', grammarType: 'adverb' },
     ],
 
     // ★ 인사/사회어 카테고리 (새로 추가)
@@ -287,7 +299,9 @@ export const DEFAULT_CARDS = {
         { id: 'pe10', text: '선생님', pictogram: 'teacher', grammarType: 'subject' },
         { id: 'pe11', text: '친구', pictogram: 'friend', grammarType: 'subject' },
         { id: 'pe12', text: '의사', pictogram: 'doctor-person', grammarType: 'subject' },
-        { id: 'pe13', text: '간호사', pictogram: 'nurse', grammarType: 'subject' }
+        { id: 'pe13', text: '간호사', pictogram: 'nurse', grammarType: 'subject' },
+        { id: 'family', text: '가족', pictogram: 'family', category: 'person', grammarType: 'noun' },
+        { id: 'people', text: '사람들', pictogram: 'people', category: 'person', grammarType: 'noun' },
     ],
 
     // ★ 감정 카테고리 - 연구 기반 확장
@@ -317,7 +331,13 @@ export const DEFAULT_CARDS = {
         // 기타 감정
         { id: 'f16', text: '심심해요', pictogram: 'bored', grammarType: 'verb' },
         { id: 'f17', text: '걱정돼요', pictogram: 'worried', grammarType: 'verb' },
-        { id: 'f18', text: '부끄러워요', pictogram: 'shy', grammarType: 'verb' }
+        { id: 'f18', text: '부끄러워요', pictogram: 'shy', grammarType: 'verb' },
+        { id: 'love-it', text: '좋아해요', pictogram: 'love-it', category: 'feeling', grammarType: 'verb' },
+        { id: 'hate-it', text: '싫어해요', pictogram: 'hate-it', category: 'feeling', grammarType: 'verb' },
+        { id: 'fun', text: '재밌어요', pictogram: 'fun', category: 'feeling', grammarType: 'adjective' },
+        { id: 'boring', text: '지루해요', pictogram: 'boring', category: 'feeling', grammarType: 'adjective' },
+        { id: 'surprise', text: '놀랐어요', pictogram: 'surprise', category: 'feeling', grammarType: 'verb' },
+        { id: 'lonely', text: '외로워요', pictogram: 'lonely', category: 'feeling', grammarType: 'adjective' },
     ],
 
     // ★ 먹기 카테고리 (음식 + 동작/상태)
@@ -348,7 +368,15 @@ export const DEFAULT_CARDS = {
         { id: 'fo_yummy', text: '맛있어요', pictogram: 'yummy', grammarType: 'verb' },
         { id: 'fo_full', text: '배불러요', pictogram: 'full', grammarType: 'verb' },
         { id: 'fo_noteat', text: '안 먹을래요', pictogram: 'not-eat', grammarType: 'verb' },
-        { id: 'fo_moreeat', text: '더 주세요', pictogram: 'more-food', grammarType: 'verb' }
+        { id: 'fo_moreeat', text: '더 주세요', pictogram: 'more-food', grammarType: 'verb' },
+        { id: 'rice-cake', text: '떡', pictogram: 'rice-cake', category: 'food', grammarType: 'noun' },
+        { id: 'noodle', text: '라면', pictogram: 'noodle', category: 'food', grammarType: 'noun' },
+        { id: 'egg', text: '계란', pictogram: 'egg', category: 'food', grammarType: 'noun' },
+        { id: 'kimchi', text: '김치', pictogram: 'kimchi', category: 'food', grammarType: 'noun' },
+        { id: 'chicken', text: '치킨', pictogram: 'chicken-food', category: 'food', grammarType: 'noun' },
+        { id: 'banana', text: '바나나', pictogram: 'banana', category: 'food', grammarType: 'noun' },
+        { id: 'tea', text: '차', pictogram: 'tea', category: 'food', grammarType: 'noun' },
+        { id: 'chocolate', text: '초콜릿', pictogram: 'chocolate', category: 'food', grammarType: 'noun' },
     ],
 
     // ★ 활동 카테고리 - 일상생활 동작
@@ -381,7 +409,15 @@ export const DEFAULT_CARDS = {
         // 대기/사회
         { id: 'act_wait', text: '기다려요', pictogram: 'wait', grammarType: 'verb' },
         { id: 'act_greet', text: '인사해요', pictogram: 'greet', grammarType: 'verb' },
-        { id: 'act_hug', text: '안아줘요', pictogram: 'hug', grammarType: 'verb' }
+        { id: 'act_hug', text: '안아줘요', pictogram: 'hug', grammarType: 'verb' },
+        { id: 'watch-tv', text: 'TV 봐요', pictogram: 'watch-tv', category: 'action', grammarType: 'verb' },
+        { id: 'listen-music', text: '음악 들어요', pictogram: 'listen-music', category: 'action', grammarType: 'verb' },
+        { id: 'open-it', text: '열어요', pictogram: 'open-it', category: 'action', grammarType: 'verb' },
+        { id: 'close-it', text: '닫아요', pictogram: 'close-it', category: 'action', grammarType: 'verb' },
+        { id: 'turn-on', text: '켜요', pictogram: 'turn-on', category: 'action', grammarType: 'verb' },
+        { id: 'turn-off', text: '꺼요', pictogram: 'turn-off', category: 'action', grammarType: 'verb' },
+        { id: 'throw-it', text: '버려요', pictogram: 'throw-it', category: 'action', grammarType: 'verb' },
+        { id: 'make-it', text: '만들어요', pictogram: 'make-it', category: 'action', grammarType: 'verb' },
     ],
 
     // ★ 장소 카테고리 - 연구 기반 + 교통수단 추가
@@ -445,7 +481,13 @@ export const DEFAULT_CARDS = {
         { id: 'th_small', text: '작아요', pictogram: 'small', grammarType: 'adjective' },
         { id: 'th_pretty', text: '예뻐요', pictogram: 'pretty', grammarType: 'adjective' },
         { id: 'th_dirty', text: '더러워요', pictogram: 'dirty', grammarType: 'adjective' },
-        { id: 'th_new', text: '새거예요', pictogram: 'new', grammarType: 'adjective' }
+        { id: 'th_new', text: '새거예요', pictogram: 'new', grammarType: 'adjective' },
+        { id: 'water-thing', text: '물', pictogram: 'water-thing', category: 'thing', grammarType: 'noun' },
+        { id: 'bag', text: '가방', pictogram: 'bag', category: 'thing', grammarType: 'noun' },
+        { id: 'key', text: '열쇠', pictogram: 'key', category: 'thing', grammarType: 'noun' },
+        { id: 'cup', text: '컵', pictogram: 'cup', category: 'thing', grammarType: 'noun' },
+        { id: 'spoon', text: '숟가락', pictogram: 'spoon', category: 'thing', grammarType: 'noun' },
+        { id: 'mirror', text: '거울', pictogram: 'mirror', category: 'thing', grammarType: 'noun' },
     ],
 
     // ★ 시간 카테고리
@@ -525,28 +567,40 @@ export const DEFAULT_CARDS = {
 // - 음식점: 주문, 수량, 맛 관련 어휘
 export const SITUATION_BOARDS = {
     home: {
-        name: '집에서',
-        // 김영태 외(2003): 가정상황 고빈도 어휘 - 엄마, TV보기, 옷입기, 식사하기
-        cards: ['pe2', 'pe3', 'fo1', 'fo7', 'th_tv', 'act_sleep', 'pl3', 'f10', 'c_want', 'act_wash']
+        name: '🏠 집에서',
+        cards: ['pe2', 'pe3', 'fo1', 'fo7', 'th_tv', 'act_sleep', 'pl3', 'f10', 'c_want', 'act_wash', 'watch-tv', 'turn-on', 'turn-off']
     },
     hospital: {
-        name: '병원에서',
-        // 김영태 외(2003): 병원상황 고빈도 어휘 - 아프다, 가렵다, 심하다
-        cards: ['em2', 'em1', 'f14', 'pe12', 'pl11', 'th_med', 'f8', 'gr_thanks', 'f6', 'hos5']
+        name: '🏥 병원에서',
+        cards: ['em2', 'em1', 'f14', 'pe12', 'pe13', 'th_med', 'f8', 'gr_thanks', 'f6', 'hos5', 'hos1', 'hos2', 'hos3', 'hos4']
     },
     restaurant: {
-        name: '식당에서',
-        // 김영태 외(2003): 음식점상황 고빈도 어휘 - -개, 하나, 주문
-        cards: ['fo1', 'fo7', 'fo_moreeat', 'fo_yummy', 'fo_full', 'c_more', 'c_want', 'gr_thanks', 'fo2']
+        name: '🍽️ 식당에서',
+        cards: ['fo1', 'fo7', 'fo_moreeat', 'fo_yummy', 'fo_full', 'c_more', 'c_want', 'gr_thanks', 'fo2', 'give-me', 'noodle', 'chicken']
+    },
+    school: {
+        name: '🏫 학교에서',
+        cards: ['pe10', 'sch1', 'sch2', 'sch3', 'sch4', 'sch5', 'sch6', 'sch7', 'sch8', 'sch9', 'sch10', 'sch11', 'sch12', 'sch13', 'sch14', 'sch15']
     },
     daycare: {
-        name: '어린이집에서',
-        // 학교/어린이집 상황 기반
-        cards: ['pe10', 'pe11', 'act_play', 'act_tidy', 'gr_hi', 'gr_bye', 'act_wait', 'em3', 'sch15']
+        name: '🧒 어린이집에서',
+        cards: ['pe10', 'pe11', 'act_play', 'act_tidy', 'gr_hi', 'gr_bye', 'act_wait', 'em3', 'sch15', 'act_draw', 'act_sing']
     },
     car: {
-        name: '차 안에서',
-        cards: ['pl_car', 'gr_where', 'gr_when', 't1', 'f12', 'em3', 'c_dunno', 'act_wait']
+        name: '🚗 차 안에서',
+        cards: ['pl_car', 'gr_where', 'gr_when', 't1', 'f12', 'em3', 'c_dontknow', 'act_wait', 'f10', 't11']
+    },
+    park: {
+        name: '🌳 공원에서',
+        cards: ['pl9', 'act_run', 'act_walk', 'act_play', 'c_more', 'f1', 'fo7', 'gr_hi', 'pe11', 'together']
+    },
+    mart: {
+        name: '🛒 마트에서',
+        cards: ['pl7', 'c_want', 'c_this', 'give-me', 'like-it', 'dont-want', 'fo1', 'fo7', 'fo10', 'fo11', 'fo6']
+    },
+    bath: {
+        name: '🛁 목욕할 때',
+        cards: ['act_wash', 'act_shower', 'fo7', 'act_undress', 'act_dress', 'th_blanket', 'f4', 'finished', 'help-core']
     }
 };
 

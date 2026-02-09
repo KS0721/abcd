@@ -7,7 +7,7 @@
  * │                                                   │
  * │  1단계 (카테고리)                                  │
  * │    카테고리 탭을 순차 하이라이트                     │
- * │    → 스페이스/엔터로 선택                           │
+ * │    → 터치/스페이스/엔터로 선택                      │
  * │                                                   │
  * │  2단계 (카드)                                      │
  * │    [⬅ 돌아가기] → 카드1 → 카드2 → ... → 카드N      │
@@ -17,8 +17,13 @@
  * │    · 카드 끝까지 한 바퀴 돌면 → 자동 카테고리 복귀   │
  * └─────────────────────────────────────────────────┘
  *
- * 자동 모드: 일정 간격 자동 이동, 스페이스/엔터 = 선택
- * 단계별 모드: 스페이스 = 다음, 엔터 = 선택
+ * 입력 방식:
+ *   PC: 스페이스/엔터 키보드
+ *   모바일: 화면 하단 터치 영역 탭
+ *   외부: 블루투스 스위치 (키보드로 인식됨)
+ *
+ * 자동 모드: 일정 간격 자동 이동, 입력 = 선택
+ * 단계별 모드: 입력1 = 다음, 입력2 = 선택 (또는 더블탭)
  */
 
 const ScanningModule = {
@@ -32,19 +37,30 @@ const ScanningModule = {
 
     // 2단계 스캐닝 상태
     phase: 'category',     // 'category' | 'card'
-    items: [],             // 현재 스캔 대상 목록 (DOM 요소 배열)
+    items: [],
 
     // 카드 단계 추적
-    cardStartIndex: 0,     // 카드 선택 후 다시 시작한 인덱스 (한 바퀴 감지용)
-    hasLooped: false,      // 한 바퀴 돌았는지
-    backBtnEl: null,       // "돌아가기" 가상 버튼 DOM
+    cardStartIndex: 0,
+    hasLooped: false,
+    backBtnEl: null,
+
+    // 터치 지원
+    touchOverlay: null,
+    isMobile: false,
 
     // === 초기화 ===
     init() {
+        this.isMobile = this.detectMobile();
         this.loadSettings();
         this.setupEventListeners();
         this.injectStyles();
-        console.log('✅ 스캐닝 모듈 초기화 (2단계 행-열 스캐닝)');
+        console.log('✅ 스캐닝 모듈 초기화 (2단계 행-열, 터치 지원)');
+    },
+
+    detectMobile() {
+        return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
+            || ('ontouchstart' in window)
+            || (window.innerWidth <= 768);
     },
 
     // === CSS 스타일 삽입 ===
@@ -54,7 +70,7 @@ const ScanningModule = {
         const style = document.createElement('style');
         style.id = 'scanning-styles';
         style.textContent = `
-            /* 스캐닝 하이라이트 공통 */
+            /* 스캐닝 하이라이트 */
             .scanning-highlight {
                 outline: 4px solid var(--scan-color, #FF6B00) !important;
                 outline-offset: 2px !important;
@@ -69,13 +85,26 @@ const ScanningModule = {
             .category-tab.scanning-highlight {
                 transform: scale(1.08) !important;
             }
+            .menu-tile.scanning-highlight {
+                transform: scale(1.06) !important;
+                outline-offset: 4px !important;
+            }
+            .situation-card.scanning-highlight {
+                transform: scale(1.05) !important;
+            }
+            .close-btn.scanning-highlight {
+                transform: scale(1.3) !important;
+                outline-offset: 6px !important;
+                background: rgba(255,107,0,0.2) !important;
+                border-radius: 50% !important;
+            }
 
             @keyframes scanPulse {
                 from { box-shadow: 0 0 10px var(--scan-color, #FF6B00); }
                 to   { box-shadow: 0 0 25px var(--scan-color, #FF6B00); }
             }
 
-            /* ⬅ 돌아가기 버튼 (카드 그리드 맨 앞에 삽입) */
+            /* ⬅ 돌아가기 버튼 */
             .scan-back-btn {
                 display: flex;
                 flex-direction: column;
@@ -92,8 +121,7 @@ const ScanningModule = {
                 color: var(--color-primary, #FF6B00);
             }
             .scan-back-btn svg {
-                width: 32px;
-                height: 32px;
+                width: 32px; height: 32px;
                 stroke: currentColor;
             }
             .scan-back-btn span {
@@ -105,7 +133,7 @@ const ScanningModule = {
                 border-style: solid !important;
             }
 
-            /* 스캐닝 인디케이터 */
+            /* 스캐닝 인디케이터 (최소화) */
             .scanning-indicator {
                 position: fixed;
                 top: 60px;
@@ -113,24 +141,78 @@ const ScanningModule = {
                 transform: translateX(-50%);
                 background: var(--color-primary, #FF6B00);
                 color: white;
-                padding: 8px 20px;
-                border-radius: 20px;
+                padding: 4px 12px;
+                border-radius: 12px;
                 display: none;
                 align-items: center;
                 justify-content: center;
-                gap: 8px;
-                font-size: 14px;
+                gap: 4px;
+                font-size: 11px;
                 font-weight: 600;
                 z-index: 9999;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
                 white-space: nowrap;
                 transition: background 0.3s;
+                max-width: calc(100vw - 32px);
+                pointer-events: none;
+                opacity: 0.85;
             }
             .scanning-indicator.active {
                 display: flex;
             }
             .scanning-indicator.phase-card {
                 background: #2563EB;
+            }
+
+            /* ===== 스캐닝 모드 표시: 화면 테두리 ===== */
+            body.scanning-mode-active {
+                box-shadow: inset 0 0 0 3px var(--scan-color, #FF6B00);
+            }
+
+            /* ===== 모바일 터치 버튼 (탭바 위) ===== */
+            .scan-touch-overlay {
+                display: none;
+                position: fixed;
+                bottom: 60px;
+                left: 0;
+                right: 0;
+                z-index: 9998;
+                justify-content: center;
+                gap: 8px;
+                padding: 0 16px 4px;
+                pointer-events: none;
+            }
+            .scan-touch-overlay.active {
+                display: flex;
+            }
+            .scan-touch-btn {
+                pointer-events: auto;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                font-size: 13px;
+                font-weight: 700;
+                color: white;
+                border: none;
+                cursor: pointer;
+                user-select: none;
+                -webkit-user-select: none;
+                -webkit-tap-highlight-color: transparent;
+                border-radius: 24px;
+                padding: 8px 18px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                min-height: 36px;
+            }
+            .scan-touch-btn:active {
+                filter: brightness(0.85);
+                transform: scale(0.95);
+            }
+            .scan-touch-btn.btn-select {
+                background: var(--scan-color, #FF6B00);
+            }
+            .scan-touch-btn.btn-next {
+                background: #6B7280;
             }
         `;
         document.head.appendChild(style);
@@ -198,7 +280,7 @@ const ScanningModule = {
             });
         }
 
-        // 키보드
+        // 키보드 (PC + 블루투스 스위치)
         document.addEventListener('keydown', (e) => {
             if (!this.isActive) return;
             if (e.code !== 'Space' && e.code !== 'Enter') return;
@@ -220,26 +302,117 @@ const ScanningModule = {
     },
 
     // ============================================================
+    //  모바일 터치 오버레이
+    // ============================================================
+
+    createTouchOverlay() {
+        this.removeTouchOverlay();
+
+        const overlay = document.createElement('div');
+        overlay.className = 'scan-touch-overlay';
+        overlay.id = 'scanTouchOverlay';
+
+        if (this.method === 'auto') {
+            overlay.innerHTML = `
+                <button class="scan-touch-btn btn-select" id="scanTouchSelect" type="button">
+                    👆 선택
+                </button>
+            `;
+        } else {
+            overlay.innerHTML = `
+                <button class="scan-touch-btn btn-next" id="scanTouchNext" type="button">
+                    ▶ 다음
+                </button>
+                <button class="scan-touch-btn btn-select" id="scanTouchSelect" type="button">
+                    👆 선택
+                </button>
+            `;
+        }
+
+        document.body.appendChild(overlay);
+        document.body.classList.add('scanning-touch-active');
+        this.touchOverlay = overlay;
+
+        // this 바인딩을 명시적으로 보존
+        const self = this;
+        let touchFired = false;  // 터치-클릭 중복 방지
+
+        const selectBtn = document.getElementById('scanTouchSelect');
+        if (selectBtn) {
+            selectBtn.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                touchFired = true;
+                if (navigator.vibrate) navigator.vibrate(30);
+                self.selectCurrent();
+                setTimeout(() => { touchFired = false; }, 300);
+            }, { passive: false });
+            selectBtn.addEventListener('click', function(e) {
+                if (touchFired) return;  // 터치로 이미 처리됨
+                e.preventDefault();
+                e.stopPropagation();
+                self.selectCurrent();
+            });
+        }
+
+        const nextBtn = document.getElementById('scanTouchNext');
+        if (nextBtn) {
+            nextBtn.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                touchFired = true;
+                if (navigator.vibrate) navigator.vibrate(20);
+                self.moveNext();
+                setTimeout(() => { touchFired = false; }, 300);
+            }, { passive: false });
+            nextBtn.addEventListener('click', function(e) {
+                if (touchFired) return;
+                e.preventDefault();
+                e.stopPropagation();
+                self.moveNext();
+            });
+        }
+
+        overlay.classList.add('active');
+    },
+
+    removeTouchOverlay() {
+        const existing = document.getElementById('scanTouchOverlay');
+        if (existing) existing.remove();
+        document.body.classList.remove('scanning-touch-active');
+        this.touchOverlay = null;
+    },
+
+    // ============================================================
     //  스캐닝 제어
     // ============================================================
 
     start() {
         this.isActive = true;
-        this.phase = 'category';
+        this.phase = 'menu';
         this.currentIndex = 0;
         this.hasLooped = false;
+        this.selectedMenu = null; // 'speak' or 'situation'
 
         document.documentElement.style.setProperty('--scan-color', this.highlightColor);
-        this.updateIndicator();
-        this.collectCategories();
-
-        if (this.items.length === 0) {
-            console.warn('스캐닝: 카테고리가 없습니다');
-            return;
+        
+        // 메인 메뉴로 이동
+        const menu = document.getElementById('mainMenu');
+        const app = document.getElementById('app');
+        if (menu && app) {
+            app.style.display = 'none';
+            menu.style.display = 'flex';
         }
 
+        this.updateIndicator();
+        this.collectMenuItems();
+
+        // 모바일이면 터치 오버레이 생성
+        this.createTouchOverlay();
+        document.body.classList.add('scanning-mode-active');
+
         this.beginScan();
-        console.log('🔄 스캐닝 시작 [카테고리]', this.method, this.speed + 'ms');
+        console.log('🔄 스캐닝 시작 [메뉴 단계]', this.method, this.speed + 'ms');
     },
 
     stop() {
@@ -247,6 +420,8 @@ const ScanningModule = {
         this.stopTimer();
         this.clearHighlight();
         this.removeBackButton();
+        this.removeTouchOverlay();
+        document.body.classList.remove('scanning-mode-active');
         this.phase = 'category';
         this.items = [];
 
@@ -265,25 +440,62 @@ const ScanningModule = {
     // ============================================================
 
     collectCategories() {
-        const bar = document.getElementById('categoryBar');
-        this.items = bar ? Array.from(bar.querySelectorAll('.category-tab')) : [];
+        if (this.selectedMenu === 'situation') {
+            // 상황판: 상황 카드 영역이 열려있으면 skip (이미 카드 단계)
+            const sitArea = document.getElementById('situationCardsArea');
+            if (sitArea && sitArea.style.display !== 'none') {
+                return;
+            }
+            // 상황 그리드에서 상황 카드들
+            const sitGrid = document.getElementById('situationGrid');
+            if (sitGrid) {
+                this.items = Array.from(sitGrid.querySelectorAll('.situation-card'));
+            } else {
+                this.items = [];
+            }
+        } else {
+            // 말하기: 카테고리 바
+            const bar = document.getElementById('categoryBar');
+            this.items = bar ? Array.from(bar.querySelectorAll('.category-tab')) : [];
+        }
     },
 
     collectCards() {
-        const grid = document.getElementById('cardsGrid') || document.querySelector('.cards-grid');
-        if (!grid) { this.items = []; return; }
-        this.items = Array.from(grid.querySelectorAll('.card:not(.hidden):not(.card-add)'));
+        if (this.selectedMenu === 'situation') {
+            // 상황판 카드 그리드
+            const sitGrid = document.getElementById('situationCardsGrid');
+            if (sitGrid) {
+                this.items = Array.from(sitGrid.querySelectorAll('.card:not(.hidden):not(.card-add)'));
+            } else {
+                this.items = [];
+            }
+        } else {
+            // 말하기 카드 그리드
+            const grid = document.getElementById('cardsGrid');
+            if (!grid) { this.items = []; return; }
+            this.items = Array.from(grid.querySelectorAll('.card:not(.hidden):not(.card-add)'));
+        }
+    },
+
+    collectMenuItems() {
+        const menu = document.getElementById('mainMenu');
+        if (!menu) { this.items = []; return; }
+        // 말하기, 상황 타일만 (기록/설정은 스캐닝 불필요)
+        this.items = Array.from(menu.querySelectorAll('.menu-tile[data-target="speak"], .menu-tile[data-target="situation"]'));
     },
 
     // ============================================================
-    //  ⬅ 돌아가기 버튼 관리
+    //  ⬅ 돌아가기 버튼
     // ============================================================
 
-    /** 카드 그리드 맨 앞에 "돌아가기" 버튼 삽입 */
     insertBackButton() {
         this.removeBackButton();
-
-        const grid = document.getElementById('cardsGrid') || document.querySelector('.cards-grid');
+        let grid;
+        if (this.selectedMenu === 'situation') {
+            grid = document.getElementById('situationCardsGrid');
+        } else {
+            grid = document.getElementById('cardsGrid');
+        }
         if (!grid) return null;
 
         const btn = document.createElement('div');
@@ -301,7 +513,6 @@ const ScanningModule = {
         return btn;
     },
 
-    /** 돌아가기 버튼 제거 */
     removeBackButton() {
         const existing = document.getElementById('scanBackBtn');
         if (existing) existing.remove();
@@ -312,7 +523,6 @@ const ScanningModule = {
     //  단계 전환
     // ============================================================
 
-    /** 카테고리 → 카드 단계 */
     enterCardPhase() {
         this.stopTimer();
         this.clearHighlight();
@@ -321,68 +531,134 @@ const ScanningModule = {
         this.currentIndex = 0;
         this.hasLooped = false;
 
-        // 렌더링 대기 후 카드 수집
         setTimeout(() => {
-            // ⬅ 돌아가기 버튼 삽입
             this.insertBackButton();
-
-            // 카드 수집 (돌아가기 버튼 + 실제 카드)
             this.collectCardItems();
             this.updateIndicator();
 
             if (this.items.length <= 1) {
-                // 돌아가기 버튼만 있고 카드가 없으면 복귀
                 console.warn('스캐닝: 카드가 없어 카테고리로 복귀');
                 this.returnToCategoryPhase();
                 return;
             }
 
-            // 돌아가기 버튼(index 0)부터 시작
             this.currentIndex = 0;
             this.cardStartIndex = 0;
             this.beginScan();
-            console.log('🔄 스캐닝 [카드 단계] 항목 수:', this.items.length,
-                        '(돌아가기 1 + 카드', this.items.length - 1, '개)');
+            console.log('🔄 스캐닝 [카드 단계] 항목 수:', this.items.length);
         }, 250);
     },
 
-    /** 카드 + 돌아가기 버튼 통합 수집 */
     collectCardItems() {
-        const grid = document.getElementById('cardsGrid') || document.querySelector('.cards-grid');
+        let grid;
+        if (this.selectedMenu === 'situation') {
+            grid = document.getElementById('situationCardsGrid');
+        } else {
+            grid = document.getElementById('cardsGrid');
+        }
         if (!grid) { this.items = []; return; }
 
-        // 돌아가기 버튼 + 실제 카드 (순서대로)
         const backBtn = grid.querySelector('.scan-back-btn');
         const cards = Array.from(grid.querySelectorAll('.card:not(.hidden):not(.card-add)'));
-
         this.items = backBtn ? [backBtn, ...cards] : cards;
     },
 
-    /** 카드 → 카테고리 단계 복귀 */
     returnToCategoryPhase() {
         this.stopTimer();
         this.clearHighlight();
         this.removeBackButton();
 
+        // 카드 단계 → 카테고리 단계로 복귀 (메뉴 아님)
         this.phase = 'category';
         this.currentIndex = 0;
         this.hasLooped = false;
 
-        this.collectCategories();
-        this.updateIndicator();
-
-        // 현재 활성 카테고리 다음부터 시작 (이미 선택한 카테고리를 건너뜀)
-        const activeTab = document.querySelector('.category-tab.active');
-        if (activeTab) {
-            const idx = this.items.indexOf(activeTab);
-            if (idx >= 0) {
-                // 다음 카테고리부터 시작 (다른 단어를 고르러 갈 확률이 높으므로)
-                this.currentIndex = (idx + 1) % this.items.length;
-            }
+        // 상황판이면 상황 카드 목록으로 돌아가기
+        if (this.selectedMenu === 'situation') {
+            // situationCardsArea 숨기고 situationGrid 다시 보이기
+            const sitArea = document.getElementById('situationCardsArea');
+            const sitGrid = document.getElementById('situationGrid');
+            if (sitArea) sitArea.style.display = 'none';
+            if (sitGrid) sitGrid.style.display = 'grid';
         }
 
+        this.collectCategories();
+        this.updateIndicator();
         this.beginScan();
         console.log('🔄 스캐닝 [카테고리 복귀]');
+    },
+    
+    returnToMenu() {
+        this.stopTimer();
+        this.clearHighlight();
+        this.removeBackButton();
+
+        this.phase = 'menu';
+        this.currentIndex = 0;
+        this.hasLooped = false;
+        
+        // 앱 숨기고 메인 메뉴 표시
+        const menu = document.getElementById('mainMenu');
+        const app = document.getElementById('app');
+        if (menu && app) {
+            app.style.display = 'none';
+            menu.style.display = 'flex';
+        }
+
+        this.collectMenuItems();
+        this.updateIndicator();
+        this.beginScan();
+        console.log('🔄 스캐닝 [메뉴 복귀]');
+    },
+
+    // 크게보기 모달 단계: X닫기 버튼을 스캔
+    enterModalPhase() {
+        const modal = document.getElementById('listenerModal');
+        if (!modal || !modal.classList.contains('active')) {
+            // 모달이 안 열렸으면 카드 스캔으로 복귀
+            this.resumeCardScan();
+            return;
+        }
+        
+        this.phase = 'modal';
+        this.currentIndex = 0;
+        this.hasLooped = false;
+        
+        const closeBtn = document.getElementById('closeListenerModal');
+        this.items = closeBtn ? [closeBtn] : [];
+        
+        this.updateIndicator();
+        
+        if (this.items.length > 0) {
+            // 자동 모드: 일정 시간 후 자동으로 X 하이라이트
+            this.highlight(0);
+            if (this.method === 'auto') {
+                this.startTimer();
+            }
+        }
+        console.log('🔄 스캐닝 [모달 단계] X버튼 대기');
+    },
+    
+    // 카드 스캔 재개 (모달 닫힌 후)
+    resumeCardScan() {
+        this.phase = 'card';
+        this.currentIndex = 0;
+        this.hasLooped = false;
+        
+        setTimeout(() => {
+            this.insertBackButton();
+            this.collectCardItems();
+            this.updateIndicator();
+            
+            if (this.items.length <= 1) {
+                this.returnToCategoryPhase();
+                return;
+            }
+            
+            this.currentIndex = 0;
+            this.beginScan();
+            console.log('🔄 스캐닝 [카드 스캔 재개]');
+        }, 300);
     },
 
     // ============================================================
@@ -409,21 +685,27 @@ const ScanningModule = {
         }
     },
 
-    /** 다음으로 이동 */
     moveNext() {
         if (this.items.length === 0) return;
         this.clearHighlight();
 
-        const prevIndex = this.currentIndex;
         this.currentIndex = (this.currentIndex + 1) % this.items.length;
 
-        // ── 카드 단계: 한 바퀴 감지 ──
+        // 카드 단계: 2바퀴 돌면 → 카테고리로 자동 복귀
         if (this.phase === 'card' && this.currentIndex === 0) {
-            // index가 0(돌아가기 버튼)으로 돌아왔다 = 한 바퀴 완료
             if (this.hasLooped) {
-                // 이미 한 번 돌았으므로 카테고리로 자동 복귀
                 console.log('🔁 카드 한 바퀴 완료 → 카테고리로 자동 복귀');
                 this.returnToCategoryPhase();
+                return;
+            }
+            this.hasLooped = true;
+        }
+        
+        // 카테고리 단계: 2바퀴 돌면 → 메뉴로 자동 복귀
+        if (this.phase === 'category' && this.currentIndex === 0) {
+            if (this.hasLooped) {
+                console.log('🔁 카테고리 한 바퀴 완료 → 메뉴로 자동 복귀');
+                this.returnToMenu();
                 return;
             }
             this.hasLooped = true;
@@ -436,7 +718,30 @@ const ScanningModule = {
         if (index < 0 || index >= this.items.length) return;
         const el = this.items[index];
         el.classList.add('scanning-highlight');
-        el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        
+        // 카테고리 탭: 카테고리 바 안에서만 수평 스크롤 (페이지 이동 방지)
+        if (this.phase === 'category') {
+            const bar = el.closest('.category-bar, #categoryBar');
+            if (bar) {
+                const barRect = bar.getBoundingClientRect();
+                const elRect = el.getBoundingClientRect();
+                if (elRect.left < barRect.left || elRect.right > barRect.right) {
+                    const scrollLeft = bar.scrollLeft + (elRect.left - barRect.left) - (barRect.width / 2) + (elRect.width / 2);
+                    bar.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+                }
+            }
+        } else {
+            // 카드: cards-area 안에서만 수직 스크롤 (페이지 이동 방지)
+            const scrollArea = el.closest('.cards-area, .situation-cards-area');
+            if (scrollArea) {
+                const areaRect = scrollArea.getBoundingClientRect();
+                const elRect = el.getBoundingClientRect();
+                if (elRect.top < areaRect.top || elRect.bottom > areaRect.bottom) {
+                    const scrollTop = scrollArea.scrollTop + (elRect.top - areaRect.top) - (areaRect.height / 2) + (elRect.height / 2);
+                    scrollArea.scrollTo({ top: scrollTop, behavior: 'smooth' });
+                }
+            }
+        }
     },
 
     clearHighlight() {
@@ -455,8 +760,53 @@ const ScanningModule = {
         const el = this.items[this.currentIndex];
         if (navigator.vibrate) navigator.vibrate(100);
 
-        if (this.phase === 'category') {
-            // ── 카테고리 선택 ──
+        if (this.phase === 'modal') {
+            // 모달 단계: X버튼 선택 → 모달 닫기 → 카드 스캔 재개
+            this.stopTimer();
+            this.clearHighlight();
+            el.click();
+            console.log('✕ 모달 닫기 → 카드 스캔 재개');
+            setTimeout(() => this.resumeCardScan(), 400);
+            return;
+        }
+
+        if (this.phase === 'menu') {
+            // 메뉴 단계: 말하기 또는 상황 선택
+            this.stopTimer();
+            this.clearHighlight();
+            
+            const target = el.dataset.target;
+            this.selectedMenu = target;
+            
+            // 메뉴에서 앱으로 전환
+            const menu = document.getElementById('mainMenu');
+            const app = document.getElementById('app');
+            if (menu && app) {
+                menu.style.display = 'none';
+                app.style.display = 'flex';
+            }
+            
+            // 해당 슬라이드로 이동
+            if (target === 'speak') {
+                // goToSlide는 외부 함수 → 직접 실행
+                const wrapper = document.getElementById('slideWrapper');
+                if (wrapper) wrapper.style.transform = 'translateX(0%)';
+                document.querySelectorAll('.tab-bar-btn').forEach((btn, i) => btn.classList.toggle('active', i === 0));
+                
+                console.log('📱 메뉴→말하기 선택');
+                // 카테고리 단계로
+                setTimeout(() => this.enterCategoryFromMenu(), 300);
+            } else if (target === 'situation') {
+                const wrapper = document.getElementById('slideWrapper');
+                if (wrapper) wrapper.style.transform = 'translateX(-100%)';
+                document.querySelectorAll('.tab-bar-btn').forEach((btn, i) => btn.classList.toggle('active', i === 1));
+                
+                console.log('📱 메뉴→상황판 선택');
+                // 상황판의 카테고리(상황 카드들)를 스캔
+                setTimeout(() => this.enterSituationScan(), 300);
+            }
+
+        } else if (this.phase === 'category') {
             this.stopTimer();
             this.clearHighlight();
             el.click();
@@ -464,42 +814,69 @@ const ScanningModule = {
             this.enterCardPhase();
 
         } else {
-            // ── 카드 단계 ──
+            // 카드 단계
             this.stopTimer();
             this.clearHighlight();
 
-            // 돌아가기 버튼인지 확인
             if (el.classList.contains('scan-back-btn')) {
                 console.log('⬅ 돌아가기 선택 → 카테고리 복귀');
                 this.returnToCategoryPhase();
                 return;
             }
 
-            // 실제 카드 선택
             el.click();
             console.log('🃏 카드 선택:', el.dataset.id);
 
-            // 같은 카테고리에서 계속 스캔 (카드 목록 갱신 후 이어서)
+            // 스캐닝 모드에서는 카드 선택 즉시 크게보기 실행
             setTimeout(() => {
-                this.collectCardItems();
-
-                if (this.items.length <= 1) {
-                    // 카드가 다 사라졌으면 복귀
-                    this.returnToCategoryPhase();
-                    return;
+                const showBtn = document.getElementById('showBtn');
+                if (showBtn && !showBtn.disabled) {
+                    showBtn.click();
                 }
-
-                // 한 바퀴 카운터 리셋 (새로 선택했으므로 다시 한 바퀴 기회)
-                this.hasLooped = false;
-
-                // 다음 카드부터 계속 스캔
-                if (this.currentIndex >= this.items.length) {
-                    this.currentIndex = 0;
-                }
-
-                this.beginScan();
-            }, 300);
+                // 크게보기 모달이 열리면 X버튼 스캔 단계로 진입
+                setTimeout(() => this.enterModalPhase(), 500);
+            }, 200);
         }
+    },
+    
+    // 메뉴→말하기 후 카테고리 단계 진입
+    enterCategoryFromMenu() {
+        this.phase = 'category';
+        this.currentIndex = 0;
+        this.hasLooped = false;
+        
+        this.collectCategories();
+        this.updateIndicator();
+        
+        if (this.items.length === 0) {
+            console.warn('스캐닝: 카테고리가 없습니다');
+            return;
+        }
+        this.beginScan();
+        console.log('🔄 스캐닝 [카테고리 단계]');
+    },
+    
+    // 메뉴→상황판 후 상황 카드 스캔
+    enterSituationScan() {
+        this.phase = 'category';
+        this.currentIndex = 0;
+        this.hasLooped = false;
+        
+        // 상황 그리드의 카드들을 카테고리로 수집
+        const sitGrid = document.getElementById('situationGrid');
+        if (sitGrid) {
+            this.items = Array.from(sitGrid.querySelectorAll('.situation-card'));
+        } else {
+            this.items = [];
+        }
+        this.updateIndicator();
+        
+        if (this.items.length === 0) {
+            console.warn('스캐닝: 상황 카드가 없습니다');
+            return;
+        }
+        this.beginScan();
+        console.log('🔄 스캐닝 [상황판 단계] 항목:', this.items.length);
     },
 
     // ============================================================
@@ -512,30 +889,18 @@ const ScanningModule = {
 
         indicator.classList.add('active');
 
-        const hint = this.method === 'auto'
-            ? '스페이스/엔터 = 선택'
-            : '스페이스 = 이동 · 엔터 = 선택';
-
-        if (this.phase === 'category') {
+        if (this.phase === 'menu') {
             indicator.classList.remove('phase-card');
-            indicator.innerHTML = `
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                    <line x1="8" y1="21" x2="16" y2="21"/>
-                    <line x1="12" y1="17" x2="12" y2="21"/>
-                </svg>
-                📁 카테고리 선택 · ${hint}
-            `;
+            indicator.textContent = '📱 메뉴 선택';
+        } else if (this.phase === 'modal') {
+            indicator.classList.add('phase-card');
+            indicator.textContent = '✕ 닫기 선택';
+        } else if (this.phase === 'category') {
+            indicator.classList.remove('phase-card');
+            indicator.textContent = '📁 카테고리 선택';
         } else {
             indicator.classList.add('phase-card');
-            indicator.innerHTML = `
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                    <path d="M12 8v8"/>
-                    <path d="M8 12h8"/>
-                </svg>
-                🃏 카드 선택 · ${hint}
-            `;
+            indicator.textContent = '🃏 카드 선택';
         }
     },
 
