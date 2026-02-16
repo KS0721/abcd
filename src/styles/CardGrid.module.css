@@ -1,0 +1,23 @@
+/* CardGrid + CardsArea */
+.cardsArea {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--spacing-md);
+  -webkit-overflow-scrolling: touch;
+  min-width: 0;
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(var(--card-columns), 1fr);
+  gap: var(--card-gap);
+  padding-bottom: var(--spacing-md);
+  width: 100%;
+  min-width: 0;
+}
+
+.cardsGrid > * {
+  width: 100%;
+  max-width: 100%;
+}

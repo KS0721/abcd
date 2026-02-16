@@ -1,0 +1,207 @@
+/* ========================================
+   category.css - 카테고리 탭 바
+   Modified Fitzgerald Key 색상 표준 적용
+======================================== */
+
+.category-bar {
+    display: flex;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm);
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    touch-action: pan-x;  /* 수평 스크롤만 허용 */
+}
+
+.category-bar::-webkit-scrollbar {
+    display: none;
+}
+
+/* 카테고리 탭 */
+.category-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px var(--spacing-md);
+    min-height: 44px;
+    background: var(--color-bg);
+    border: 2px solid var(--color-border);
+    border-radius: 22px;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+
+.category-tab svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.category-tab:hover {
+    border-color: var(--color-text-muted);
+    background: var(--color-surface);
+}
+
+.category-tab:active {
+    transform: scale(0.97);
+}
+
+/* 활성 상태 - Modified Fitzgerald Key 카테고리별 색상 */
+.category-tab.active {
+    color: white;
+    border-color: transparent;
+    font-weight: 600;
+}
+
+/* 🟡 YELLOW: 핵심어/대명사 (Core/Pronouns) */
+.category-tab.active[data-category="core"] {
+    background: var(--cat-pronoun);
+    color: #1A1A1A;
+}
+
+/* 💖 PINK: 인사/사회어 (Greeting/Social) */
+.category-tab.active[data-category="greeting"] {
+    background: var(--cat-social);
+}
+
+/* 💜 PURPLE: 사람 (Person) */
+.category-tab.active[data-category="person"] {
+    background: var(--cat-person);
+}
+
+/* 🔵 BLUE: 감정/형용사 (Feeling/Adjectives) */
+.category-tab.active[data-category="feeling"] {
+    background: var(--cat-adjective);
+}
+
+/* 🟠 ORANGE: 음식/명사 (Food/Nouns) */
+.category-tab.active[data-category="food"] {
+    background: var(--cat-noun);
+}
+
+/* 🟢 GREEN: 활동/동사 (Action/Verbs) */
+.category-tab.active[data-category="action"] {
+    background: var(--cat-verb);
+}
+
+/* 🩵 CYAN: 장소 (Place) */
+.category-tab.active[data-category="place"] {
+    background: var(--cat-place);
+}
+
+/* 🟠 ORANGE: 사물/명사 (Thing/Nouns) */
+.category-tab.active[data-category="thing"] {
+    background: var(--cat-noun);
+}
+
+/* 🟤 BROWN: 시간/부사 (Time/Adverbs) */
+.category-tab.active[data-category="time"] {
+    background: var(--cat-adverb);
+    color: #1A1A1A;
+}
+
+/* 🔴 RED: 긴급/필요 (Emergency/Need) */
+.category-tab.active[data-category="need"],
+.category-tab.active[data-category="pain"] {
+    background: var(--cat-emergency);
+}
+
+/* 🏥 병원 카테고리 */
+.category-tab.active[data-category="hospital"] {
+    background: #DC2626;
+}
+
+/* 🏫 학교 카테고리 */
+.category-tab.active[data-category="school"] {
+    background: #2563EB;
+}
+
+/* 카테고리 추가 버튼 */
+.category-add-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg);
+    border: 2px dashed var(--color-border);
+    border-radius: 50%;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.category-add-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.category-add-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+/* ========================================
+   상황별 어휘판 바 (새로 추가)
+   김영태 외(2003): 상황별 어휘 차이 47%
+======================================== */
+
+.situation-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    touch-action: pan-x;
+}
+
+.situation-bar::-webkit-scrollbar {
+    display: none;
+}
+
+.situation-label {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.situation-chips {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.situation-chip {
+    padding: 6px 12px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.situation-chip:hover {
+    background: var(--color-primary-bg);
+    border-color: var(--color-primary);
+}
+
+.situation-chip.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+}

@@ -1,0 +1,46 @@
+/* TabBar 컴포넌트 */
+.bar {
+  display: flex;
+  height: var(--tab-bar-height);
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: var(--spacing-xs) 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  min-height: 44px;
+}
+
+.tab svg {
+  width: 22px;
+  height: 22px;
+}
+
+.tab span {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+}
+
+.tab:hover {
+  color: var(--color-text-secondary);
+}
+
+.active {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.active span {
+  font-weight: 600;
+}

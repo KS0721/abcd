@@ -1,0 +1,22 @@
+/* ========================================
+   global.css - 전역 스타일
+   data-theme, data-font-size 등 HTML 속성 기반 스타일
+======================================== */
+
+/* 앱 기본 레이아웃 */
+#root {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* 기본 앱 프레임 */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  max-width: 100vw;
+  overflow: hidden;
+  background: var(--color-bg);
+}

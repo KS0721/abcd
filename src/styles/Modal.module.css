@@ -1,0 +1,226 @@
+/* 모달 공통 스타일 */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 리스너 모달 (전체화면) */
+.listenerModal {
+  position: fixed;
+  inset: 0;
+  background: var(--color-surface);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  animation: fadeIn 0.2s ease;
+}
+
+.listenerModal.emergency {
+  background: var(--color-danger-bg);
+  animation: emergencyPulse 2s ease-in-out infinite;
+}
+
+@keyframes emergencyPulse {
+  0%, 100% { background: var(--color-danger-bg); }
+  50% { background: #FEE2E2; }
+}
+
+.listenerClose {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  z-index: 10;
+}
+
+.listenerClose:hover {
+  background: var(--color-border-light);
+}
+
+.listenerText {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  text-align: center;
+  word-break: keep-all;
+  line-height: 1.3;
+  max-width: 90%;
+}
+
+.listenerPictograms {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.listenerPictogram {
+  width: 80px;
+  height: 80px;
+}
+
+.listenerPictogram img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* 확인 모달 */
+.confirmModal {
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: var(--spacing-xl);
+  max-width: 320px;
+  width: 90%;
+  text-align: center;
+  animation: scaleIn 0.2s ease;
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.confirmIcon {
+  width: 48px;
+  height: 48px;
+  color: var(--color-warning);
+  margin: 0 auto var(--spacing-md);
+}
+
+.confirmMessage {
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-lg);
+  line-height: 1.5;
+}
+
+.confirmButtons {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.confirmBtn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.confirmCancel {
+  composes: confirmBtn;
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+}
+
+.confirmOk {
+  composes: confirmBtn;
+  background: var(--color-primary);
+  color: white;
+}
+
+.confirmDanger {
+  composes: confirmBtn;
+  background: var(--color-danger);
+  color: white;
+}
+
+/* 카드 추가 모달 */
+.addCardModal {
+  background: var(--color-surface);
+  border-radius: 16px;
+  max-width: 400px;
+  width: 90%;
+  animation: scaleIn 0.2s ease;
+}
+
+.addCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.addCardHeader h3 {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+.addCardClose {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.addCardBody {
+  padding: var(--spacing-md);
+}
+
+.addCardInput {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid var(--color-border);
+  border-radius: 10px;
+  font-size: var(--font-size-base);
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  outline: none;
+}
+
+.addCardInput:focus {
+  border-color: var(--color-primary);
+}
+
+.addCardFooter {
+  display: flex;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.addCardFooter button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+}

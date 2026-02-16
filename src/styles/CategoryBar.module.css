@@ -1,0 +1,64 @@
+/* CategoryBar 컴포넌트 */
+.bar {
+  display: flex;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  touch-action: pan-x;
+}
+
+.bar::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px var(--spacing-md);
+  min-height: 44px;
+  background: var(--color-bg);
+  border: 2px solid var(--color-border);
+  border-radius: 22px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.tab svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.tab:hover {
+  border-color: var(--color-text-muted);
+  background: var(--color-surface);
+}
+
+.tab:active {
+  transform: scale(0.97);
+}
+
+/* 활성 상태 */
+.active {
+  color: white;
+  border-color: transparent;
+  font-weight: 600;
+}
+
+.active[data-category="person"]     { background: var(--cat-person); }
+.active[data-category="action"]     { background: var(--cat-verb); }
+.active[data-category="feeling"]    { background: var(--cat-adjective); }
+.active[data-category="food"]       { background: var(--cat-noun); }
+.active[data-category="place"]      { background: var(--cat-place); }
+.active[data-category="thing"]      { background: var(--cat-noun); }
+.active[data-category="time"]       { background: var(--cat-adverb); color: #1A1A1A; }
+.active[data-category="expression"] { background: var(--cat-social); }

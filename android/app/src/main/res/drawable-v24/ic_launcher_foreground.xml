@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- 말풍선 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M24,30 C24,22 32,16 54,16 C76,16 84,22 84,30 L84,52 C84,60 76,66 54,66 L42,66 L30,80 L34,66 C30,66 24,60 24,52 Z" />
+    <!-- 하트 -->
+    <path
+        android:fillColor="#FF6B00"
+        android:pathData="M54,56 C54,56 40,46 40,40 C40,34 46,31 54,38 C62,31 68,34 68,40 C68,46 54,56 54,56 Z" />
+</vector>
