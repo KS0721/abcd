@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { preloadImages } from '../../lib/arasaac';
 import { DEFAULT_CARDS } from '../../data/cards';
 import { SITUATION_BOARDS } from '../../data/cards';
@@ -9,43 +9,16 @@ interface Props {
 }
 
 export default function SplashScreen({ onComplete }: Props) {
-  const [status, setStatus] = useState('로딩 중...');
-
   useEffect(() => {
-    let cancelled = false;
+    // 백그라운드에서 ARASAAC 이미지 캐시 (앱 전환을 차단하지 않음)
+    const allCards: { arasaacKeyword?: string }[] = [];
+    Object.values(DEFAULT_CARDS).forEach((cards) => allCards.push(...cards));
+    Object.values(SITUATION_BOARDS).forEach((board) => allCards.push(...board.cards));
+    preloadImages(allCards).catch(() => {});
 
-    async function init() {
-      try {
-        // 모든 카드 키워드 수집
-        const allCards: { arasaacKeyword?: string }[] = [];
-        Object.values(DEFAULT_CARDS).forEach((cards) => allCards.push(...cards));
-        Object.values(SITUATION_BOARDS).forEach((board) => allCards.push(...board.cards));
-
-        if (!cancelled) setStatus('아이콘 로딩 중...');
-
-        // ARASAAC 픽토그램 ID 미리 캐시 (localStorage에 저장됨)
-        await preloadImages(allCards);
-
-        if (!cancelled) setStatus('완료!');
-      } catch {
-        // 프리로드 실패해도 앱은 정상 실행
-      }
-
-      // 최소 1.5초 대기 후 완료
-      if (!cancelled) {
-        setTimeout(onComplete, 500);
-      }
-    }
-
-    // 최소 표시 시간 + 프리로드
-    const minTimer = setTimeout(() => {
-      init();
-    }, 1500);
-
-    return () => {
-      cancelled = true;
-      clearTimeout(minTimer);
-    };
+    // 2.5초 후 앱 전환 (프리로드 완료 여부와 관계없이)
+    const timer = setTimeout(onComplete, 2500);
+    return () => clearTimeout(timer);
   }, [onComplete]);
 
   return (
@@ -60,7 +33,7 @@ export default function SplashScreen({ onComplete }: Props) {
       <h1 className={styles.title}>올인원<span>AAC</span></h1>
       <p className={styles.subtitle}>의사소통을 위한 첫걸음</p>
       <div className={styles.loadingBar} />
-      <span className={styles.version}>{status}</span>
+      <span className={styles.version}>v4.0</span>
     </div>
   );
 }
