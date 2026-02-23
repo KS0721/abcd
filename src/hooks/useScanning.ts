@@ -1,10 +1,14 @@
 // ========================================
 // useScanning.ts - 스캐닝 모드 핵심 로직
-// 자동 모드 전용 (3초 간격, 터치=선택, 꾹 누르기=취소)
+// 자동 모드 전용 (3초 간격)
 //
-// 흐름: menu → category → card → modal
-//   · 자동: 타이머로 자동 이동, 터치 = 선택, 꾹 누르기 = 취소
-//   · 2바퀴 순환 시 이전 단계 자동 복귀
+// 조작법:
+//   · 터치 = 선택
+//   · 꾹 누르기(1.5초) = 스캐닝 끄기
+//   · 두번터치 = 화면 이동 (말하기→상황→기록→설정)
+//
+// 흐름: category → card → modal (tap to close)
+//   · 2바퀴 순환 시 카드→카테고리 자동 복귀
 //   · TTS: 하이라이트 이동 시 항목 이름 읽기
 // ========================================
 
@@ -14,9 +18,10 @@ import type { ScanPhase } from '../store/useScanningStore';
 import { useAppStore } from '../store/useAppStore';
 import { DEFAULT_CATEGORIES } from '../data/cards';
 import { SITUATION_BOARDS } from '../data/cards';
-import type { SituationId, CategoryId } from '../types';
+import type { SituationId, CategoryId, SlideIndex } from '../types';
 
 const SITUATION_IDS = Object.keys(SITUATION_BOARDS) as SituationId[];
+const SCREEN_COUNT = 4; // 말하기(0), 상황(1), 기록(2), 설정(3)
 
 // ── TTS: 항목 이름 읽기 ──
 function speakItemName(text: string) {
@@ -31,36 +36,42 @@ function speakItemName(text: string) {
 
 // ── 현재 하이라이트된 항목의 이름 가져오기 ──
 function getItemLabel(phase: ScanPhase, index: number): string {
-  const { selectedMenu } = useScanningStore.getState();
+  const { currentSlide } = useAppStore.getState();
   const { cards, currentCategory, activeSituation } = useAppStore.getState();
 
   switch (phase) {
-    case 'menu':
-      return index === 0 ? '말하기' : '상황';
-
     case 'category':
-      if (selectedMenu === 'situation') {
+      // 상황 화면
+      if (currentSlide === 1) {
         const sitId = SITUATION_IDS[index];
         return sitId ? SITUATION_BOARDS[sitId].name : '';
       }
+      // 말하기 화면
       return DEFAULT_CATEGORIES[index]?.name || '';
 
     case 'card': {
       if (index === 0) return '돌아가기';
-      if (selectedMenu === 'situation' && activeSituation) {
+      // 상황 화면 카드
+      if (currentSlide === 1 && activeSituation) {
         const board = SITUATION_BOARDS[activeSituation as SituationId];
         return board?.cards[index - 1]?.text || '';
       }
+      // 말하기 화면 카드
       const categoryCards = cards[currentCategory] || [];
       return categoryCards[index - 1]?.text || '';
     }
 
     case 'modal':
-      return '닫기';
+      return ''; // ListenerModal이 자체 TTS 처리
 
     default:
       return '';
   }
+}
+
+// ── 화면에 스캔 가능한 항목이 있는지 확인 ──
+function isScannableScreen(slide: number): boolean {
+  return slide === 0 || slide === 1; // 말하기, 상황만
 }
 
 export function useScanning() {
@@ -84,18 +95,15 @@ export function useScanning() {
 
   // ── 현재 단계의 항목 수 계산 ──
   const getItemCount = useCallback((): number => {
-    const { phase, selectedMenu } = useScanningStore.getState();
-    const { cards, currentCategory, activeSituation } = useAppStore.getState();
+    const { phase } = useScanningStore.getState();
+    const { currentSlide, cards, currentCategory, activeSituation } = useAppStore.getState();
 
     switch (phase) {
-      case 'menu':
-        return 2;
       case 'category':
-        return selectedMenu === 'situation'
-          ? SITUATION_IDS.length
-          : DEFAULT_CATEGORIES.length;
+        if (currentSlide === 1) return SITUATION_IDS.length;
+        return DEFAULT_CATEGORIES.length;
       case 'card': {
-        if (selectedMenu === 'situation' && activeSituation) {
+        if (currentSlide === 1 && activeSituation) {
           const board = SITUATION_BOARDS[activeSituation as SituationId];
           return 1 + (board?.cards.length || 0);
         }
@@ -118,10 +126,15 @@ export function useScanning() {
 
     if (nextIndex === 0) {
       if (s.hasLooped) {
+        // 카드 2바퀴 → 카테고리로 복귀
         if (s.phase === 'card') { returnToCategory(); return; }
-        if (s.phase === 'category') { returnToMenu(); return; }
+        // 카테고리 2바퀴 → 그냥 계속 순환 (리셋)
+        if (s.phase === 'category') {
+          useScanningStore.setState({ hasLooped: false });
+        }
+      } else {
+        useScanningStore.setState({ hasLooped: true });
       }
-      useScanningStore.setState({ hasLooped: true });
     }
 
     useScanningStore.setState({ currentIndex: nextIndex });
@@ -142,54 +155,25 @@ export function useScanning() {
     if ('speechSynthesis' in window) speechSynthesis.cancel();
 
     switch (s.phase) {
-      case 'menu': selectMenu(s.currentIndex); break;
       case 'category': selectCategory(s.currentIndex); break;
       case 'card': selectCard(s.currentIndex); break;
       case 'modal': selectModal(); break;
     }
   }, [getItemCount, stopTimer]);
 
-  // ── 취소 (이전 단계로 복귀) ──
-  const goBack = useCallback(() => {
-    stopTimer();
-    if ('speechSynthesis' in window) speechSynthesis.cancel();
-    const { phase } = useScanningStore.getState();
-
-    switch (phase) {
-      case 'card': returnToCategory(); break;
-      case 'category': returnToMenu(); break;
-      case 'modal': {
-        useAppStore.getState().closeListenerModal();
-        useAppStore.getState().clearSelection();
-        if ('speechSynthesis' in window) speechSynthesis.cancel();
-        setTimeout(() => resumeCardScan(), 400);
-        break;
-      }
-      default: break;
-    }
-  }, [stopTimer]);
-
-  // ── 메뉴 선택 ──
-  const selectMenu = useCallback((index: number) => {
-    const menu = index === 0 ? 'speak' : 'situation';
-    useScanningStore.setState({ selectedMenu: menu });
-    useAppStore.getState().setCurrentView('app');
-    useAppStore.getState().setCurrentSlide(menu === 'speak' ? 0 : 1);
-
-    setTimeout(() => enterCategoryPhase(), 300);
-  }, []);
-
   // ── 카테고리 선택 ──
   const selectCategory = useCallback((index: number) => {
-    const { selectedMenu } = useScanningStore.getState();
+    const { currentSlide } = useAppStore.getState();
 
-    if (selectedMenu === 'situation') {
+    if (currentSlide === 1) {
+      // 상황 화면
       const sitId = SITUATION_IDS[index];
       if (sitId) {
         useAppStore.getState().setActiveSituation(sitId);
         setTimeout(() => enterCardPhase(), 250);
       }
     } else {
+      // 말하기 화면
       const cat = DEFAULT_CATEGORIES[index];
       if (cat) {
         useAppStore.getState().setCurrentCategory(cat.id as CategoryId);
@@ -202,11 +186,11 @@ export function useScanning() {
   const selectCard = useCallback((index: number) => {
     if (index === 0) { returnToCategory(); return; }
 
-    const { selectedMenu } = useScanningStore.getState();
+    const { currentSlide } = useAppStore.getState();
     const app = useAppStore.getState();
 
     let card;
-    if (selectedMenu === 'situation' && app.activeSituation) {
+    if (currentSlide === 1 && app.activeSituation) {
       const board = SITUATION_BOARDS[app.activeSituation as SituationId];
       const sitCard = board?.cards[index - 1];
       if (sitCard) card = { ...sitCard, category: 'expression' as const };
@@ -237,71 +221,115 @@ export function useScanning() {
   }, []);
 
   // ── 단계 전환 ──
-  const beginAutoScan = useCallback(() => {
-    setTimeout(() => startTimer(), 100);
-    // 첫 항목 TTS
-    const { phase } = useScanningStore.getState();
-    const label = getItemLabel(phase, 0);
-    if (label) speakItemName(label);
-  }, [startTimer]);
-
   const enterCategoryPhase = useCallback(() => {
     stopTimer();
     useScanningStore.setState({ phase: 'category', currentIndex: 0, hasLooped: false });
-    beginAutoScan();
-  }, [stopTimer, beginAutoScan]);
+    // 첫 항목 TTS
+    const label = getItemLabel('category', 0);
+    if (label) speakItemName(label);
+    setTimeout(() => startTimer(), 100);
+  }, [stopTimer, startTimer]);
 
   const enterCardPhase = useCallback(() => {
     stopTimer();
     useScanningStore.setState({ phase: 'card', currentIndex: 0, hasLooped: false });
     if (getItemCount() <= 1) { returnToCategory(); return; }
-    beginAutoScan();
-  }, [stopTimer, beginAutoScan, getItemCount]);
+    // 첫 항목 TTS
+    const label = getItemLabel('card', 0);
+    if (label) speakItemName(label);
+    setTimeout(() => startTimer(), 100);
+  }, [stopTimer, startTimer, getItemCount]);
 
   const enterModalPhase = useCallback(() => {
     stopTimer();
+    // 모달에선 타이머 없음 - 터치로 닫기만
     useScanningStore.setState({ phase: 'modal', currentIndex: 0, hasLooped: false });
-    beginAutoScan();
-  }, [stopTimer, beginAutoScan]);
+  }, [stopTimer]);
 
   const resumeCardScan = useCallback(() => {
     useScanningStore.setState({ phase: 'card', currentIndex: 0, hasLooped: false });
-    beginAutoScan();
-  }, [beginAutoScan]);
+    const label = getItemLabel('card', 0);
+    if (label) speakItemName(label);
+    setTimeout(() => startTimer(), 100);
+  }, [startTimer]);
 
   const returnToCategory = useCallback(() => {
     stopTimer();
-    const { selectedMenu } = useScanningStore.getState();
-    if (selectedMenu === 'situation') {
+    const { currentSlide } = useAppStore.getState();
+    if (currentSlide === 1) {
       useAppStore.getState().setActiveSituation(null);
     }
     enterCategoryPhase();
   }, [stopTimer, enterCategoryPhase]);
 
-  const returnToMenu = useCallback(() => {
+  // ── 화면 이동 (두번터치) ──
+  const navigateScreen = useCallback(() => {
     stopTimer();
-    useScanningStore.setState({ selectedMenu: null });
-    useAppStore.getState().setCurrentView('menu');
-    useScanningStore.setState({ phase: 'menu', currentIndex: 0, hasLooped: false });
-    beginAutoScan();
-  }, [stopTimer, beginAutoScan]);
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+
+    const app = useAppStore.getState();
+    // 현재 view가 menu면 app으로 전환
+    if (app.currentView !== 'app') {
+      app.setCurrentView('app');
+    }
+
+    const nextSlide = ((app.currentSlide + 1) % SCREEN_COUNT) as SlideIndex;
+    app.setCurrentSlide(nextSlide);
+
+    // 상황 화면에서 나가면 활성 상황 초기화
+    if (app.currentSlide === 1) {
+      app.setActiveSituation(null);
+    }
+
+    if (navigator.vibrate) navigator.vibrate([30, 30, 30]);
+
+    // 화면 이름 TTS
+    const screenNames = ['말하기', '상황', '기록', '설정'];
+    speakItemName(screenNames[nextSlide]);
+
+    // 스캔 가능한 화면이면 카테고리 스캔 시작
+    setTimeout(() => {
+      if (isScannableScreen(nextSlide)) {
+        enterCategoryPhase();
+      } else {
+        // 기록/설정: 타이머 정지, 대기 (두번터치로 이동 가능)
+        useScanningStore.setState({ phase: 'category', currentIndex: -1, hasLooped: false });
+      }
+    }, 300);
+  }, [stopTimer, enterCategoryPhase]);
 
   // ── 시작/정지 ──
   const start = useCallback(() => {
-    useAppStore.getState().setCurrentView('menu');
+    const app = useAppStore.getState();
     document.documentElement.style.setProperty('--scan-color', '#FF6B00');
+
+    // 현재 view가 menu면 app으로 전환
+    if (app.currentView !== 'app') {
+      app.setCurrentView('app');
+    }
+
     useScanningStore.setState({
-      isActive: true, phase: 'menu', currentIndex: 0,
+      isActive: true, phase: 'category', currentIndex: 0,
       hasLooped: false, selectedMenu: null,
     });
-    beginAutoScan();
-  }, [beginAutoScan]);
+
+    const slide = app.currentSlide;
+    if (isScannableScreen(slide)) {
+      // 스캔 가능한 화면: 카테고리 스캔 시작
+      const label = getItemLabel('category', 0);
+      if (label) speakItemName(label);
+      setTimeout(() => startTimer(), 100);
+    } else {
+      // 기록/설정: 대기 상태
+      useScanningStore.setState({ currentIndex: -1 });
+    }
+  }, [startTimer]);
 
   const stop = useCallback(() => {
     stopTimer();
     if ('speechSynthesis' in window) speechSynthesis.cancel();
     useScanningStore.setState({
-      isActive: false, phase: 'menu', currentIndex: 0,
+      isActive: false, phase: 'category', currentIndex: 0,
       hasLooped: false, selectedMenu: null,
     });
   }, [stopTimer]);
@@ -311,7 +339,7 @@ export function useScanning() {
     setTimeout(() => start(), 150);
   }, [stop, start]);
 
-  // ── 키보드 이벤트 (Enter=선택, ESC=취소) ──
+  // ── 키보드 이벤트 (Enter=선택, ESC=끄기) ──
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       const { isActive } = useScanningStore.getState();
@@ -319,7 +347,7 @@ export function useScanning() {
 
       if (e.code === 'Escape') {
         e.preventDefault();
-        goBack();
+        stop();
         return;
       }
 
@@ -331,13 +359,13 @@ export function useScanning() {
 
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [selectCurrent, goBack]);
+  }, [selectCurrent, stop]);
 
   useEffect(() => {
     return () => stopTimer();
   }, [stopTimer]);
 
-  return { start, stop, restart, moveNext, selectCurrent, goBack };
+  return { start, stop, restart, moveNext, selectCurrent, navigateScreen };
 }
 
 // ── 유틸: 하이라이트 요소 스크롤 ──

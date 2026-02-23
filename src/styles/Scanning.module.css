@@ -169,10 +169,7 @@
   background: var(--scan-color, #FF6B00);
 }
 
-.btnNext {
-  composes: touchBtn;
-  background: #6B7280;
-}
+/* .btnNext 제거됨 - 취소 버튼 삭제 */
 
 /* 스캐닝 모드 테두리 */
 .scanningActive {

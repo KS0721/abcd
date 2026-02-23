@@ -1,5 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { useAppStore } from '../../store/useAppStore';
+import { useScanningStore } from '../../store/useScanningStore';
 import { useScanHighlight } from '../../hooks/useScanning';
 import styles from '../../styles/Modal.module.css';
 import scanStyles from '../../styles/Scanning.module.css';
@@ -8,6 +9,7 @@ export default function ListenerModal() {
   const { isOpen, message, isEmergency } = useAppStore((s) => s.listenerModal);
   const closeListenerModal = useAppStore((s) => s.closeListenerModal);
   const clearSelection = useAppStore((s) => s.clearSelection);
+  const isScanning = useScanningStore((s) => s.isActive);
   const highlighted = useScanHighlight('modal', 0);
 
   const handleClose = useCallback(() => {
@@ -52,17 +54,20 @@ export default function ListenerModal() {
         </div>
       )}
 
-      <button
-        className={`${styles.listenerClose} ${isEmergency ? styles.emergencyClose : ''} ${highlighted ? scanStyles.highlightClose : ''}`}
-        onClick={handleClose}
-        aria-label="닫기"
-        data-scan-phase="modal"
-        data-scan-index={0}
-      >
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
+      {/* 스캐닝 중엔 X 버튼 숨김 (오버레이 터치로 닫기) */}
+      {!isScanning && (
+        <button
+          className={`${styles.listenerClose} ${isEmergency ? styles.emergencyClose : ''} ${highlighted ? scanStyles.highlightClose : ''}`}
+          onClick={handleClose}
+          aria-label="닫기"
+          data-scan-phase="modal"
+          data-scan-index={0}
+        >
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      )}
 
       <div className={`${styles.listenerText} ${isEmergency ? styles.emergencyText : ''}`}>
         {message}
@@ -70,7 +75,11 @@ export default function ListenerModal() {
 
       {/* 하단 안내 */}
       <div className={styles.listenerHint}>
-        {isEmergency ? '이 화면을 주변 사람에게 보여주세요' : '화면을 터치하거나 닫기를 눌러주세요'}
+        {isEmergency
+          ? '이 화면을 주변 사람에게 보여주세요'
+          : isScanning
+            ? '터치하면 닫힙니다'
+            : '화면을 터치하거나 닫기를 눌러주세요'}
       </div>
     </div>
   );

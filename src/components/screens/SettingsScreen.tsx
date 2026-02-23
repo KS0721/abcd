@@ -153,7 +153,7 @@ export default function SettingsScreen() {
         </div>
 
         <div style={{ padding: 'var(--spacing-sm) 0', fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
-          자동 스캔 (3초 간격) · 터치 = 선택 · 꾹 누르기 = 취소
+          자동 스캔 (3초 간격) · 터치 = 선택 · 꾹 = 끄기 · 두번터치 = 화면이동
         </div>
       </div>
 
