@@ -7,9 +7,7 @@ import type { Settings } from '../../types';
 export default function SettingsScreen() {
   const settings = useSettingsStore();
   const speech = useSpeechStore();
-  const scanConfig = useScanningStore((s) => s.config);
   const isScanActive = useScanningStore((s) => s.isActive);
-  const updateScanConfig = useScanningStore((s) => s.updateConfig);
   const { start: startScan, stop: stopScan } = useScanning();
 
   const sectionStyle: React.CSSProperties = {
@@ -154,43 +152,8 @@ export default function SettingsScreen() {
           />
         </div>
 
-        <div style={rowStyle}>
-          <span style={labelStyle}>스캔 방식</span>
-          <select
-            value={scanConfig.method}
-            onChange={(e) => updateScanConfig('method', e.target.value as 'auto' | 'step')}
-            style={{
-              padding: '8px 12px', borderRadius: '8px',
-              border: '1px solid var(--color-border)',
-              background: 'var(--color-bg)', color: 'var(--color-text-primary)',
-              fontSize: 'var(--font-size-sm)',
-            }}
-          >
-            <option value="auto">자동 (터치 = 선택)</option>
-            <option value="step">단계별 (터치 = 다음, 길게 = 선택)</option>
-          </select>
-        </div>
-
-        <div style={{ padding: 'var(--spacing-sm) 0' }}>
-          <label style={{ ...labelStyle, display: 'block', marginBottom: '4px' }}>
-            스캔 속도: {(scanConfig.speed / 1000).toFixed(1)}초
-          </label>
-          <input
-            type="range" min="500" max="5000" step="250"
-            value={scanConfig.speed}
-            onChange={(e) => updateScanConfig('speed', parseInt(e.target.value))}
-            style={{ width: '100%' }}
-          />
-        </div>
-
-        <div style={rowStyle}>
-          <span style={labelStyle}>하이라이트 색상</span>
-          <input
-            type="color"
-            value={scanConfig.highlightColor}
-            onChange={(e) => updateScanConfig('highlightColor', e.target.value)}
-            style={{ width: '40px', height: '32px', border: 'none', cursor: 'pointer' }}
-          />
+        <div style={{ padding: 'var(--spacing-sm) 0', fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
+          자동 스캔 (3초 간격) · 터치 = 선택 · 꾹 누르기 = 취소
         </div>
       </div>
 

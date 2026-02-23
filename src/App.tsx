@@ -6,6 +6,7 @@ import AppShell from './components/layout/AppShell';
 import ListenerModal from './components/modals/ListenerModal';
 import ConfirmModal from './components/modals/ConfirmModal';
 import AddCardModal from './components/modals/AddCardModal';
+import EditCardModal from './components/modals/EditCardModal';
 import ScanningIndicator from './components/scanning/ScanningIndicator';
 import ScanningOverlay from './components/scanning/ScanningOverlay';
 
@@ -33,6 +34,7 @@ export default function App() {
       <ListenerModal />
       <ConfirmModal />
       <AddCardModal />
+      <EditCardModal />
 
       {/* 스캐닝 UI */}
       <ScanningIndicator />

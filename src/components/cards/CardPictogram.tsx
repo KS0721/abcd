@@ -15,6 +15,7 @@ const CardPictogram = memo(function CardPictogram({
 }: Props) {
   const [imgUrl, setImgUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -48,7 +49,16 @@ const CardPictogram = memo(function CardPictogram({
     // 4순위: 폴백 SVG
     setImgUrl(getFallbackSvg(text, category));
     setLoading(false);
-  }, [keyword, pictogramId, pictogramUrl, text, category]);
+  }, [keyword, pictogramId, pictogramUrl, text, category, retryCount]);
+
+  const handleError = () => {
+    // 최대 2회 재시도
+    if (retryCount < 2) {
+      setRetryCount((c) => c + 1);
+    } else {
+      setImgUrl(getFallbackSvg(text, category));
+    }
+  };
 
   return (
     <div className={`${styles.pictogram} ${loading ? styles.loading : ''}`}>
@@ -56,10 +66,8 @@ const CardPictogram = memo(function CardPictogram({
         <img
           src={imgUrl}
           alt={text}
-          loading="lazy"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = getFallbackSvg(text, category);
-          }}
+          loading="eager"
+          onError={handleError}
         />
       )}
     </div>

@@ -16,14 +16,14 @@
   align-items: center;
   gap: 4px;
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-danger);
   white-space: nowrap;
 }
 
 .label svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
 }
 
 .chips {
@@ -32,34 +32,37 @@
   flex: 1;
 }
 
+/* 긴급 칩 - 진한 빨간 배경 + 흰 글씨 (가독성 개선) */
 .chip {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 12px 20px;
   min-height: 44px;
-  background: var(--color-surface);
-  border: 2px solid var(--color-border);
+  background: #DC2626;
+  border: 2px solid #B91C1C;
   border-radius: 22px;
   font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
+  font-weight: 700;
+  color: #FFFFFF;
   white-space: nowrap;
   cursor: pointer;
   transition: all var(--transition-fast);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .chip:hover {
-  border-color: var(--color-danger);
-  color: var(--color-danger);
+  background: #B91C1C;
+  border-color: #991B1B;
 }
 
 .chip:active {
   transform: scale(0.95);
+  background: #991B1B;
 }
 
 .chip.selected {
-  background: var(--color-danger);
-  border-color: var(--color-danger);
-  color: white;
+  background: #7F1D1D;
+  border-color: #7F1D1D;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.3);
 }

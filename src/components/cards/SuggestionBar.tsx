@@ -25,7 +25,7 @@ export default function SuggestionBar() {
   if (suggestions.length === 0) return null;
 
   return (
-    <div style={{
+    <div data-no-swipe style={{
       display: 'flex',
       alignItems: 'center',
       gap: 'var(--spacing-sm)',

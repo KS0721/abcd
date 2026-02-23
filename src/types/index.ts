@@ -66,11 +66,9 @@ export interface SpeechSettings {
   repeatOnShow: boolean;
 }
 
-// 스캐닝 설정
+// 스캐닝 설정 (자동 모드 전용, 3초 고정)
 export interface ScanningConfig {
   speed: number;
-  method: 'auto' | 'step';
-  highlightColor: string;
 }
 
 // 뷰 타입
@@ -93,5 +91,11 @@ export interface ConfirmModalState {
 
 export interface AddCardModalState {
   isOpen: boolean;
+  category: CategoryId | null;
+}
+
+export interface EditCardModalState {
+  isOpen: boolean;
+  card: Card | null;
   category: CategoryId | null;
 }

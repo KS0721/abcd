@@ -1,19 +1,36 @@
 // ========================================
 // useSwipeGesture.ts - 슬라이드 스와이프 제스처
-// 출처: legacy/js/modules/swiper.js
+// 카드 그리드 영역에서만 스와이프 허용
+// (긴급바, 카테고리바 터치 시 페이지 넘김 방지)
 // ========================================
 
 import { useRef, useCallback } from 'react';
 import type { SlideIndex } from '../types';
 import { useAppStore } from '../store/useAppStore';
 
-const SWIPE_THRESHOLD = 50; // 최소 스와이프 거리 (px)
-const MAX_SLIDES = 4;       // 슬라이드 수 (0~3)
+const SWIPE_THRESHOLD = 50;
+const MAX_SLIDES = 4;
+
+/** 터치 시작 지점이 스와이프 금지 영역인지 확인 */
+function isNoSwipeZone(target: EventTarget | null): boolean {
+  let el = target as HTMLElement | null;
+  while (el) {
+    if (el.dataset?.noSwipe !== undefined) return true;
+    el = el.parentElement;
+  }
+  return false;
+}
 
 export function useSwipeGesture() {
   const touchStart = useRef<{ x: number; y: number; time: number } | null>(null);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    // 긴급바, 카테고리바 등에서 시작된 터치는 스와이프 무시
+    if (isNoSwipeZone(e.target)) {
+      touchStart.current = null;
+      return;
+    }
+
     const touch = e.touches[0];
     touchStart.current = {
       x: touch.clientX,
@@ -39,10 +56,8 @@ export function useSwipeGesture() {
     const { currentSlide, setCurrentSlide } = useAppStore.getState();
 
     if (dx < 0 && currentSlide < MAX_SLIDES - 1) {
-      // 왼쪽 스와이프 → 다음 슬라이드
       setCurrentSlide((currentSlide + 1) as SlideIndex);
     } else if (dx > 0 && currentSlide > 0) {
-      // 오른쪽 스와이프 → 이전 슬라이드
       setCurrentSlide((currentSlide - 1) as SlideIndex);
     }
   }, []);

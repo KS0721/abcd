@@ -44,7 +44,7 @@ export default function CategoryBar() {
   }, [setCurrentCategory]);
 
   return (
-    <div className={styles.bar} data-scan-scroll>
+    <div className={styles.bar} data-scan-scroll data-no-swipe>
       {DEFAULT_CATEGORIES.map((cat, i) => (
         <CategoryTab
           key={cat.id}

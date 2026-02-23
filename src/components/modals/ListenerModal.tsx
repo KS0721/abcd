@@ -28,7 +28,7 @@ export default function ListenerModal() {
     }
   }, [isOpen, message]);
 
-  // ESC로 닫기 (스캐닝 중이 아닐 때만 - 스캐닝은 useScanning에서 ESC 처리)
+  // ESC로 닫기
   useEffect(() => {
     if (!isOpen) return;
     const handleKey = (e: KeyboardEvent) => {
@@ -42,18 +42,36 @@ export default function ListenerModal() {
 
   return (
     <div className={`${styles.listenerModal} ${isEmergency ? styles.emergency : ''}`}>
+      {/* 상단 라벨 */}
+      {isEmergency && (
+        <div className={styles.emergencyLabel}>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+          </svg>
+          긴급 상황
+        </div>
+      )}
+
       <button
-        className={`${styles.listenerClose} ${highlighted ? scanStyles.highlightClose : ''}`}
+        className={`${styles.listenerClose} ${isEmergency ? styles.emergencyClose : ''} ${highlighted ? scanStyles.highlightClose : ''}`}
         onClick={handleClose}
         aria-label="닫기"
         data-scan-phase="modal"
         data-scan-index={0}
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
           <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
       </button>
-      <div className={styles.listenerText}>{message}</div>
+
+      <div className={`${styles.listenerText} ${isEmergency ? styles.emergencyText : ''}`}>
+        {message}
+      </div>
+
+      {/* 하단 안내 */}
+      <div className={styles.listenerHint}>
+        {isEmergency ? '이 화면을 주변 사람에게 보여주세요' : '화면을 터치하거나 닫기를 눌러주세요'}
+      </div>
     </div>
   );
 }

@@ -26,13 +26,14 @@ function ScanBackButton() {
 }
 
 /** 스캐닝 하이라이트가 적용된 카드 래퍼 */
-function ScannableCard({ index, card, isSelected, isEditMode, onSelect, onDelete }: {
+function ScannableCard({ index, card, isSelected, isEditMode, onSelect, onDelete, onEdit }: {
   index: number;
   card: Card;
   isSelected: boolean;
   isEditMode: boolean;
   onSelect: (card: Card) => void;
   onDelete?: (cardId: string) => void;
+  onEdit?: (card: Card) => void;
 }) {
   const highlighted = useScanHighlight('card', index);
   return (
@@ -47,6 +48,7 @@ function ScannableCard({ index, card, isSelected, isEditMode, onSelect, onDelete
         isEditMode={isEditMode}
         onSelect={onSelect}
         onDelete={onDelete}
+        onEdit={onEdit}
       />
     </div>
   );
@@ -61,6 +63,7 @@ export default function CardGrid() {
   const deselectCard = useAppStore((s) => s.deselectCard);
   const deleteUserCard = useAppStore((s) => s.deleteUserCard);
   const openAddCardModal = useAppStore((s) => s.openAddCardModal);
+  const openEditCardModal = useAppStore((s) => s.openEditCardModal);
   const isScanning = useScanningStore((s) => s.isActive);
 
   const selectedIds = new Set(selectedCards.map((c) => c.id));
@@ -76,6 +79,10 @@ export default function CardGrid() {
   const handleDelete = useCallback((cardId: string) => {
     deleteUserCard(currentCategory, cardId);
   }, [currentCategory, deleteUserCard]);
+
+  const handleEdit = useCallback((card: Card) => {
+    openEditCardModal(card, currentCategory);
+  }, [currentCategory, openEditCardModal]);
 
   const handleAddCard = useCallback(() => {
     openAddCardModal(currentCategory);
@@ -96,6 +103,7 @@ export default function CardGrid() {
             isEditMode={editMode}
             onSelect={handleSelect}
             onDelete={handleDelete}
+            onEdit={handleEdit}
           />
         ))}
 

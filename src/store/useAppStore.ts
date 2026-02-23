@@ -6,7 +6,7 @@
 import { create } from 'zustand';
 import type {
   Card, CategoryId, AppView, SlideIndex,
-  ListenerModalState, ConfirmModalState, AddCardModalState,
+  ListenerModalState, ConfirmModalState, AddCardModalState, EditCardModalState,
 } from '../types';
 import { DEFAULT_CARDS, VERB_SUGGESTIONS } from '../data/cards';
 import { isVerbForReplacement, sortCardsByGrammar, buildMessage } from '../lib/grammar';
@@ -71,6 +71,7 @@ interface AppStore {
   reorderCards: (category: CategoryId, from: number, to: number) => void;
   addUserCard: (category: CategoryId, card: Card) => void;
   deleteUserCard: (category: CategoryId, cardId: string) => void;
+  updateUserCard: (category: CategoryId, cardId: string, updates: Partial<Card>) => void;
 
   // 기록
   history: string[];
@@ -88,12 +89,15 @@ interface AppStore {
   listenerModal: ListenerModalState;
   confirmModal: ConfirmModalState;
   addCardModal: AddCardModalState;
+  editCardModal: EditCardModalState;
   openListenerModal: (message: string, isEmergency: boolean, cards: Card[]) => void;
   closeListenerModal: () => void;
   showConfirm: (message: string) => Promise<boolean>;
   closeConfirm: (result: boolean) => void;
   openAddCardModal: (category: CategoryId) => void;
   closeAddCardModal: () => void;
+  openEditCardModal: (card: Card, category: CategoryId) => void;
+  closeEditCardModal: () => void;
 
   // 초기화
   loadFromStorage: () => void;
@@ -204,6 +208,21 @@ export const useAppStore = create<AppStore>((set, get) => ({
     safeStorage.set(STORAGE_KEYS.userCards, newUserCards);
   },
 
+  updateUserCard: (category, cardId, updates) => {
+    const { cards, userCards } = get();
+    const updateCard = (c: Card) => c.id === cardId ? { ...c, ...updates } : c;
+    const newUserCards = {
+      ...userCards,
+      [category]: (userCards[category] || []).map(updateCard),
+    };
+    const newCards = {
+      ...cards,
+      [category]: cards[category].map(updateCard),
+    };
+    set({ cards: newCards, userCards: newUserCards });
+    safeStorage.set(STORAGE_KEYS.userCards, newUserCards);
+  },
+
   // 기록
   history: [],
   addToHistory: (message) => {
@@ -229,6 +248,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
   listenerModal: { isOpen: false, message: '', isEmergency: false, cards: [] },
   confirmModal: { isOpen: false, message: '', resolve: null },
   addCardModal: { isOpen: false, category: null },
+  editCardModal: { isOpen: false, card: null, category: null },
 
   openListenerModal: (message, isEmergency, cards) =>
     set({ listenerModal: { isOpen: true, message, isEmergency, cards } }),
@@ -250,6 +270,11 @@ export const useAppStore = create<AppStore>((set, get) => ({
     set({ addCardModal: { isOpen: true, category } }),
   closeAddCardModal: () =>
     set({ addCardModal: { isOpen: false, category: null } }),
+
+  openEditCardModal: (card, category) =>
+    set({ editCardModal: { isOpen: true, card, category } }),
+  closeEditCardModal: () =>
+    set({ editCardModal: { isOpen: false, card: null, category: null } }),
 
   // 로컬 스토리지에서 로드
   loadFromStorage: () => {

@@ -1,13 +1,11 @@
 // ========================================
 // useScanning.ts - 스캐닝 모드 핵심 로직
-// 출처: legacy/js/modules/scanning.js (925 LOC)
+// 자동 모드 전용 (3초 간격, 터치=선택, 꾹 누르기=취소)
 //
 // 흐름: menu → category → card → modal
-//   · 자동 모드: 타이머로 자동 이동, 입력 = 선택
-//   · 단계별 모드: Space=다음, Enter=선택
+//   · 자동: 타이머로 자동 이동, 터치 = 선택, 꾹 누르기 = 취소
 //   · 2바퀴 순환 시 이전 단계 자동 복귀
 //   · TTS: 하이라이트 이동 시 항목 이름 읽기
-//   · 취소: 터치 오버레이 취소 버튼으로 이전 단계 복귀
 // ========================================
 
 import { useEffect, useCallback, useRef } from 'react';
@@ -26,7 +24,7 @@ function speakItemName(text: string) {
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = 'ko-KR';
-  u.rate = 1.2; // 스캐닝 중에는 약간 빠르게
+  u.rate = 1.2;
   u.volume = 0.7;
   speechSynthesis.speak(u);
 }
@@ -161,14 +159,13 @@ export function useScanning() {
       case 'card': returnToCategory(); break;
       case 'category': returnToMenu(); break;
       case 'modal': {
-        // 모달 닫고 카드 스캔 재개
         useAppStore.getState().closeListenerModal();
         useAppStore.getState().clearSelection();
         if ('speechSynthesis' in window) speechSynthesis.cancel();
         setTimeout(() => resumeCardScan(), 400);
         break;
       }
-      default: break; // 메뉴 단계에서는 취소 불가 (최상위)
+      default: break;
     }
   }, [stopTimer]);
 
@@ -241,10 +238,7 @@ export function useScanning() {
 
   // ── 단계 전환 ──
   const beginAutoScan = useCallback(() => {
-    const { config } = useScanningStore.getState();
-    if (config.method === 'auto') {
-      setTimeout(() => startTimer(), 100);
-    }
+    setTimeout(() => startTimer(), 100);
     // 첫 항목 TTS
     const { phase } = useScanningStore.getState();
     const label = getItemLabel(phase, 0);
@@ -295,10 +289,7 @@ export function useScanning() {
   // ── 시작/정지 ──
   const start = useCallback(() => {
     useAppStore.getState().setCurrentView('menu');
-    document.documentElement.style.setProperty(
-      '--scan-color',
-      useScanningStore.getState().config.highlightColor,
-    );
+    document.documentElement.style.setProperty('--scan-color', '#FF6B00');
     useScanningStore.setState({
       isActive: true, phase: 'menu', currentIndex: 0,
       hasLooped: false, selectedMenu: null,
@@ -320,32 +311,27 @@ export function useScanning() {
     setTimeout(() => start(), 150);
   }, [stop, start]);
 
-  // ── 키보드 이벤트 (Space/Enter + ESC 취소) ──
+  // ── 키보드 이벤트 (Enter=선택, ESC=취소) ──
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      const { isActive, config } = useScanningStore.getState();
+      const { isActive } = useScanningStore.getState();
       if (!isActive) return;
 
-      // ESC → 취소 (이전 단계로)
       if (e.code === 'Escape') {
         e.preventDefault();
         goBack();
         return;
       }
 
-      if (e.code !== 'Space' && e.code !== 'Enter') return;
-      e.preventDefault();
-
-      if (config.method === 'step') {
-        e.code === 'Space' ? moveNext() : selectCurrent();
-      } else {
+      if (e.code === 'Enter' || e.code === 'Space') {
+        e.preventDefault();
         selectCurrent();
       }
     };
 
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [moveNext, selectCurrent, goBack]);
+  }, [selectCurrent, goBack]);
 
   useEffect(() => {
     return () => stopTimer();

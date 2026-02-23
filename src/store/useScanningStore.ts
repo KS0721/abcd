@@ -1,9 +1,6 @@
 // ========================================
 // useScanningStore.ts - 스캐닝 모드 상태
-// 출처: legacy/js/modules/scanning.js
-//
-// 운동 장애 사용자를 위한 2단계 행-열 스캐닝
-// 권순복 & 김수진(2019) 연구 기반
+// 자동 모드 전용, 3초 간격 고정
 // ========================================
 
 import { create } from 'zustand';
@@ -31,7 +28,6 @@ interface ScanningStore {
   setHasLooped: (looped: boolean) => void;
   setSelectedMenu: (menu: 'speak' | 'situation' | null) => void;
   setItemCount: (count: number) => void;
-  updateConfig: <K extends keyof ScanningConfig>(key: K, value: ScanningConfig[K]) => void;
   reset: () => void;
 }
 
@@ -46,9 +42,7 @@ export const useScanningStore = create<ScanningStore>()(
       itemCount: 0,
 
       config: {
-        speed: 2000,
-        method: 'auto',
-        highlightColor: '#FF6B00',
+        speed: 3000,
       },
 
       setActive: (active) => set({ isActive: active }),
@@ -57,8 +51,6 @@ export const useScanningStore = create<ScanningStore>()(
       setHasLooped: (looped) => set({ hasLooped: looped }),
       setSelectedMenu: (menu) => set({ selectedMenu: menu }),
       setItemCount: (count) => set({ itemCount: count }),
-      updateConfig: (key, value) =>
-        set((s) => ({ config: { ...s.config, [key]: value } })),
       reset: () =>
         set({
           isActive: false,

@@ -1,4 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { preloadImages } from '../../lib/arasaac';
+import { DEFAULT_CARDS } from '../../data/cards';
+import { SITUATION_BOARDS } from '../../data/cards';
 import styles from '../../styles/SplashScreen.module.css';
 
 interface Props {
@@ -6,9 +9,43 @@ interface Props {
 }
 
 export default function SplashScreen({ onComplete }: Props) {
+  const [status, setStatus] = useState('로딩 중...');
+
   useEffect(() => {
-    const timer = setTimeout(onComplete, 2500);
-    return () => clearTimeout(timer);
+    let cancelled = false;
+
+    async function init() {
+      try {
+        // 모든 카드 키워드 수집
+        const allCards: { arasaacKeyword?: string }[] = [];
+        Object.values(DEFAULT_CARDS).forEach((cards) => allCards.push(...cards));
+        Object.values(SITUATION_BOARDS).forEach((board) => allCards.push(...board.cards));
+
+        if (!cancelled) setStatus('아이콘 로딩 중...');
+
+        // ARASAAC 픽토그램 ID 미리 캐시 (localStorage에 저장됨)
+        await preloadImages(allCards);
+
+        if (!cancelled) setStatus('완료!');
+      } catch {
+        // 프리로드 실패해도 앱은 정상 실행
+      }
+
+      // 최소 1.5초 대기 후 완료
+      if (!cancelled) {
+        setTimeout(onComplete, 500);
+      }
+    }
+
+    // 최소 표시 시간 + 프리로드
+    const minTimer = setTimeout(() => {
+      init();
+    }, 1500);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(minTimer);
+    };
   }, [onComplete]);
 
   return (
@@ -23,7 +60,7 @@ export default function SplashScreen({ onComplete }: Props) {
       <h1 className={styles.title}>올인원<span>AAC</span></h1>
       <p className={styles.subtitle}>의사소통을 위한 첫걸음</p>
       <div className={styles.loadingBar} />
-      <span className={styles.version}>v4.0</span>
+      <span className={styles.version}>{status}</span>
     </div>
   );
 }

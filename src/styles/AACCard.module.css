@@ -147,10 +147,10 @@
 
 .deleteBtn {
   position: absolute;
-  top: -8px;
-  right: -8px;
-  width: 24px;
-  height: 24px;
+  top: 4px;
+  right: 4px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -163,7 +163,26 @@
   box-shadow: var(--shadow-md);
 }
 
+.editBtn {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: var(--shadow-md);
+}
+
 .deleteBtn svg,
+.editBtn svg,
 .dragHandle svg {
   width: 14px;
   height: 14px;
