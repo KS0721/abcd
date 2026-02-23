@@ -139,7 +139,7 @@ export default function SituationScreen() {
 
   // 상황판 목록
   return (
-    <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--spacing-md)' }} data-scan-scroll>
+    <div style={{ flex: 1, overflowY: 'auto' }} data-scan-scroll>
       <div style={{
         padding: 'var(--spacing-md)', background: 'var(--color-surface)',
         borderBottom: '1px solid var(--color-border)',
@@ -149,6 +149,7 @@ export default function SituationScreen() {
       <div style={{
         display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
         gap: 'var(--spacing-md)', padding: 'var(--spacing-md)',
+        boxSizing: 'border-box', width: '100%',
       }}>
         {SITUATION_IDS.map((id, i) => {
           const board = SITUATION_BOARDS[id];
