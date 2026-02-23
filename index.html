@@ -17,5 +17,21 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // 서비스 워커 등록 + 이전 캐시 강제 삭제
+      (function() {
+        // 모든 CacheStorage 캐시 삭제
+        if ('caches' in window) {
+          caches.keys().then(function(keys) {
+            keys.forEach(function(k) { caches.delete(k); });
+          });
+        }
+        // 서비스 워커 등록 (네트워크 우선 전략)
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('./sw.js')
+            .then(function(reg) { reg.update(); });
+        }
+      })();
+    </script>
   </body>
 </html>

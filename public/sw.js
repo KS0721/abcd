@@ -1,0 +1,41 @@
+// 올인원 AAC 서비스 워커
+// 네트워크 우선 전략: 항상 최신 코드를 가져옴
+// 오프라인일 때만 캐시 사용
+
+const CACHE_NAME = 'aac-v4.1';
+
+// 설치 즉시 활성화
+self.addEventListener('install', () => self.skipWaiting());
+
+// 활성화 시 이전 캐시 전부 삭제
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys()
+      .then(keys => Promise.all(keys.map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
+  );
+});
+
+// 요청 처리
+self.addEventListener('fetch', event => {
+  const req = event.request;
+
+  // HTML 페이지 요청: 무조건 네트워크에서 가져옴
+  if (req.mode === 'navigate') {
+    event.respondWith(
+      fetch(req, { cache: 'no-store' }).catch(() => caches.match(req))
+    );
+    return;
+  }
+
+  // JS/CSS/이미지: 네트워크 우선, 실패 시 캐시
+  event.respondWith(
+    fetch(req)
+      .then(res => {
+        const clone = res.clone();
+        caches.open(CACHE_NAME).then(c => c.put(req, clone));
+        return res;
+      })
+      .catch(() => caches.match(req))
+  );
+});
