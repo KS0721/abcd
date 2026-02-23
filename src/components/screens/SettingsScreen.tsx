@@ -159,7 +159,7 @@ export default function SettingsScreen() {
 
       {/* 앱 정보 */}
       <div style={{ ...sectionStyle, textAlign: 'center', color: 'var(--color-text-muted)' }}>
-        <p style={{ fontSize: 'var(--font-size-sm)' }}>올인원 AAC v4.0</p>
+        <p style={{ fontSize: 'var(--font-size-sm)' }}>올인원 AAC v4.1</p>
         <p style={{ fontSize: 'var(--font-size-xs)', marginTop: '4px' }}>
           ARASAAC 픽토그램 (CC BY-NC-SA)
         </p>

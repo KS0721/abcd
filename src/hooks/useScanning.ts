@@ -308,21 +308,24 @@ export function useScanning() {
       app.setCurrentView('app');
     }
 
+    // 스캔 불가 화면(기록/설정)이면 말하기(0)로 이동
+    let slide = app.currentSlide;
+    if (!isScannableScreen(slide)) {
+      slide = 0 as SlideIndex;
+      app.setCurrentSlide(slide);
+    }
+
     useScanningStore.setState({
       isActive: true, phase: 'category', currentIndex: 0,
       hasLooped: false, selectedMenu: null,
     });
 
-    const slide = app.currentSlide;
-    if (isScannableScreen(slide)) {
-      // 스캔 가능한 화면: 카테고리 스캔 시작
+    // 카테고리 스캔 시작
+    setTimeout(() => {
       const label = getItemLabel('category', 0);
       if (label) speakItemName(label);
-      setTimeout(() => startTimer(), 100);
-    } else {
-      // 기록/설정: 대기 상태
-      useScanningStore.setState({ currentIndex: -1 });
-    }
+      startTimer();
+    }, 300);
   }, [startTimer]);
 
   const stop = useCallback(() => {
