@@ -21,16 +21,6 @@ export default function ScanningOverlay() {
   const didLongPress = useRef(false);
   const lastTapTime = useRef(0);
 
-  const clearTimers = useCallback(() => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-    if (singleTapTimer.current) {
-      clearTimeout(singleTapTimer.current);
-      singleTapTimer.current = null;
-    }
-  }, []);
 
   const handleTouchStart = useCallback((e: React.TouchEvent | React.MouseEvent) => {
     e.preventDefault();
