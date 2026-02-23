@@ -13,7 +13,7 @@ interface SettingsStore extends Settings {
 export const useSettingsStore = create<SettingsStore>()(
   persist(
     (set) => ({
-      highContrast: false,
+      highContrast: true,
       darkMode: false,
       fontSize: 'medium',
       vibration: true,
@@ -45,12 +45,12 @@ export const useSettingsStore = create<SettingsStore>()(
       name: 'aac_settings',
       onRehydrateStorage: () => (state) => {
         if (!state) return;
+        // 고대비 모드 항상 활성화 (기본값 강제)
+        state.highContrast = true;
+        document.documentElement.setAttribute('data-contrast', 'high');
         // 복원된 설정을 DOM에 적용
         if (state.darkMode) {
           document.documentElement.setAttribute('data-theme', 'dark');
-        }
-        if (state.highContrast) {
-          document.documentElement.setAttribute('data-contrast', 'high');
         }
         document.documentElement.setAttribute('data-font-size', state.fontSize);
       },

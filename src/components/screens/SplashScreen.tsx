@@ -1,7 +1,4 @@
 import { useEffect } from 'react';
-import { preloadImages } from '../../lib/arasaac';
-import { DEFAULT_CARDS } from '../../data/cards';
-import { SITUATION_BOARDS } from '../../data/cards';
 import styles from '../../styles/SplashScreen.module.css';
 
 interface Props {
@@ -10,14 +7,8 @@ interface Props {
 
 export default function SplashScreen({ onComplete }: Props) {
   useEffect(() => {
-    // 백그라운드에서 ARASAAC 이미지 캐시 (앱 전환을 차단하지 않음)
-    const allCards: { arasaacKeyword?: string }[] = [];
-    Object.values(DEFAULT_CARDS).forEach((cards) => allCards.push(...cards));
-    Object.values(SITUATION_BOARDS).forEach((board) => allCards.push(...board.cards));
-    preloadImages(allCards).catch(() => {});
-
-    // 2.5초 후 앱 전환 (프리로드 완료 여부와 관계없이)
-    const timer = setTimeout(onComplete, 2500);
+    // 1초 후 즉시 앱 전환 (이미지는 각 카드가 개별 로드)
+    const timer = setTimeout(onComplete, 1000);
     return () => clearTimeout(timer);
   }, [onComplete]);
 
@@ -33,7 +24,6 @@ export default function SplashScreen({ onComplete }: Props) {
       <h1 className={styles.title}>올인원<span>AAC</span></h1>
       <p className={styles.subtitle}>의사소통을 위한 첫걸음</p>
       <div className={styles.loadingBar} />
-      <span className={styles.version}>v4.0</span>
     </div>
   );
 }

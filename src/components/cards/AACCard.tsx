@@ -56,7 +56,7 @@ const AACCard = memo(function AACCard({ card, isSelected, isEditMode, onSelect, 
         <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>
       </div>}
 
-      {/* 편집 모드: 삭제 + 수정 버튼 */}
+      {/* 편집 모드: 삭제 + 수정 버튼 (사용자 카드만) */}
       {isEditMode && card.isUserCard && (
         <>
           <button className={styles.deleteBtn} onClick={handleDelete} onTouchEnd={handleDelete} aria-label="삭제">

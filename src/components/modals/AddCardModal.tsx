@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import { sanitizeText, isValidCardText } from '../../lib/sanitize';
 import { getImageUrl } from '../../lib/arasaac';
+import { normalizeKeyword } from '../../lib/grammar';
 import styles from '../../styles/Modal.module.css';
 
 const ARASAAC_API = 'https://api.arasaac.org/v1/pictograms/ko/search';
@@ -40,8 +41,9 @@ export default function AddCardModal() {
 
     searchTimerRef.current = setTimeout(async () => {
       setIsSearching(true);
+      const searchKeyword = normalizeKeyword(sanitized);
       try {
-        const res = await fetch(`${ARASAAC_API}/${encodeURIComponent(sanitized)}`, {
+        const res = await fetch(`${ARASAAC_API}/${encodeURIComponent(searchKeyword)}`, {
           signal: AbortSignal.timeout(5000),
         });
         if (res.ok) {
@@ -72,7 +74,7 @@ export default function AddCardModal() {
     } else if (selectedPictogramId) {
       card.pictogramId = selectedPictogramId;
     } else {
-      card.arasaacKeyword = sanitized;
+      card.arasaacKeyword = normalizeKeyword(sanitized);
     }
 
     addUserCard(category, card as any);
