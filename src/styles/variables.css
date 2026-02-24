@@ -48,69 +48,69 @@
     /* ===== Modified Fitzgerald Key 문법별 색상 ===== */
     
     /* 🟢 GREEN: 동사/활동 (Verbs/Actions) */
-    --cat-verb: #16A34A;
-    --cat-verb-light: #22C55E;
-    --cat-verb-bg: #F0FDF4;
-    --cat-verb-border: #16A34A;
-    
-    /* 🟠 ORANGE: 명사/사물/음식 (Nouns/Things/Food) */
-    --cat-noun: #EA580C;
-    --cat-noun-light: #F97316;
-    --cat-noun-bg: #FFF7ED;
-    --cat-noun-border: #EA580C;
-    
+    --cat-verb: #15803D;
+    --cat-verb-light: #34C472;
+    --cat-verb-bg: #F4FDF7;
+    --cat-verb-border: #15803D;
+
+    /* 🟠 ORANGE: 명사/사물/음식 (Nouns/Things/Food) - 파스텔화: 채도↓ 명도↑ */
+    --cat-noun: #C2550D;
+    --cat-noun-light: #E8845C;
+    --cat-noun-bg: #FFFBF7;
+    --cat-noun-border: #C2550D;
+
     /* 🟡 YELLOW: 대명사/핵심어 (Pronouns/Core) */
-    --cat-pronoun: #CA8A04;
-    --cat-pronoun-light: #EAB308;
-    --cat-pronoun-bg: #FEFCE8;
-    --cat-pronoun-border: #CA8A04;
-    
+    --cat-pronoun: #B45309;
+    --cat-pronoun-light: #D4A017;
+    --cat-pronoun-bg: #FEFEF2;
+    --cat-pronoun-border: #B45309;
+
     /* 🔵 BLUE: 형용사/묘사어/감정 (Adjectives/Descriptors/Feelings) */
-    --cat-adjective: #2563EB;
-    --cat-adjective-light: #3B82F6;
-    --cat-adjective-bg: #EFF6FF;
-    --cat-adjective-border: #2563EB;
-    
+    --cat-adjective: #2D6FE8;
+    --cat-adjective-light: #5B8EF0;
+    --cat-adjective-bg: #F3F7FF;
+    --cat-adjective-border: #2D6FE8;
+
     /* 💖 PINK: 사회어/인사 (Social words/Greetings) */
-    --cat-social: #DB2777;
-    --cat-social-light: #EC4899;
-    --cat-social-bg: #FDF2F8;
-    --cat-social-border: #DB2777;
-    
+    --cat-social: #BE185D;
+    --cat-social-light: #E879A8;
+    --cat-social-bg: #FEF5FA;
+    --cat-social-border: #BE185D;
+
     /* 💜 PURPLE: 질문 (Questions) */
-    --cat-question: #7C3AED;
-    --cat-question-light: #8B5CF6;
-    --cat-question-bg: #F5F3FF;
-    --cat-question-border: #7C3AED;
-    
+    --cat-question: #6D28D9;
+    --cat-question-light: #9B6EF5;
+    --cat-question-bg: #F7F5FF;
+    --cat-question-border: #6D28D9;
+
     /* 🟤 BROWN/TAN: 부사/시간 (Adverbs/Time) */
-    --cat-adverb: #A16207;
-    --cat-adverb-light: #CA8A04;
-    --cat-adverb-bg: #FEF9C3;
-    --cat-adverb-border: #A16207;
-    
-    /* 🔴 RED: 긴급/부정/중요 (Emergency/Negation/Important) */
+    --cat-adverb: #92400E;
+    --cat-adverb-light: #B8870A;
+    --cat-adverb-bg: #FEFDF0;
+    --cat-adverb-border: #92400E;
+
+    /* 🔴 RED: 긴급/부정/중요 (Emergency/Negation/Important) - 안전상 유지 */
     --cat-emergency: #DC2626;
     --cat-emergency-light: #EF4444;
     --cat-emergency-bg: #FEF2F2;
     --cat-emergency-border: #DC2626;
-    
+
     /* ⬜ WHITE/GRAY: 접속사/응답 (Conjunctions/Responses) */
     --cat-misc: #6B7280;
     --cat-misc-light: #9CA3AF;
-    --cat-misc-bg: #F9FAFB;
+    --cat-misc-bg: #FAFAFA;
     --cat-misc-border: #6B7280;
-    
+
     /* 🟣 PURPLE-PINK: 사람 (People - 특별 카테고리) */
-    --cat-person: #9333EA;
-    --cat-person-light: #A855F7;
-    --cat-person-bg: #FAF5FF;
-    --cat-person-border: #9333EA;
-    
+    --cat-person: #7E22CE;
+    --cat-person-light: #B07AF5;
+    --cat-person-bg: #FCF8FF;
+    --cat-person-border: #7E22CE;
+
     /* 🩵 CYAN: 장소 (Places - 특별 카테고리) */
     --cat-place: #0891B2;
-    --cat-place-light: #06B6D4;
-    --cat-place-bg: #ECFEFF;
+    --cat-place-light: #22C8E8;
+    --cat-place-bg: #F0FBFF;
     --cat-place-border: #0891B2;
     
     /* ===== 레거시 호환 (기존 카테고리명 매핑) ===== */

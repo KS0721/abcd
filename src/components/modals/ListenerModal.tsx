@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import { useScanningStore } from '../../store/useScanningStore';
 import { useScanHighlight } from '../../hooks/useScanning';
@@ -11,24 +11,70 @@ export default function ListenerModal() {
   const clearSelection = useAppStore((s) => s.clearSelection);
   const isScanning = useScanningStore((s) => s.isActive);
   const highlighted = useScanHighlight('modal', 0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleClose = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
     closeListenerModal();
     clearSelection();
-    if ('speechSynthesis' in window) {
-      speechSynthesis.cancel();
-    }
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
   }, [closeListenerModal, clearSelection]);
 
-  // 자동 TTS
+  // TTS 루프
   useEffect(() => {
-    if (isOpen && message && 'speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(message);
-      utterance.lang = 'ko-KR';
+    if (!isOpen || !message || !('speechSynthesis' in window)) return;
+
+    // 일반 모달: 1회 재생
+    if (!isEmergency) {
+      const u = new SpeechSynthesisUtterance(message);
+      u.lang = 'ko-KR';
       speechSynthesis.cancel();
-      speechSynthesis.speak(utterance);
+      speechSynthesis.speak(u);
+      return;
     }
-  }, [isOpen, message]);
+
+    // 긴급 모달: 3회 반복 → 5초 대기 → 3회 반복 ... (닫기 전까지 무한)
+    let stopped = false;
+
+    const runCycle = () => {
+      let count = 0;
+
+      const speakNext = () => {
+        if (stopped) return;
+        count++;
+        const u = new SpeechSynthesisUtterance(message);
+        u.lang = 'ko-KR';
+        u.rate = 0.88;
+        u.volume = 1;
+        u.onend = () => {
+          if (stopped) return;
+          if (count < 3) {
+            // 1.3초 후 다음 발화
+            timerRef.current = setTimeout(speakNext, 1300);
+          } else {
+            // 3회 완료 → 5초 후 다음 사이클
+            timerRef.current = setTimeout(runCycle, 5000);
+          }
+        };
+        u.onerror = () => {
+          // 에러 시에도 다음 사이클 계속
+          if (!stopped) timerRef.current = setTimeout(runCycle, 3000);
+        };
+        speechSynthesis.speak(u);
+      };
+
+      speechSynthesis.cancel();
+      speakNext();
+    };
+
+    runCycle();
+
+    return () => {
+      stopped = true;
+      if (timerRef.current) clearTimeout(timerRef.current);
+      speechSynthesis.cancel();
+    };
+  }, [isOpen, message, isEmergency]);
 
   // ESC로 닫기
   useEffect(() => {
@@ -54,7 +100,7 @@ export default function ListenerModal() {
         </div>
       )}
 
-      {/* 스캐닝 중엔 X 버튼 숨김 (오버레이 터치로 닫기) */}
+      {/* 스캐닝 중엔 X 버튼 숨김 */}
       {!isScanning && (
         <button
           className={`${styles.listenerClose} ${isEmergency ? styles.emergencyClose : ''} ${highlighted ? scanStyles.highlightClose : ''}`}

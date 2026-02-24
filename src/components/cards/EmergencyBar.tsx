@@ -8,6 +8,8 @@ export default function EmergencyBar() {
   const openListenerModal = useAppStore((s) => s.openListenerModal);
 
   const handleClick = useCallback((card: typeof EMERGENCY_CARDS[0]) => {
+    // 긴급 햅틱: 두 번 강하게
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
     selectCard(card);
     openListenerModal(card.text, true, [card]);
   }, [selectCard, openListenerModal]);
