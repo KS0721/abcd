@@ -1,11 +1,12 @@
 // ========================================
 // useTTS.ts - TTS (Text-to-Speech) 훅
 // Chrome 10초 멈춤 버그 우회 포함
-// 출처: legacy/js/modules/tts.js
+// 프리셋 기반 음성 설정 + 적응형 음량 지원
 // ========================================
 
 import { useCallback, useRef, useEffect } from 'react';
-import { useSpeechStore } from '../store/useSpeechStore';
+import { useSpeechStore, RATE_VALUES, PITCH_VALUES, VOLUME_VALUES } from '../store/useSpeechStore';
+import { getAdaptiveVolume } from '../lib/adaptiveVolume';
 
 /** 한국어 음성 자동 선택 (로컬 > Google) */
 function findKoreanVoice(): SpeechSynthesisVoice | null {
@@ -21,9 +22,18 @@ function findKoreanVoice(): SpeechSynthesisVoice | null {
   return voices.find((v) => v.lang.startsWith('ko')) || null;
 }
 
+/** 프리셋에서 실제 음량 값 계산 */
+function resolveVolume(preset: string): number {
+  const mapped = VOLUME_VALUES[preset as keyof typeof VOLUME_VALUES] ?? 1.0;
+  if (mapped < 0) {
+    // adaptive: 주변 소음 기반 음량
+    return getAdaptiveVolume();
+  }
+  return mapped;
+}
+
 export function useTTS() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
@@ -51,14 +61,12 @@ export function useTTS() {
 
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'ko-KR';
-    u.rate = options?.emergency ? 0.9 : rate;
-    u.pitch = pitch;
-    u.volume = volume;
+    u.rate = options?.emergency ? 0.9 : (RATE_VALUES[rate] ?? 1.0);
+    u.pitch = PITCH_VALUES[pitch] ?? 1.0;
+    u.volume = resolveVolume(volume);
 
     const voice = findKoreanVoice();
     if (voice) u.voice = voice;
-
-    utteranceRef.current = u;
 
     // Chrome 10초 멈춤 버그 우회: 긴 텍스트일 때 주기적 pause/resume
     u.onstart = () => {

@@ -58,7 +58,7 @@ async function searchPictogramId(keyword: string): Promise<number | null> {
     const response = await fetch(`${ARASAAC_API}/${encoded}`, {
       method: 'GET',
       headers: { Accept: 'application/json' },
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(3000),
     });
 
     if (!response.ok) {
@@ -124,7 +124,7 @@ export async function preloadImages(
     }
   }
 
-  const batchSize = 5;
+  const batchSize = 20;
   for (let i = 0; i < uncached.length; i += batchSize) {
     const batch = uncached.slice(i, i + batchSize);
     const promises = batch.map(async (keyword) => {
@@ -135,10 +135,6 @@ export async function preloadImages(
       }
     });
     await Promise.allSettled(promises);
-
-    if (i + batchSize < uncached.length) {
-      await new Promise((r) => setTimeout(r, 200));
-    }
   }
 
   saveCache(memoryCache);
@@ -153,16 +149,21 @@ export function clearCache(): void {
 
 /** 폴백 SVG 데이터 URL */
 export function getFallbackSvg(text: string, category: string): string {
+  // Fitzgerald Key 기반 색상 (AAC 표준 색상 코딩)
+  // 참고: Fitzgerald(1949), Beukelman & Mirenda(2013)
   const colors: Record<string, { bg: string; fg: string }> = {
-    person:     { bg: '#FAF5FF', fg: '#9333EA' },
-    action:     { bg: '#F0FDF4', fg: '#16A34A' },
-    feeling:    { bg: '#EFF6FF', fg: '#2563EB' },
-    food:       { bg: '#FFF7ED', fg: '#EA580C' },
-    place:      { bg: '#ECFEFF', fg: '#0891B2' },
-    thing:      { bg: '#FFF7ED', fg: '#EA580C' },
-    time:       { bg: '#FEF9C3', fg: '#A16207' },
-    expression: { bg: '#F9FAFB', fg: '#6B7280' },
-    emergency:  { bg: '#FEF2F2', fg: '#DC2626' },
+    person:     { bg: '#FAF5FF', fg: '#9333EA' }, // 보라 - 사람/대명사
+    action:     { bg: '#F0FDF4', fg: '#16A34A' }, // 초록 - 동작/동사
+    feeling:    { bg: '#EFF6FF', fg: '#2563EB' }, // 파랑 - 감정/형용사
+    food:       { bg: '#FFF7ED', fg: '#EA580C' }, // 주황 - 음식/명사
+    place:      { bg: '#ECFEFF', fg: '#0891B2' }, // 청록 - 장소
+    thing:      { bg: '#F5F5F4', fg: '#57534E' }, // 회갈색 - 사물/명사
+    time:       { bg: '#FEF9C3', fg: '#A16207' }, // 노랑 - 시간
+    expression: { bg: '#FDF4FF', fg: '#A21CAF' }, // 분홍 - 표현/사회어
+    body:       { bg: '#FFF3E0', fg: '#C2410C' }, // 황토 - 신체 (명사류)
+    color:      { bg: '#EEF2FF', fg: '#3730A3' }, // 남색 - 색상 (형용사류)
+    medical:    { bg: '#FFF1F2', fg: '#BE185D' }, // 장미 - 의료 (중요/긴급)
+    emergency:  { bg: '#FEF2F2', fg: '#DC2626' }, // 빨강 - 응급
   };
   const c = colors[category] || colors.expression;
   const firstChar = (text || '?').charAt(0).replace(/[<>&"']/g, '');

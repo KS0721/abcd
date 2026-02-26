@@ -82,11 +82,11 @@
 
 /* 카드 텍스트 */
 .text {
-  font-size: var(--font-size-sm);
+  font-size: clamp(0.65rem, 2.5vw, var(--font-size-sm));
   font-weight: 600;
   color: var(--color-text-primary);
   text-align: center;
-  line-height: 1.2;
+  line-height: 1.15;
   word-break: keep-all;
   overflow: hidden;
   text-overflow: ellipsis;

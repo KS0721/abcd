@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { getImageByKeyword, getImageById, getFallbackSvg } from '../../lib/arasaac';
 import styles from '../../styles/AACCard.module.css';
 
@@ -15,7 +15,7 @@ const CardPictogram = memo(function CardPictogram({
 }: Props) {
   const [imgUrl, setImgUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [retryCount, setRetryCount] = useState(0);
+  const failedUrls = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     let cancelled = false;
@@ -40,7 +40,12 @@ const CardPictogram = memo(function CardPictogram({
       setLoading(true);
       getImageByKeyword(keyword).then((url) => {
         if (cancelled) return;
-        setImgUrl(url || getFallbackSvg(text, category));
+        // 이전에 실패한 URL이면 즉시 폴백 (Cabello & Bertola, 2018: 빠른 폴백이 사용성 향상)
+        if (url && failedUrls.current.has(url)) {
+          setImgUrl(getFallbackSvg(text, category));
+        } else {
+          setImgUrl(url || getFallbackSvg(text, category));
+        }
         setLoading(false);
       });
       return () => { cancelled = true; };
@@ -49,15 +54,12 @@ const CardPictogram = memo(function CardPictogram({
     // 4순위: 폴백 SVG
     setImgUrl(getFallbackSvg(text, category));
     setLoading(false);
-  }, [keyword, pictogramId, pictogramUrl, text, category, retryCount]);
+  }, [keyword, pictogramId, pictogramUrl, text, category]);
 
   const handleError = () => {
-    // 최대 2회 재시도
-    if (retryCount < 2) {
-      setRetryCount((c) => c + 1);
-    } else {
-      setImgUrl(getFallbackSvg(text, category));
-    }
+    // 실패한 URL 기록 후 즉시 폴백 (불필요한 재시도 제거)
+    if (imgUrl) failedUrls.current.add(imgUrl);
+    setImgUrl(getFallbackSvg(text, category));
   };
 
   return (
@@ -66,7 +68,7 @@ const CardPictogram = memo(function CardPictogram({
         <img
           src={imgUrl}
           alt={text}
-          loading="eager"
+          loading="lazy"
           onError={handleError}
         />
       )}

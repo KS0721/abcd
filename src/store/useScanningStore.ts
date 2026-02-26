@@ -28,6 +28,7 @@ interface ScanningStore {
   setHasLooped: (looped: boolean) => void;
   setSelectedMenu: (menu: 'speak' | 'situation' | null) => void;
   setItemCount: (count: number) => void;
+  updateConfig: <K extends keyof ScanningConfig>(key: K, value: ScanningConfig[K]) => void;
   reset: () => void;
 }
 
@@ -51,6 +52,7 @@ export const useScanningStore = create<ScanningStore>()(
       setHasLooped: (looped) => set({ hasLooped: looped }),
       setSelectedMenu: (menu) => set({ selectedMenu: menu }),
       setItemCount: (count) => set({ itemCount: count }),
+      updateConfig: (key, value) => set((s) => ({ config: { ...s.config, [key]: value } })),
       reset: () =>
         set({
           isActive: false,

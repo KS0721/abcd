@@ -1,6 +1,5 @@
 // ========================================
 // useAppStore.ts - 메인 앱 상태 (Zustand)
-// 출처: legacy/js/state.js
 // ========================================
 
 import { create } from 'zustand';
@@ -28,13 +27,49 @@ const safeStorage = {
       // 저장 실패 무시
     }
   },
+  remove(key: string): void {
+    try {
+      localStorage.removeItem(key);
+    } catch {
+      // 무시
+    }
+  },
 };
 
 const STORAGE_KEYS = {
   userCards: 'aac_user_cards',
   cardOrder: 'aac_card_order',
+  quickPhrases: 'aac_quick_phrases',
   history: 'aac_history',
 };
+
+// 빠른 문장 기본값: 핵심 의사소통 + 한국 사회적 표현
+// 연구 근거: 김영태 외(2003) 핵심어휘, 한국 문화 필수 인사/식사 표현
+const DEFAULT_QUICK_PHRASES = [
+  '안녕하세요',
+  '감사합니다',
+  '화장실 가고 싶어요',
+  '배고파요',
+  '아파요',
+  '도와주세요',
+  '괜찮아요',
+  '잠깐만요',
+  '물 주세요',
+  '집에 가고 싶어요',
+  // 한국 사회적 표현 (Tier 2: 문화 특화 필수)
+  '잘 먹겠습니다',
+  '잘 먹었습니다',
+  '수고하세요',
+  '안녕히 가세요',
+  '실례합니다',
+  '죄송합니다',
+  // 의사소통 수리 전략 (Brekke & von Tetzchner, 2003)
+  // 상대가 못 알아들었을 때 대화 포기 방지
+  '다시 말할게요',
+  '그게 아니에요',
+  '천천히 말해주세요',
+  '네 아니요로 물어봐 주세요',
+];
 
 function moveArrayItem<T>(arr: T[], from: number, to: number): T[] {
   const newArr = [...arr];
@@ -73,7 +108,14 @@ interface AppStore {
   deleteUserCard: (category: CategoryId, cardId: string) => void;
   updateUserCard: (category: CategoryId, cardId: string, updates: Partial<Card>) => void;
 
+  // 빠른 문장
+  quickPhrases: string[];
+  addQuickPhrase: (phrase: string) => void;
+  removeQuickPhrase: (index: number) => void;
+  updateQuickPhrase: (index: number, newPhrase: string) => void;
+
   // 기록
+  // 연구 근거: Higginbotham & Wilkins (1999) - 의사소통 이력으로 반복 발화 50%↑
   history: string[];
   addToHistory: (message: string) => void;
   clearHistory: () => void;
@@ -105,7 +147,7 @@ interface AppStore {
 
 export const useAppStore = create<AppStore>((set, get) => ({
   // 네비게이션
-  currentView: 'splash',
+  currentView: 'app',
   currentSlide: 0,
   setCurrentView: (view) => set({ currentView: view }),
   setCurrentSlide: (index) => set({ currentSlide: index }),
@@ -128,7 +170,6 @@ export const useAppStore = create<AppStore>((set, get) => ({
 
     let newSelected: Card[];
     if (isVerb) {
-      // 기존 동사 제거 후 새 동사 추가
       newSelected = selectedCards.filter((c) => !isVerbForReplacement(c));
     } else {
       newSelected = [...selectedCards];
@@ -137,8 +178,6 @@ export const useAppStore = create<AppStore>((set, get) => ({
 
     const sorted = sortCardsByGrammar(newSelected);
     const message = buildMessage(sorted);
-
-    // 동사 추천
     const suggestions = isVerb ? (VERB_SUGGESTIONS[card.id] || null) : get().activeSuggestions;
 
     set({
@@ -172,7 +211,6 @@ export const useAppStore = create<AppStore>((set, get) => ({
     const newCards = { ...cards, [category]: moveArrayItem(cards[category], from, to) };
     set({ cards: newCards });
 
-    // 순서 저장
     const order: Record<string, string[]> = {};
     Object.keys(newCards).forEach((cat) => {
       order[cat] = newCards[cat as CategoryId].map((c) => c.id);
@@ -188,7 +226,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
     };
     const newCards = {
       ...cards,
-      [category]: [...cards[category], card],
+      [category]: [...(cards[category] || []), card],
     };
     set({ cards: newCards, userCards: newUserCards });
     safeStorage.set(STORAGE_KEYS.userCards, newUserCards);
@@ -202,7 +240,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
     };
     const newCards = {
       ...cards,
-      [category]: cards[category].filter((c) => c.id !== cardId),
+      [category]: (cards[category] || []).filter((c) => c.id !== cardId),
     };
     set({ cards: newCards, userCards: newUserCards });
     safeStorage.set(STORAGE_KEYS.userCards, newUserCards);
@@ -217,24 +255,51 @@ export const useAppStore = create<AppStore>((set, get) => ({
     };
     const newCards = {
       ...cards,
-      [category]: cards[category].map(updateCard),
+      [category]: (cards[category] || []).map(updateCard),
     };
     set({ cards: newCards, userCards: newUserCards });
     safeStorage.set(STORAGE_KEYS.userCards, newUserCards);
   },
 
-  // 기록
-  history: [],
-  addToHistory: (message) => {
-    if (!message) return;
-    const { history } = get();
-    const newHistory = [message, ...history.filter((m) => m !== message)].slice(0, 50);
-    set({ history: newHistory });
-    safeStorage.set(STORAGE_KEYS.history, newHistory);
+  // 빠른 문장
+  quickPhrases: DEFAULT_QUICK_PHRASES,
+
+  addQuickPhrase: (phrase) => {
+    const { quickPhrases } = get();
+    if (quickPhrases.includes(phrase)) return;
+    const updated = [...quickPhrases, phrase];
+    set({ quickPhrases: updated });
+    safeStorage.set(STORAGE_KEYS.quickPhrases, updated);
   },
+
+  removeQuickPhrase: (index) => {
+    const updated = get().quickPhrases.filter((_, i) => i !== index);
+    set({ quickPhrases: updated });
+    safeStorage.set(STORAGE_KEYS.quickPhrases, updated);
+  },
+
+  updateQuickPhrase: (index, newPhrase) => {
+    const updated = get().quickPhrases.map((p, i) => i === index ? newPhrase : p);
+    set({ quickPhrases: updated });
+    safeStorage.set(STORAGE_KEYS.quickPhrases, updated);
+  },
+
+  // 기록
+  // 🤖 AI TODO: LLM으로 기록 분석 → 자주 쓰는 패턴 학습 → 빠른 문장 자동 추천
+  history: [],
+
+  addToHistory: (message) => {
+    const { history } = get();
+    // 중복 방지: 직전 문장과 같으면 추가하지 않음
+    if (history.length > 0 && history[0] === message) return;
+    const updated = [message, ...history].slice(0, 100); // 최대 100개
+    set({ history: updated });
+    safeStorage.set(STORAGE_KEYS.history, updated);
+  },
+
   clearHistory: () => {
     set({ history: [] });
-    safeStorage.set(STORAGE_KEYS.history, []);
+    safeStorage.remove(STORAGE_KEYS.history);
   },
 
   // 추천
@@ -279,8 +344,9 @@ export const useAppStore = create<AppStore>((set, get) => ({
   // 로컬 스토리지에서 로드
   loadFromStorage: () => {
     const savedUserCards = safeStorage.get<Record<CategoryId, Card[]>>(STORAGE_KEYS.userCards);
-    const savedHistory = safeStorage.get<string[]>(STORAGE_KEYS.history);
     const savedOrder = safeStorage.get<Record<string, string[]>>(STORAGE_KEYS.cardOrder);
+    const savedPhrases = safeStorage.get<string[]>(STORAGE_KEYS.quickPhrases);
+    const savedHistory = safeStorage.get<string[]>(STORAGE_KEYS.history);
 
     const cards = JSON.parse(JSON.stringify(DEFAULT_CARDS)) as Record<CategoryId, Card[]>;
 
@@ -309,9 +375,14 @@ export const useAppStore = create<AppStore>((set, get) => ({
       });
     }
 
+    // 이전 버전 localStorage 정리
+    safeStorage.remove('aac_user_pin');
+    safeStorage.remove('aac_guardian_profiles');
+
     set({
       cards,
       userCards: savedUserCards || ({} as Record<CategoryId, Card[]>),
+      quickPhrases: savedPhrases || DEFAULT_QUICK_PHRASES,
       history: savedHistory || [],
     });
   },

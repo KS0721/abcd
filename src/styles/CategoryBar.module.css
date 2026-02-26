@@ -62,3 +62,9 @@
 .active[data-category="thing"]      { background: var(--cat-noun); }
 .active[data-category="time"]       { background: var(--cat-adverb); color: #1A1A1A; }
 .active[data-category="expression"] { background: var(--cat-social); }
+.active[data-category="body"]       { background: var(--cat-body); }
+.active[data-category="color"]      { background: var(--cat-color); }
+.active[data-category="medical"]    { background: var(--cat-medical); }
+.active[data-category="descriptor"] { background: var(--cat-descriptor); }
+.active[data-category="animal"]     { background: var(--cat-animal); color: #1A1A1A; }
+.active[data-category="nature"]     { background: var(--cat-nature); }

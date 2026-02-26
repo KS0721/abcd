@@ -17,6 +17,8 @@ export const useSettingsStore = create<SettingsStore>()(
       darkMode: false,
       fontSize: 'medium',
       vibration: true,
+      gridSize: '4x4' as const,
+      dwellTime: 0,
 
       updateSetting: (key, value) => {
         set({ [key]: value });
@@ -39,6 +41,11 @@ export const useSettingsStore = create<SettingsStore>()(
         if (key === 'fontSize') {
           document.documentElement.setAttribute('data-font-size', value as string);
         }
+        if (key === 'gridSize') {
+          // gridSize '4x4' → 4 columns
+          const cols = parseInt((value as string).split('x')[0], 10);
+          document.documentElement.style.setProperty('--card-columns', String(cols));
+        }
       },
     }),
     {
@@ -53,6 +60,9 @@ export const useSettingsStore = create<SettingsStore>()(
           document.documentElement.setAttribute('data-theme', 'dark');
         }
         document.documentElement.setAttribute('data-font-size', state.fontSize);
+        // gridSize를 CSS 변수에 적용
+        const cols = parseInt(state.gridSize.split('x')[0], 10);
+        document.documentElement.style.setProperty('--card-columns', String(cols));
       },
     },
   ),

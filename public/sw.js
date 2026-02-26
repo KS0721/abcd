@@ -28,7 +28,25 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // JS/CSS/이미지: 네트워크 우선, 실패 시 캐시
+  // chrome-extension:// 등 비표준 scheme은 캐시 불가 → 스킵
+  if (!req.url.startsWith('http')) return;
+
+  // ARASAAC 이미지: 캐시 우선 (한 번 받으면 네트워크 요청 없음)
+  if (req.url.includes('static.arasaac.org')) {
+    event.respondWith(
+      caches.match(req).then(cached => {
+        if (cached) return cached;
+        return fetch(req).then(res => {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then(c => c.put(req, clone));
+          return res;
+        });
+      })
+    );
+    return;
+  }
+
+  // JS/CSS/앱 파일: 네트워크 우선, 실패 시 캐시
   event.respondWith(
     fetch(req)
       .then(res => {

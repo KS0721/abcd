@@ -5,19 +5,14 @@ import styles from '../../styles/Header.module.css';
 export default function Header() {
   const editMode = useAppStore((s) => s.editMode);
   const setEditMode = useAppStore((s) => s.setEditMode);
-  const setCurrentView = useAppStore((s) => s.setCurrentView);
 
   const toggleEdit = useCallback(() => {
     setEditMode(!editMode);
   }, [editMode, setEditMode]);
 
-  const goToMenu = useCallback(() => {
-    setCurrentView('menu');
-  }, [setCurrentView]);
-
   return (
     <header className={styles.header}>
-      <div className={styles.logo} onClick={goToMenu}>
+      <div className={styles.logo}>
         <svg className={styles.logoIcon} viewBox="0 0 120 120" fill="none">
           <circle cx="60" cy="60" r="55" fill="rgba(255,255,255,0.1)"/>
           <path d="M30 35 C30 25, 40 18, 60 18 C80 18, 90 25, 90 35 L90 60 C90 70, 80 77, 60 77 L45 77 L35 90 L38 77 C35 77, 30 70, 30 60 Z" fill="#D45A00"/>

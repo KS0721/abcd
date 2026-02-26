@@ -6,6 +6,7 @@ import TabBar from './TabBar';
 import SpeakScreen from '../screens/SpeakScreen';
 import SituationScreen from '../screens/SituationScreen';
 import HistoryScreen from '../screens/HistoryScreen';
+import QuickPhrasesScreen from '../screens/QuickPhrasesScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import styles from '../../styles/AppShell.module.css';
 
@@ -30,6 +31,7 @@ export default function AppShell() {
             <div className={styles.slide}><SpeakScreen /></div>
             <div className={styles.slide}><SituationScreen /></div>
             <div className={styles.slide}><HistoryScreen /></div>
+            <div className={styles.slide}><QuickPhrasesScreen /></div>
             <div className={styles.slide}><SettingsScreen /></div>
           </div>
         </div>

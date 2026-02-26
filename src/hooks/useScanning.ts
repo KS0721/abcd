@@ -5,7 +5,7 @@
 // 조작법:
 //   · 터치 = 선택
 //   · 꾹 누르기(1.5초) = 스캐닝 끄기
-//   · 두번터치 = 화면 이동 (말하기→상황→기록→설정)
+//   · 두번터치 = 화면 이동 (말하기→상황→빠른문장→설정)
 //
 // 흐름: category → card → modal (tap to close)
 //   · 2바퀴 순환 시 카드→카테고리 자동 복귀
@@ -21,7 +21,7 @@ import { SITUATION_BOARDS } from '../data/cards';
 import type { SituationId, CategoryId, SlideIndex } from '../types';
 
 const SITUATION_IDS = Object.keys(SITUATION_BOARDS) as SituationId[];
-const SCREEN_COUNT = 4; // 말하기(0), 상황(1), 기록(2), 설정(3)
+const SCREEN_COUNT = 5; // 말하기(0), 상황(1), 기록(2), 빠른문장(3), 설정(4)
 
 // ── TTS: 항목 이름 읽기 ──
 function speakItemName(text: string) {
@@ -284,7 +284,7 @@ export function useScanning() {
     if (navigator.vibrate) navigator.vibrate([30, 30, 30]);
 
     // 화면 이름 TTS
-    const screenNames = ['말하기', '상황', '기록', '설정'];
+    const screenNames = ['말하기', '상황', '기록', '빠른 문장', '설정'];
     speakItemName(screenNames[nextSlide]);
 
     // 스캔 가능한 화면이면 카테고리 스캔 시작
@@ -292,7 +292,7 @@ export function useScanning() {
       if (isScannableScreen(nextSlide)) {
         enterCategoryPhase();
       } else {
-        // 기록/설정: 타이머 정지, 대기 (두번터치로 이동 가능)
+        // 빠른문장/설정: 타이머 정지, 대기 (두번터치로 이동 가능)
         useScanningStore.setState({ phase: 'category', currentIndex: -1, hasLooped: false });
       }
     }, 300);
@@ -308,7 +308,7 @@ export function useScanning() {
       app.setCurrentView('app');
     }
 
-    // 스캔 불가 화면(기록/설정)이면 말하기(0)로 이동
+    // 스캔 불가 화면(빠른문장/설정)이면 말하기(0)로 이동
     let slide = app.currentSlide;
     if (!isScannableScreen(slide)) {
       slide = 0 as SlideIndex;

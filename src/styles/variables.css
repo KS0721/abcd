@@ -112,7 +112,43 @@
     --cat-place-light: #22C8E8;
     --cat-place-bg: #F0FBFF;
     --cat-place-border: #0891B2;
-    
+
+    /* 🟤 BURNT ORANGE: 신체 (Body - 명사류 변형) */
+    --cat-body: #C2410C;
+    --cat-body-light: #E8845C;
+    --cat-body-bg: #FFF3E0;
+    --cat-body-border: #C2410C;
+
+    /* 🔵 INDIGO: 색상 (Color - 형용사류 변형) */
+    --cat-color: #3730A3;
+    --cat-color-light: #6366F1;
+    --cat-color-bg: #EEF2FF;
+    --cat-color-border: #3730A3;
+
+    /* 🌹 ROSE: 의료 (Medical - 긴급/중요 변형) */
+    --cat-medical: #BE185D;
+    --cat-medical-light: #EC4899;
+    --cat-medical-bg: #FFF1F2;
+    --cat-medical-border: #BE185D;
+
+    /* 🩵 TEAL: 묘사/형용사/부사 (Descriptors) - Fitzgerald Key: Blue계열 변형 */
+    --cat-descriptor: #0D9488;
+    --cat-descriptor-light: #5EEAD4;
+    --cat-descriptor-bg: #F0FDFA;
+    --cat-descriptor-border: #0D9488;
+
+    /* 🟤 AMBER: 동물 (Animals - 명사류) */
+    --cat-animal: #A16207;
+    --cat-animal-light: #D4A017;
+    --cat-animal-bg: #FFFBEB;
+    --cat-animal-border: #A16207;
+
+    /* 🌿 FOREST GREEN: 자연/날씨 (Nature/Weather) */
+    --cat-nature: #166534;
+    --cat-nature-light: #4ADE80;
+    --cat-nature-bg: #F0FDF4;
+    --cat-nature-border: #166534;
+
     /* ===== 레거시 호환 (기존 카테고리명 매핑) ===== */
     --cat-core: var(--cat-pronoun);
     --cat-core-light: var(--cat-pronoun-light);
@@ -258,7 +294,31 @@
     --cat-place: #22D3EE;
     --cat-place-light: #67E8F9;
     --cat-place-bg: #164E63;
-    
+
+    --cat-body: #FB923C;
+    --cat-body-light: #FDBA74;
+    --cat-body-bg: #7C2D12;
+
+    --cat-color: #818CF8;
+    --cat-color-light: #A5B4FC;
+    --cat-color-bg: #312E81;
+
+    --cat-medical: #F472B6;
+    --cat-medical-light: #F9A8D4;
+    --cat-medical-bg: #831843;
+
+    --cat-descriptor: #2DD4BF;
+    --cat-descriptor-light: #5EEAD4;
+    --cat-descriptor-bg: #134E4A;
+
+    --cat-animal: #FCD34D;
+    --cat-animal-light: #FDE68A;
+    --cat-animal-bg: #78350F;
+
+    --cat-nature: #4ADE80;
+    --cat-nature-light: #86EFAC;
+    --cat-nature-bg: #14532D;
+
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);

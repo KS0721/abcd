@@ -1,5 +1,6 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useRef } from 'react';
 import type { Card } from '../../types';
+import { useSettingsStore } from '../../store/useSettingsStore';
 import CardPictogram from './CardPictogram';
 import styles from '../../styles/AACCard.module.css';
 
@@ -13,10 +14,33 @@ interface Props {
 }
 
 const AACCard = memo(function AACCard({ card, isSelected, isEditMode, onSelect, onDelete, onEdit }: Props) {
+  const dwellTime = useSettingsStore((s) => s.dwellTime);
+  const dwellTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dwellComplete = useRef(false);
+
   const handleClick = useCallback(() => {
     if (isEditMode) return;
+    // dwellTime > 0이면 pointerDown/Up으로 처리하므로 click 무시
+    if (dwellTime > 0) return;
     onSelect(card);
-  }, [card, isEditMode, onSelect]);
+  }, [card, isEditMode, onSelect, dwellTime]);
+
+  const handlePointerDown = useCallback(() => {
+    if (isEditMode || dwellTime === 0) return;
+    dwellComplete.current = false;
+    dwellTimer.current = setTimeout(() => {
+      dwellComplete.current = true;
+      onSelect(card);
+      if (navigator.vibrate) navigator.vibrate(30);
+    }, dwellTime);
+  }, [card, isEditMode, onSelect, dwellTime]);
+
+  const handlePointerUp = useCallback(() => {
+    if (dwellTimer.current) {
+      clearTimeout(dwellTimer.current);
+      dwellTimer.current = null;
+    }
+  }, []);
 
   const handleDelete = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
@@ -41,6 +65,9 @@ const AACCard = memo(function AACCard({ card, isSelected, isEditMode, onSelect, 
     <div
       className={classNames}
       onClick={handleClick}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerUp}
       role="button"
       aria-pressed={isSelected}
       aria-label={card.text}
@@ -48,7 +75,7 @@ const AACCard = memo(function AACCard({ card, isSelected, isEditMode, onSelect, 
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          handleClick();
+          if (dwellTime === 0) onSelect(card);
         }
       }}
     >
