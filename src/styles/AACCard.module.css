@@ -188,18 +188,13 @@
   height: 14px;
 }
 
-/* 편집 모드 흔들림 */
+/* 편집 모드 — 흔들림 대신 점선 테두리로 표시 */
+/* 수정 이유: 무한 흔들림 애니메이션은 시각/인지 피로 유발, 운동장애 사용자의 터치 정확도 저하 */
+/* 논문: WCAG 2.3.3 — 모션 애니메이션 최소화 */
+/* 논문: Curtis et al. (2022, ASSETS) — 과도한 애니메이션이 AAC 포기율 증가 원인 */
 .editing {
-  animation: shake 0.4s ease-in-out infinite;
-}
-
-@keyframes shake {
-  0%, 100% { transform: rotate(-0.5deg); }
-  50% { transform: rotate(0.5deg); }
-}
-
-.editing:hover {
-  animation: none;
+  border: 2px dashed var(--color-primary);
+  background: var(--color-primary-bg);
 }
 
 /* 검색 하이라이트 */

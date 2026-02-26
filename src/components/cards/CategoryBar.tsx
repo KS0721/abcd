@@ -29,7 +29,7 @@ function CategoryTab({ index, cat, isActive, onClick }: {
       aria-pressed={isActive}
       aria-label={cat.name}
     >
-      <span dangerouslySetInnerHTML={{ __html: CATEGORY_ICONS[cat.id] }} />
+      <span aria-hidden="true" dangerouslySetInnerHTML={{ __html: CATEGORY_ICONS[cat.id] }} />
       {cat.name}
     </button>
   );

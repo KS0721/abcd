@@ -8,7 +8,8 @@ const PHASE_LABELS: Record<string, string> = {
   modal: '화면 터치',
 };
 
-const SCREEN_NAMES = ['말하기', '상황', '기록', '설정'];
+// TabBar의 TABS와 순서 일치: 말하기(0), 상황(1), 기록(2), 빠른 문장(3), 설정(4)
+const SCREEN_NAMES = ['말하기', '상황', '기록', '빠른 문장', '설정'];
 
 export default function ScanningIndicator() {
   const isActive = useScanningStore((s) => s.isActive);

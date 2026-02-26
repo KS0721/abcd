@@ -29,8 +29,10 @@ function MenuTile({ index, item, onClick }: {
       onClick={onClick}
       data-scan-phase="menu"
       data-scan-index={index}
+      aria-label={item.label}
     >
-      <span dangerouslySetInnerHTML={{ __html: item.icon }} />
+      {/* SVG 아이콘: 하드코딩된 상수 (사용자 입력 아님) — 스크린리더는 aria-label 읽음 */}
+      <span aria-hidden="true" dangerouslySetInnerHTML={{ __html: item.icon }} />
       <span>{item.label}</span>
     </button>
   );

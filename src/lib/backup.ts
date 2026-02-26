@@ -15,6 +15,7 @@ const BACKUP_KEYS = [
   'aac_settings',
   'aac_speech_settings',
   'aac_scanning_settings',
+  'aac_usage_stats',  // 카드 사용 빈도 통계 (기기 이전 시 학습 데이터 유지)
 ] as const;
 
 export interface BackupData {

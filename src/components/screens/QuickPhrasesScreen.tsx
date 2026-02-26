@@ -148,8 +148,11 @@ export default function QuickPhrasesScreen() {
     padding: 'var(--spacing-xs) 0',
   };
 
+  // WCAG 2.5.5: 터치 타겟 최소 44×44px 확보
   const btnStyle: React.CSSProperties = {
-    padding: '6px 10px',
+    padding: '10px 14px',
+    minHeight: '44px',
+    minWidth: '44px',
     border: 'none',
     borderRadius: '6px',
     cursor: 'pointer',

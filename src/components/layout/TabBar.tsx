@@ -29,7 +29,7 @@ export default function TabBar() {
           aria-label={tab.label}
           aria-current={currentSlide === tab.index ? 'page' : undefined}
         >
-          <span dangerouslySetInnerHTML={{ __html: tab.icon }} />
+          <span aria-hidden="true" dangerouslySetInnerHTML={{ __html: tab.icon }} />
           <span>{tab.label}</span>
         </button>
       ))}

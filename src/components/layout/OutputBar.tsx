@@ -115,7 +115,7 @@ export default function OutputBar() {
 
   return (
     <div className={styles.bar}>
-      <div className={styles.textArea} aria-live="polite" aria-atomic="true">
+      <div className={styles.textArea} aria-live="polite" aria-atomic="true" aria-label="현재 문장">
         {hasMessage ? (
           <span className={styles.text}>{currentMessage}</span>
         ) : (

@@ -13,7 +13,7 @@
   flex: 1;
   display: flex;
   align-items: center;
-  min-height: 36px;
+  min-height: 44px; /* WCAG 2.5.5: 최소 터치 타겟 44px */
   padding: 6px 12px;
   background: var(--color-bg);
   border-radius: 18px;

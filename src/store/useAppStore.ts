@@ -9,6 +9,7 @@ import type {
 } from '../types';
 import { DEFAULT_CARDS, VERB_SUGGESTIONS } from '../data/cards';
 import { isVerbForReplacement, sortCardsByGrammar, buildMessage } from '../lib/grammar';
+import { recordCardUsage, recordPhraseUsage } from '../lib/usageStats';
 
 // 로컬 스토리지 안전 접근
 const safeStorage = {
@@ -168,6 +169,14 @@ export const useAppStore = create<AppStore>((set, get) => ({
     const { selectedCards } = get();
     const isVerb = isVerbForReplacement(card);
 
+    // 사용 통계 기록 (백그라운드 — 사용자에게 보이지 않음)
+    // 논문: Higginbotham & Wilkins (1999) - 사용 이력 → 반복 발화 속도 50% 향상
+    // 논문: Light & McNaughton (2014) - AAC 사용자 발화의 70%가 반복적
+    const previousCard = selectedCards.length > 0
+      ? selectedCards[selectedCards.length - 1]
+      : undefined;
+    recordCardUsage(card.id, previousCard?.id);
+
     let newSelected: Card[];
     if (isVerb) {
       newSelected = selectedCards.filter((c) => !isVerbForReplacement(c));
@@ -295,6 +304,10 @@ export const useAppStore = create<AppStore>((set, get) => ({
     const updated = [message, ...history].slice(0, 100); // 최대 100개
     set({ history: updated });
     safeStorage.set(STORAGE_KEYS.history, updated);
+
+    // 완성 문장 발화 빈도 기록 (백그라운드 — 사용자에게 보이지 않음)
+    // 논문: Trnka et al. (2009) - 빈도 기반 예측 → 입력 40% 감소
+    recordPhraseUsage(message);
   },
 
   clearHistory: () => {

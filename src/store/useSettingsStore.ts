@@ -52,9 +52,12 @@ export const useSettingsStore = create<SettingsStore>()(
       name: 'aac_settings',
       onRehydrateStorage: () => (state) => {
         if (!state) return;
-        // 고대비 모드 항상 활성화 (기본값 강제)
-        state.highContrast = true;
-        document.documentElement.setAttribute('data-contrast', 'high');
+        // 고대비 모드: 사용자 설정값 존중 (기본값 true, 설정에서 끌 수 있음)
+        if (state.highContrast) {
+          document.documentElement.setAttribute('data-contrast', 'high');
+        } else {
+          document.documentElement.removeAttribute('data-contrast');
+        }
         // 복원된 설정을 DOM에 적용
         if (state.darkMode) {
           document.documentElement.setAttribute('data-theme', 'dark');

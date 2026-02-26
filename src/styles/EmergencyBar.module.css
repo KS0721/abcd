@@ -20,7 +20,8 @@
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-x;
-  animation: barPulse 2.5s ease-in-out infinite;
+  /* 무한 깜빡임 → 3회로 제한 (WCAG 2.3.1: 초당 3회 이상 깜빡임 금지 / 간질 유발 위험 방지) */
+  animation: barPulse 2.5s ease-in-out 3;
 }
 
 .label {
@@ -61,7 +62,8 @@
   cursor: pointer;
   transition: transform var(--transition-fast), background var(--transition-fast);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  animation: chipGlow 2s ease-in-out infinite;
+  /* 무한 깜빡임 → 3회로 제한 (WCAG 2.3.1: 간질 유발 방지) */
+  animation: chipGlow 2s ease-in-out 3;
 }
 
 .chip:hover {

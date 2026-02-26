@@ -38,11 +38,12 @@
 //   - Wilkinson & McIlvane (2002): AAC 디스플레이 구성이 선택 정확도에 미치는 영향
 // ========================================
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { Card } from '../../types';
 import { useAppStore } from '../../store/useAppStore';
 import { useScanningStore } from '../../store/useScanningStore';
 import { useScanHighlight } from '../../hooks/useScanning';
+import { getCardFrequencyMap, getFrequentCardsForNow, getCardsAfter } from '../../lib/usageStats';
 import AACCard from './AACCard';
 import styles from '../../styles/CardGrid.module.css';
 import cardStyles from '../../styles/AACCard.module.css';
@@ -108,6 +109,54 @@ export default function CardGrid() {
 
   const selectedIds = new Set(selectedCards.map((c) => c.id));
 
+  // ── 사용 빈도 기반 스마트 정렬 (사용자에게 보이지 않는 백그라운드 최적화) ──
+  // 논문: Trnka et al. (2008) - 빈도 기반 예측 → 소통 속도 58.6% 향상
+  // 논문: Valencia et al. (2023, CHI) - 문맥 기반 추천 → 소통 속도 2배
+  // 원리: 자주 쓰는 카드, 현재 시간대에 많이 쓰는 카드, 직전 카드 이후 자주 오는 카드를
+  //       앞쪽으로 자연스럽게 배치. 편집 모드에서는 사용자 정렬 유지.
+  //
+  // [LLM 확장 계획]
+  // ────────────────────────────────────────────────────────────
+  // 현재: 단순 빈도 통계 (localStorage 기반)로 정렬
+  // LLM 추가 시: 대화 문맥을 이해하여 더 정밀한 정렬 가능
+  //
+  // 예시 시나리오:
+  //   사용자가 "학교"를 선택한 상태에서 action 카테고리를 보면,
+  //   현재 방식: 전체 빈도순 (항상 같은 순서)
+  //   LLM 방식: "학교"라는 문맥을 이해하고 "공부해요", "놀아요"를 상단 배치
+  //
+  // 구현 방법:
+  //   1. llm.ts의 complete() 함수에 현재 선택된 카드 + 카테고리 전달
+  //   2. LLM이 관련성 점수 반환 → 점수순 정렬
+  //   3. LLM 응답 전까지 기존 빈도순 유지 (폴백 보장)
+  //   4. 응답 캐시로 동일 문맥 재요청 방지
+  //
+  // 필요한 LLM 사양: 한국어 이해 가능, 응답 500ms 이내, 로컬 구동 권장
+  // 참고: AI_INTEGRATION_NOTES.md의 통합 지점 #6
+  // ────────────────────────────────────────────────────────────
+  const sortedCards = useMemo(() => {
+    // 편집 모드에서는 사용자가 직접 정렬하므로 원래 순서 유지
+    if (editMode) return cards;
+
+    const freqMap = getCardFrequencyMap();
+    const timeCards = new Set(getFrequentCardsForNow(8));
+    const lastCard = selectedCards.length > 0
+      ? selectedCards[selectedCards.length - 1]
+      : null;
+    const afterCards = lastCard ? new Set(getCardsAfter(lastCard.id, 8)) : new Set<string>();
+
+    // 점수 = 빈도(기본) + 시간대 보너스 + 연속 패턴 보너스
+    return [...cards].sort((a, b) => {
+      const scoreA = (freqMap[a.id] || 0)
+        + (timeCards.has(a.id) ? 100 : 0)
+        + (afterCards.has(a.id) ? 200 : 0);
+      const scoreB = (freqMap[b.id] || 0)
+        + (timeCards.has(b.id) ? 100 : 0)
+        + (afterCards.has(b.id) ? 200 : 0);
+      return scoreB - scoreA;
+    });
+  }, [cards, selectedCards, editMode]);
+
   const handleSelect = useCallback((card: Card) => {
     if (selectedIds.has(card.id)) {
       deselectCard(card.id);
@@ -134,7 +183,7 @@ export default function CardGrid() {
         {/* 스캐닝 모드: 돌아가기 버튼 */}
         {isScanning && <ScanBackButton />}
 
-        {cards.map((card, i) => (
+        {sortedCards.map((card, i) => (
           <ScannableCard
             key={card.id}
             index={i + 1}
