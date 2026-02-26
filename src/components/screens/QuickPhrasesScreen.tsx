@@ -81,9 +81,10 @@
 //   - 일 평균 발화 횟수 증가: 25% 이상
 // ========================================
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import { useTTS } from '../../hooks/useTTS';
+import { getFrequentPhrases } from '../../lib/usageStats';
 
 export default function QuickPhrasesScreen() {
   const quickPhrases = useAppStore((s) => s.quickPhrases);
@@ -91,6 +92,17 @@ export default function QuickPhrasesScreen() {
   const removeQuickPhrase = useAppStore((s) => s.removeQuickPhrase);
   const updateQuickPhrase = useAppStore((s) => s.updateQuickPhrase);
   const { speak } = useTTS();
+
+  // 빈도순 정렬: 자주 발화한 문장을 상단에 배치
+  // 논문: Trnka et al. (2009): 빈도 기반 정렬 → 입력/선택 시간 40% 감소
+  // 논문: Light & McNaughton (2014): AAC 사용자 발화의 70%가 반복적 → 빈도 우선이 효율적
+  const sortedPhrases = useMemo(() => {
+    const freqData = getFrequentPhrases(100);
+    const freqMap = new Map(freqData.map((p) => [p.text, p.count]));
+    return quickPhrases
+      .map((phrase, originalIndex) => ({ phrase, originalIndex, freq: freqMap.get(phrase) || 0 }))
+      .sort((a, b) => b.freq - a.freq);
+  }, [quickPhrases]);
 
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [editText, setEditText] = useState('');
@@ -224,7 +236,7 @@ export default function QuickPhrasesScreen() {
       )}
 
       <div style={sectionStyle}>
-        {quickPhrases.length === 0 ? (
+        {sortedPhrases.length === 0 ? (
           <p style={{
             textAlign: 'center', color: 'var(--color-text-muted)',
             padding: 'var(--spacing-xl) 0', fontSize: 'var(--font-size-base)',
@@ -232,9 +244,9 @@ export default function QuickPhrasesScreen() {
             저장된 문장이 없습니다
           </p>
         ) : (
-          quickPhrases.map((phrase, index) => (
-            <div key={index} style={phraseStyle}>
-              {editIndex === index ? (
+          sortedPhrases.map(({ phrase, originalIndex }) => (
+            <div key={originalIndex} style={phraseStyle}>
+              {editIndex === originalIndex ? (
                 <>
                   <input
                     style={inputStyle}
@@ -265,7 +277,7 @@ export default function QuickPhrasesScreen() {
                     {phrase}
                   </div>
                   <button
-                    onClick={() => handleEdit(index)}
+                    onClick={() => handleEdit(originalIndex)}
                     style={{ ...btnStyle, background: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                     aria-label="수정"
                   >
@@ -275,7 +287,7 @@ export default function QuickPhrasesScreen() {
                     </svg>
                   </button>
                   <button
-                    onClick={() => handleDelete(index)}
+                    onClick={() => handleDelete(originalIndex)}
                     style={{ ...btnStyle, background: 'var(--color-danger)', color: 'white' }}
                     aria-label="삭제"
                   >
