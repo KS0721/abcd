@@ -50,3 +50,7 @@ ios/App/build/
 
 # Vite
 *.local
+.vite/
+
+# Temp JSON
+tmp_*.json
