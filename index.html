@@ -30,7 +30,7 @@
         });
 
         // 서비스 워커 등록 + 즉시 업데이트 체크
-        navigator.serviceWorker.register('./sw.js').then(function(reg) {
+        navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(function(reg) {
           // 페이지 로드마다 새 버전 체크
           reg.update();
 
