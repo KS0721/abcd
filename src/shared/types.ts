@@ -21,6 +21,8 @@ export interface Settings {
   // 길게 누르기 시간 (ms): 0 = 즉시 선택, 100~1000 = 누르고 있어야 선택
   // 논문: Fager et al. (2019, PMC6436971) - 운동장애 사용자 오선택 방지
   dwellTime: number;
+  // 상대방 듣기 (STT): 켜면 헤더에 마이크 버튼 표시
+  sttEnabled: boolean;
 }
 
 // 모달 상태

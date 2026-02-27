@@ -1,10 +1,15 @@
 import { useCallback } from 'react';
 import { useCardStore } from '../../../domains/card/store/useCardStore.ts';
+import { useSettingsStore } from '../../store/useSettingsStore.ts';
+import { useUIStore } from '../../store/useUIStore.ts';
 import styles from '../../styles/Header.module.css';
 
 export default function Header() {
   const editMode = useCardStore((s) => s.editMode);
   const setEditMode = useCardStore((s) => s.setEditMode);
+  const sttEnabled = useSettingsStore((s) => s.sttEnabled);
+  const sttPanelOpen = useUIStore((s) => s.sttPanelOpen);
+  const toggleSTTPanel = useUIStore((s) => s.toggleSTTPanel);
 
   const toggleEdit = useCallback(() => {
     setEditMode(!editMode);
@@ -24,6 +29,21 @@ export default function Header() {
       {editMode && <span className={`${styles.editBadge} ${styles.visible}`}>편집 모드</span>}
 
       <div className={styles.actions}>
+        {/* 상대방 듣기 (STT) 버튼 — 설정에서 켜야 표시 */}
+        {sttEnabled && (
+          <button
+            className={`${styles.headerBtn} ${sttPanelOpen ? styles.editActive : ''}`}
+            onClick={toggleSTTPanel}
+            aria-label={sttPanelOpen ? '듣기 닫기' : '상대방 듣기'}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          </button>
+        )}
+
         <button
           className={`${styles.headerBtn} ${editMode ? styles.editActive : ''}`}
           onClick={toggleEdit}

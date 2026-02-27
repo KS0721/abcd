@@ -9,6 +9,8 @@ import ScreenErrorBoundary from './ScreenErrorBoundary';
 import SpeakScreen from '../screens/SpeakScreen';
 import styles from '../../styles/AppShell.module.css';
 
+const STTScreen = lazy(() => import('../screens/STTScreen'));
+
 // 비활성 화면 lazy loading (SpeakScreen은 기본 화면이므로 정적 import 유지)
 const SituationScreen = lazy(() => import('../screens/SituationScreen'));
 const HistoryScreen = lazy(() => import('../screens/HistoryScreen'));
@@ -19,6 +21,7 @@ const SCREEN_NAMES = ['말하기', '상황', '기록', '빠른 문장', '설정'
 
 export default function AppShell() {
   const currentSlide = useUIStore((s) => s.currentSlide);
+  const sttPanelOpen = useUIStore((s) => s.sttPanelOpen);
   const { handleTouchStart, handleTouchEnd } = useSwipeGesture();
 
   const screenAnnouncement = useMemo(
@@ -57,6 +60,27 @@ export default function AppShell() {
           </div>
         </div>
       </div>
+
+      {/* STT 패널 — 위에서 내려오는 오버레이 */}
+      {sttPanelOpen && (
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 900,
+          background: 'var(--color-bg)',
+          display: 'flex',
+          flexDirection: 'column',
+          animation: 'sttSlideDown 0.25s ease',
+        }}>
+          <Suspense fallback={<Loading />}><STTScreen /></Suspense>
+          <style>{`
+            @keyframes sttSlideDown {
+              from { transform: translateY(-100%); opacity: 0; }
+              to { transform: translateY(0); opacity: 1; }
+            }
+          `}</style>
+        </div>
+      )}
 
       <OutputBar />
       <TabBar />

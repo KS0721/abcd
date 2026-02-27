@@ -16,6 +16,11 @@ interface UIStore {
   setCurrentView: (view: AppView) => void;
   setCurrentSlide: (index: SlideIndex) => void;
 
+  // STT 패널
+  sttPanelOpen: boolean;
+  toggleSTTPanel: () => void;
+  closeSTTPanel: () => void;
+
   // 모달
   listenerModal: ListenerModalState;
   confirmModal: ConfirmModalState;
@@ -37,6 +42,11 @@ export const useUIStore = create<UIStore>((set, get) => ({
   currentSlide: 0,
   setCurrentView: (view) => set({ currentView: view }),
   setCurrentSlide: (index) => set({ currentSlide: index }),
+
+  // STT 패널
+  sttPanelOpen: false,
+  toggleSTTPanel: () => set((s) => ({ sttPanelOpen: !s.sttPanelOpen })),
+  closeSTTPanel: () => set({ sttPanelOpen: false }),
 
   // 모달
   listenerModal: { isOpen: false, message: '', isEmergency: false, cards: [], withSpeech: false },

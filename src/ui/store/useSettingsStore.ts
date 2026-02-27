@@ -19,6 +19,7 @@ export const useSettingsStore = create<SettingsStore>()(
       vibration: true,
       gridSize: '4x4' as const,
       dwellTime: 0,
+      sttEnabled: false,
 
       updateSetting: (key, value) => {
         set({ [key]: value });

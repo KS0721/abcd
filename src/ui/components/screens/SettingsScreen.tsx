@@ -234,6 +234,29 @@ export default function SettingsScreen() {
         </div>
       </div>
 
+      {/* 상대방 듣기 (STT) */}
+      <div style={sectionStyle}>
+        <div style={titleStyle}>상대방 듣기</div>
+
+        <div style={rowStyle}>
+          <div>
+            <span style={labelStyle}>음성 인식 (STT)</span>
+            <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', marginTop: '2px' }}>
+              켜면 헤더에 마이크 버튼이 나타납니다
+            </div>
+          </div>
+          <ToggleSwitch
+            checked={settings.sttEnabled}
+            onChange={(v) => settings.updateSetting('sttEnabled', v)}
+          />
+        </div>
+
+        <div style={{ padding: 'var(--spacing-sm) 0', fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
+          상대방이 말하면 텍스트로 변환해서 화면에 표시합니다.
+          청각 장애가 동반된 경우 유용합니다.
+        </div>
+      </div>
+
       {/* 데이터 관리 */}
       <DataManagementSection sectionStyle={sectionStyle} titleStyle={titleStyle} />
 
