@@ -3,10 +3,19 @@ import { useUIStore } from '../../store/useUIStore.ts';
 import { useSentenceStore } from '../../../domains/sentence/store/useSentenceStore.ts';
 import { useScanningStore } from '../../../domains/scanning/store/useScanningStore.ts';
 import { useScanHighlight } from '../../../domains/scanning/hooks/useScanning.ts';
-import { useTTS } from '../../hooks/useTTS.ts';
 import { getImageById, getFallbackSvg } from '../../../infrastructure/arasaac/arasaac.ts';
 import styles from '../../styles/Modal.module.css';
 import scanStyles from '../../styles/Scanning.module.css';
+
+/** Web Speech API 직접 호출 — 즉시 발화, 지연 없음 */
+function speakDirect(text: string, rate = 1.0) {
+  if (!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ko-KR';
+  u.rate = rate;
+  speechSynthesis.speak(u);
+}
 
 export default function ListenerModal() {
   const { isOpen, message, isEmergency, cards, withSpeech } = useUIStore((s) => s.listenerModal);
@@ -14,65 +23,48 @@ export default function ListenerModal() {
   const clearSelection = useSentenceStore((s) => s.clearSelection);
   const isScanning = useScanningStore((s) => s.isActive);
   const highlighted = useScanHighlight('modal', 0);
-  const { speak, stop } = useTTS();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleClose = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
-    stop();
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
     closeListenerModal();
     clearSelection();
-  }, [closeListenerModal, clearSelection, stop]);
+  }, [closeListenerModal, clearSelection]);
 
   // TTS (withSpeech가 true일 때만)
   useEffect(() => {
     if (!isOpen || !message || !withSpeech) return;
 
-    // 일반 모드: useTTS로 1회 재생 + 완료 후 자동 닫기
+    // 일반 모드: 즉시 1회 재생, 모달은 X 누를 때까지 유지
     if (!isEmergency) {
-      speak(message, {
-        onEnd: () => { handleClose(); },
-      });
-      return;
+      speakDirect(message);
+      return () => {
+        if ('speechSynthesis' in window) speechSynthesis.cancel();
+      };
     }
 
-    // 긴급 모달: 3회 반복 → 5초 대기 → 3회 반복 (무한)
+    // 긴급 모달: 반복 발화
     let stopped = false;
+    let count = 0;
 
-    const runCycle = () => {
-      let count = 0;
-
-      const speakNext = () => {
-        if (stopped) return;
-        count++;
-        speak(message, {
-          emergency: true,
-          onEnd: () => {
-            if (stopped) return;
-            if (count < 3) {
-              timerRef.current = setTimeout(speakNext, 1300);
-            } else {
-              timerRef.current = setTimeout(runCycle, 5000);
-            }
-          },
-          onError: () => {
-            if (!stopped) timerRef.current = setTimeout(runCycle, 3000);
-          },
-        });
-      };
-
-      stop();
-      speakNext();
+    const speakNext = () => {
+      if (stopped) return;
+      speakDirect(message, 0.9);
+      count++;
+      // 3회 발화 후 5초 대기, 그 후 다시 3회
+      const delay = count % 3 === 0 ? 5000 : 1300;
+      timerRef.current = setTimeout(speakNext, delay + message.length * 150);
     };
 
-    runCycle();
+    speakNext();
 
     return () => {
       stopped = true;
       if (timerRef.current) clearTimeout(timerRef.current);
-      stop();
+      if ('speechSynthesis' in window) speechSynthesis.cancel();
     };
-  }, [isOpen, message, isEmergency, withSpeech, speak, stop, handleClose]);
+  }, [isOpen, message, isEmergency, withSpeech]);
 
   // ESC로 닫기
   useEffect(() => {

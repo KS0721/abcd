@@ -17,13 +17,19 @@ export default function QuickPhrasesScreen() {
   const updateQuickPhrase = useUserDataStore((s) => s.updateQuickPhrase);
   const openListenerModal = useUIStore((s) => s.openListenerModal);
 
-  // 전체 카드 텍스트→카드 매핑 (픽토그램 검색용)
-  const textToCardMap = useMemo(() => {
-    const map = new Map<string, Card>();
+  // 전체 카드 매핑 (텍스트 + arasaacKeyword 양쪽으로 검색)
+  const { textToCardMap, keywordToCardMap, allCards } = useMemo(() => {
+    const tMap = new Map<string, Card>();
+    const kMap = new Map<string, Card>();
+    const all: Card[] = [];
     Object.values(DEFAULT_CARDS).forEach((cards) =>
-      cards.forEach((c) => map.set(c.text, c))
+      cards.forEach((c) => {
+        tMap.set(c.text, c);
+        if (c.arasaacKeyword) kMap.set(c.arasaacKeyword, c);
+        all.push(c);
+      })
     );
-    return map;
+    return { textToCardMap: tMap, keywordToCardMap: kMap, allCards: all };
   }, []);
 
   // 빈도순 정렬
@@ -71,18 +77,33 @@ export default function QuickPhrasesScreen() {
   }, [removeQuickPhrase, editIndex]);
 
   // 문장에서 매칭되는 카드 찾기 (픽토그램용)
+  // "안녕하세요" → 카드 "안녕", "감사합니다" → 키워드 "감사합니다"
   const findCardForPhrase = useCallback((phrase: string): Card | null => {
-    // 1. 정확히 매칭
+    // 1. 정확히 텍스트 매칭
     const exact = textToCardMap.get(phrase);
     if (exact) return exact;
-    // 2. 단어별 매칭 (첫 매칭 사용)
+    // 2. 정확히 키워드 매칭
+    const kwExact = keywordToCardMap.get(phrase);
+    if (kwExact) return kwExact;
+    // 3. 카드 텍스트가 문장에 포함 (예: "안녕" in "안녕하세요")
+    for (const card of allCards) {
+      if (card.text.length >= 2 && phrase.includes(card.text)) return card;
+    }
+    // 4. 키워드가 문장에 포함
+    for (const card of allCards) {
+      if (card.arasaacKeyword && card.arasaacKeyword.length >= 2 && phrase.includes(card.arasaacKeyword)) return card;
+    }
+    // 5. 단어별 매칭
     const words = phrase.split(/\s+/);
     for (const word of words) {
-      const match = textToCardMap.get(word);
+      const match = textToCardMap.get(word) || keywordToCardMap.get(word);
       if (match) return match;
+      for (const card of allCards) {
+        if (card.text.length >= 2 && word.includes(card.text)) return card;
+      }
     }
     return null;
-  }, [textToCardMap]);
+  }, [textToCardMap, keywordToCardMap, allCards]);
 
   // 빠른 문장 터치 → 크게보기 + 말하기 (픽토그램 포함)
   const handlePhraseClick = useCallback((phrase: string) => {
