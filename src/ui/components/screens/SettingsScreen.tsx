@@ -107,16 +107,36 @@ export default function SettingsScreen() {
         </div>
 
         <div style={{ padding: 'var(--spacing-sm) 0' }}>
-          <label style={{ ...labelStyle, display: 'block', marginBottom: '4px' }}>
-            카드 누르기 시간: {settings.dwellTime === 0 ? '즉시' : `${(settings.dwellTime / 1000).toFixed(1)}초`}
-          </label>
-          <input
-            type="range" min="0" max="1000" step="100"
-            value={settings.dwellTime}
-            onChange={(e) => settings.updateSetting('dwellTime', parseInt(e.target.value, 10))}
-            style={{ width: '100%' }}
-          />
-          <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', marginTop: '2px' }}>
+          <div style={{ ...labelStyle, marginBottom: '6px' }}>카드 누르기 시간</div>
+          <div style={{ display: 'flex', gap: '6px' }}>
+            {([
+              { ms: 0, label: '즉시' },
+              { ms: 500, label: '0.5초' },
+              { ms: 1000, label: '1초' },
+            ] as const).map((opt) => {
+              const selected = settings.dwellTime === opt.ms;
+              return (
+                <button
+                  key={opt.ms}
+                  onClick={() => settings.updateSetting('dwellTime', opt.ms)}
+                  style={{
+                    flex: 1,
+                    padding: '8px 4px',
+                    borderRadius: '8px',
+                    border: `2px solid ${selected ? 'var(--color-primary)' : 'var(--color-border)'}`,
+                    background: selected ? 'var(--color-primary)' : 'var(--color-bg)',
+                    color: selected ? 'white' : 'var(--color-text-primary)',
+                    fontSize: 'var(--font-size-sm)',
+                    fontWeight: selected ? 600 : 400,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+          <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', marginTop: '4px' }}>
             떨림이 있는 경우 길게 설정하면 오선택을 줄일 수 있습니다
           </div>
         </div>

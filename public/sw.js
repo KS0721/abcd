@@ -2,17 +2,25 @@
 // 네트워크 우선 전략: 항상 최신 코드를 가져옴
 // 오프라인일 때만 캐시 사용
 
-const CACHE_NAME = 'aac-v4.1';
+const CACHE_NAME = 'aac-v5.0';
 
-// 설치 즉시 활성화
+// 설치 즉시 활성화 (대기 없이 즉시 교체)
 self.addEventListener('install', () => self.skipWaiting());
 
-// 활성화 시 이전 캐시 전부 삭제
+// 활성화 시 이전 버전 캐시 전부 삭제 + 즉시 제어 시작
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.map(k => caches.delete(k))))
+      .then(keys => Promise.all(
+        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+      ))
       .then(() => self.clients.claim())
+      .then(() => {
+        // 모든 클라이언트에게 새 버전 알림 → 자동 새로고침
+        self.clients.matchAll({ type: 'window' }).then(clients => {
+          clients.forEach(client => client.postMessage({ type: 'SW_UPDATED' }));
+        });
+      })
   );
 });
 

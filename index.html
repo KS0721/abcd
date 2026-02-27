@@ -18,19 +18,34 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
-      // 서비스 워커 등록 + 이전 캐시 강제 삭제
+      // 서비스 워커 등록 + 자동 캐시 갱신 (모바일 대응)
       (function() {
-        // 모든 CacheStorage 캐시 삭제
-        if ('caches' in window) {
-          caches.keys().then(function(keys) {
-            keys.forEach(function(k) { caches.delete(k); });
+        if (!('serviceWorker' in navigator)) return;
+
+        // 서비스 워커가 새 버전 알림 보내면 자동 새로고침
+        navigator.serviceWorker.addEventListener('message', function(e) {
+          if (e.data && e.data.type === 'SW_UPDATED') {
+            window.location.reload();
+          }
+        });
+
+        // 서비스 워커 등록 + 즉시 업데이트 체크
+        navigator.serviceWorker.register('./sw.js').then(function(reg) {
+          // 페이지 로드마다 새 버전 체크
+          reg.update();
+
+          // 새 서비스 워커가 대기 중이면 즉시 활성화
+          reg.addEventListener('updatefound', function() {
+            var newSW = reg.installing;
+            if (newSW) {
+              newSW.addEventListener('statechange', function() {
+                if (newSW.state === 'activated') {
+                  window.location.reload();
+                }
+              });
+            }
           });
-        }
-        // 서비스 워커 등록 (네트워크 우선 전략)
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register('./sw.js')
-            .then(function(reg) { reg.update(); });
-        }
+        });
       })();
     </script>
   </body>
