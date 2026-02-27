@@ -20,10 +20,6 @@
 //   - Beukelman & Mirenda (2013): 다중 출력 모달리티 + 오프라인 TTS →
 //     AAC 시스템 가용성(availability)과 신뢰성(reliability) 핵심
 //
-// 🤖 AI TODO [Edge TTS 3단계 확장]:
-//   향후 LLM 서버 확보 시, 같은 서버에 Edge TTS 프록시 배포하여
-//   3단계로 확장 가능 (Tier 0: Edge TTS → Tier 1: Supertonic → Tier 2: Web Speech API)
-//   Edge TTS는 9개 한국어 Neural 음성 제공 (ko-KR-SunHiNeural 등)
 // ========================================
 
 import { useCallback, useRef, useEffect } from 'react';

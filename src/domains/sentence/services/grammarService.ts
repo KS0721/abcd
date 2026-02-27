@@ -5,12 +5,7 @@
 // - 받침 유무로 은/는, 이/가, 을/를 자동 판별
 // - 카테고리 + 동사 유형으로 주어/목적어/장소 역할 추론
 // - 버튼 추가 횟수 0: 기존과 동일한 터치로 자연스러운 문장 생성
-//
-// AI TODO: 향후 LLM 모델 연결 시 buildMessage()를 LLM 기반으로 교체
-// - 문맥 기반 조사 선택 (은/는 vs 이/가 구분)
-// - 높임말 자동 변환 (마셔요 → 드세요)
-// - 연결어미 자동 생성 (-고, -지만, -면)
-// - 문장 자연스러움 평가 및 교정
+// 향후: LLM 기반 문맥 조사 선택 + 높임말 변환 확장 예정
 // ========================================
 
 import type { Card } from '../../card/models.ts';
@@ -40,10 +35,7 @@ function lastCharHasBatchim(text: string): boolean {
 
 type GrammarRole = 'noun' | 'verb' | 'adjective' | 'adverb' | 'social' | 'particle';
 
-/**
- * 카드의 문법적 역할을 추론
- * AI TODO: LLM으로 문맥 기반 역할 추론 (동일 단어가 문맥에 따라 다른 역할)
- */
+/** 카드의 문법적 역할을 추론 */
 function getCardRole(card: Card): GrammarRole {
   // 명시적 grammarType 우선
   if (card.grammarType === 'verb') return 'verb';
@@ -114,10 +106,6 @@ const INTRANSITIVE_VERB_IDS = new Set([
  * 6. 명사 2개+: 첫 번째 → "은/는", 마지막 → "을/를" or 장소규칙
  * 7. "나/저" 단독 → "는" (나는 ~)
  *
- * AI TODO: LLM으로 교체 시 이 함수 전체를 대체
- * - 문맥 기반 은/는 vs 이/가 구분
- * - 복합 조사 (에게, 한테, 보고, (으)로, 와/과)
- * - 보조사 (도, 만, 까지, 부터, 마저)
  */
 function autoParticle(
   noun: Card,

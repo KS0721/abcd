@@ -3,38 +3,40 @@ import { useUIStore } from '../../store/useUIStore.ts';
 import { useSentenceStore } from '../../../domains/sentence/store/useSentenceStore.ts';
 import { useScanningStore } from '../../../domains/scanning/store/useScanningStore.ts';
 import { useScanHighlight } from '../../../domains/scanning/hooks/useScanning.ts';
+import { useTTS } from '../../hooks/useTTS.ts';
+import { getImageById, getFallbackSvg } from '../../../infrastructure/arasaac/arasaac.ts';
 import styles from '../../styles/Modal.module.css';
 import scanStyles from '../../styles/Scanning.module.css';
 
 export default function ListenerModal() {
-  const { isOpen, message, isEmergency } = useUIStore((s) => s.listenerModal);
+  const { isOpen, message, isEmergency, cards, withSpeech } = useUIStore((s) => s.listenerModal);
   const closeListenerModal = useUIStore((s) => s.closeListenerModal);
   const clearSelection = useSentenceStore((s) => s.clearSelection);
   const isScanning = useScanningStore((s) => s.isActive);
   const highlighted = useScanHighlight('modal', 0);
+  const { speak, stop } = useTTS();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleClose = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
+    stop();
     closeListenerModal();
     clearSelection();
-    if ('speechSynthesis' in window) speechSynthesis.cancel();
-  }, [closeListenerModal, clearSelection]);
+  }, [closeListenerModal, clearSelection, stop]);
 
-  // TTS 루프
+  // TTS (withSpeech가 true일 때만)
   useEffect(() => {
-    if (!isOpen || !message || !('speechSynthesis' in window)) return;
+    if (!isOpen || !message || !withSpeech) return;
 
-    // 일반 모달: 1회 재생
+    // 일반 모드: useTTS로 1회 재생 + 완료 후 자동 닫기
     if (!isEmergency) {
-      const u = new SpeechSynthesisUtterance(message);
-      u.lang = 'ko-KR';
-      speechSynthesis.cancel();
-      speechSynthesis.speak(u);
+      speak(message, {
+        onEnd: () => { handleClose(); },
+      });
       return;
     }
 
-    // 긴급 모달: 3회 반복 → 5초 대기 → 3회 반복 ... (닫기 전까지 무한)
+    // 긴급 모달: 3회 반복 → 5초 대기 → 3회 반복 (무한)
     let stopped = false;
 
     const runCycle = () => {
@@ -43,28 +45,23 @@ export default function ListenerModal() {
       const speakNext = () => {
         if (stopped) return;
         count++;
-        const u = new SpeechSynthesisUtterance(message);
-        u.lang = 'ko-KR';
-        u.rate = 0.88;
-        u.volume = 1;
-        u.onend = () => {
-          if (stopped) return;
-          if (count < 3) {
-            // 1.3초 후 다음 발화
-            timerRef.current = setTimeout(speakNext, 1300);
-          } else {
-            // 3회 완료 → 5초 후 다음 사이클
-            timerRef.current = setTimeout(runCycle, 5000);
-          }
-        };
-        u.onerror = () => {
-          // 에러 시에도 다음 사이클 계속
-          if (!stopped) timerRef.current = setTimeout(runCycle, 3000);
-        };
-        speechSynthesis.speak(u);
+        speak(message, {
+          emergency: true,
+          onEnd: () => {
+            if (stopped) return;
+            if (count < 3) {
+              timerRef.current = setTimeout(speakNext, 1300);
+            } else {
+              timerRef.current = setTimeout(runCycle, 5000);
+            }
+          },
+          onError: () => {
+            if (!stopped) timerRef.current = setTimeout(runCycle, 3000);
+          },
+        });
       };
 
-      speechSynthesis.cancel();
+      stop();
       speakNext();
     };
 
@@ -73,9 +70,9 @@ export default function ListenerModal() {
     return () => {
       stopped = true;
       if (timerRef.current) clearTimeout(timerRef.current);
-      speechSynthesis.cancel();
+      stop();
     };
-  }, [isOpen, message, isEmergency]);
+  }, [isOpen, message, isEmergency, withSpeech, speak, stop, handleClose]);
 
   // ESC로 닫기
   useEffect(() => {
@@ -89,8 +86,20 @@ export default function ListenerModal() {
 
   if (!isOpen) return null;
 
+  // 카드에서 이미지 URL 가져오기 (마지막 카드)
+  const displayCard = cards.length > 0 ? cards[cards.length - 1] : null;
+  const imgUrl = displayCard
+    ? (displayCard.pictogramUrl || (displayCard.pictogramId ? getImageById(displayCard.pictogramId) : null) || getFallbackSvg(displayCard.text, displayCard.category))
+    : null;
+
   return (
-    <div className={`${styles.listenerModal} ${isEmergency ? styles.emergency : ''}`} role="dialog" aria-modal="true" aria-label={isEmergency ? '긴급 상황' : '문장 표시'}>
+    <div
+      className={`${styles.listenerModal} ${isEmergency ? styles.emergency : ''}`}
+      role="dialog"
+      aria-modal="true"
+      aria-label={isEmergency ? '긴급 상황' : '문장 표시'}
+      onClick={handleClose}
+    >
       {/* 상단 라벨 */}
       {isEmergency && (
         <div className={styles.emergencyLabel}>
@@ -105,7 +114,7 @@ export default function ListenerModal() {
       {!isScanning && (
         <button
           className={`${styles.listenerClose} ${isEmergency ? styles.emergencyClose : ''} ${highlighted ? scanStyles.highlightClose : ''}`}
-          onClick={handleClose}
+          onClick={(e) => { e.stopPropagation(); handleClose(); }}
           aria-label="닫기"
           data-scan-phase="modal"
           data-scan-index={0}
@@ -116,8 +125,18 @@ export default function ListenerModal() {
         </button>
       )}
 
-      <div className={`${styles.listenerText} ${isEmergency ? styles.emergencyText : ''}`}>
-        {message}
+      {/* 이미지 + 텍스트 */}
+      <div className={styles.listenerContent}>
+        {imgUrl && (
+          <img
+            className={styles.listenerImage}
+            src={imgUrl}
+            alt={message}
+          />
+        )}
+        <div className={`${styles.listenerText} ${isEmergency ? styles.emergencyText : ''}`}>
+          {message}
+        </div>
       </div>
 
       {/* 하단 안내 */}
@@ -126,7 +145,7 @@ export default function ListenerModal() {
           ? '이 화면을 주변 사람에게 보여주세요'
           : isScanning
             ? '터치하면 닫힙니다'
-            : '화면을 터치하거나 닫기를 눌러주세요'}
+            : '화면을 터치하면 닫힙니다'}
       </div>
     </div>
   );

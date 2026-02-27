@@ -8,7 +8,7 @@
 //   - Valencia et al. (2023, CHI): LLM → AAC 소통 속도/다양성 2배 향상
 //   - Cai et al. (2024, Nature): LLM + STT → ALS 환자 소통 57% 효율 증가
 //
-// 핵심 원칙 (AI_INTEGRATION_NOTES.md):
+// 핵심 원칙:
 //   - 0 추가 터치: AI는 백그라운드에서 작동
 //   - 폴백 보장: LLM 실패 시 기존 규칙 기반 동작 100% 유지
 //   - 지연시간 최소화: 500ms 이내

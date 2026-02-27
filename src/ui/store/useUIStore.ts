@@ -21,7 +21,7 @@ interface UIStore {
   confirmModal: ConfirmModalState;
   addCardModal: AddCardModalState;
   editCardModal: EditCardModalState;
-  openListenerModal: (message: string, isEmergency: boolean, cards: Card[]) => void;
+  openListenerModal: (message: string, isEmergency: boolean, cards: Card[], withSpeech?: boolean) => void;
   closeListenerModal: () => void;
   showConfirm: (message: string) => Promise<boolean>;
   closeConfirm: (result: boolean) => void;
@@ -39,15 +39,15 @@ export const useUIStore = create<UIStore>((set, get) => ({
   setCurrentSlide: (index) => set({ currentSlide: index }),
 
   // 모달
-  listenerModal: { isOpen: false, message: '', isEmergency: false, cards: [] },
+  listenerModal: { isOpen: false, message: '', isEmergency: false, cards: [], withSpeech: false },
   confirmModal: { isOpen: false, message: '', resolve: null },
   addCardModal: { isOpen: false, category: null },
   editCardModal: { isOpen: false, card: null, category: null },
 
-  openListenerModal: (message, isEmergency, cards) =>
-    set({ listenerModal: { isOpen: true, message, isEmergency, cards } }),
+  openListenerModal: (message, isEmergency, cards, withSpeech = true) =>
+    set({ listenerModal: { isOpen: true, message, isEmergency, cards, withSpeech } }),
   closeListenerModal: () =>
-    set({ listenerModal: { isOpen: false, message: '', isEmergency: false, cards: [] } }),
+    set({ listenerModal: { isOpen: false, message: '', isEmergency: false, cards: [], withSpeech: false } }),
 
   showConfirm: (message) => {
     return new Promise<boolean>((resolve) => {

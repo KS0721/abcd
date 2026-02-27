@@ -29,6 +29,7 @@ export interface ListenerModalState {
   message: string;
   isEmergency: boolean;
   cards: Card[];
+  withSpeech: boolean;
 }
 
 export interface ConfirmModalState {

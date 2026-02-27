@@ -18,12 +18,6 @@
 //   - Beukelman & Mirenda (2013): 오프라인 TTS는 AAC 시스템의
 //     가용성(availability) 핵심 요소 → 인터넷 없이도 의사소통 가능
 //
-// AI TODO [LLM + TTS 통합 확장]:
-//   향후 LLM 서버 확보 시 Edge TTS 프록시를 같은 서버에 배포하여
-//   3단계 폴백으로 확장 가능:
-//   Tier 0: Edge TTS (서버 경유, 최고 품질, 9개 한국어 음성)
-//   Tier 1: Supertonic TTS 2 (로컬, 고품질, 오프라인)
-//   Tier 2: Web Speech API (내장, 항상 사용 가능)
 // ========================================
 
 const MODEL_ID = 'onnx-community/Supertonic-TTS-2-ONNX';
