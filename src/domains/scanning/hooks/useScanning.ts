@@ -22,7 +22,6 @@ import { useSituationStore } from '../../situation/store/useSituationStore.ts';
 import { DEFAULT_CATEGORIES } from '../../card/data/index.ts';
 import { SITUATION_BOARDS } from '../../situation/data/situations.ts';
 import type { SituationId } from '../../situation/models.ts';
-import type { CategoryId } from '../../card/models.ts';
 import type { SlideIndex } from '../../../shared/types.ts';
 
 const SITUATION_IDS = Object.keys(SITUATION_BOARDS) as SituationId[];
@@ -184,7 +183,7 @@ export function useScanning() {
       // 말하기 화면
       const cat = DEFAULT_CATEGORIES[index];
       if (cat) {
-        useCardStore.getState().setCurrentCategory(cat.id as CategoryId);
+        useCardStore.getState().setCurrentCategory(cat.id);
         setTimeout(() => enterCardPhase(), 250);
       }
     }

@@ -7,6 +7,7 @@ export const STORAGE_KEYS = {
   cardOrder: 'aac_card_order',
   quickPhrases: 'aac_quick_phrases',
   history: 'aac_history',
+  userCategories: 'aac_user_categories',
 } as const;
 
 // 빠른 문장 기본값: 핵심 의사소통 + 한국 사회적 표현

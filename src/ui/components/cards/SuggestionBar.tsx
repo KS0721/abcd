@@ -79,15 +79,16 @@ export default function SuggestionBar() {
             key={card.id}
             onClick={() => handleClick(card)}
             style={{
-              padding: '6px 12px',
+              padding: hasSuggestions ? '6px 12px' : '10px 18px',
               background: 'var(--color-surface)',
-              border: `1px solid ${hasSuggestions ? 'var(--color-primary)' : 'var(--color-border)'}`,
-              borderRadius: '20px',
-              fontSize: 'var(--font-size-sm)',
-              fontWeight: 500,
+              border: `2px solid ${hasSuggestions ? 'var(--color-primary)' : 'var(--color-border)'}`,
+              borderRadius: '24px',
+              fontSize: hasSuggestions ? 'var(--font-size-sm)' : 'var(--font-size-base)',
+              fontWeight: hasSuggestions ? 500 : 600,
               color: hasSuggestions ? 'var(--color-primary)' : 'var(--color-text-primary)',
               whiteSpace: 'nowrap',
               cursor: 'pointer',
+              minHeight: '44px',
             }}
           >
             {card.text}

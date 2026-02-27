@@ -3,7 +3,6 @@ import { useUIStore } from '../../store/useUIStore.ts';
 import { useCardStore } from '../../../domains/card/store/useCardStore.ts';
 import { sanitizeText, isValidCardText } from '../../../shared/sanitize.ts';
 import { getImageUrl } from '../../../infrastructure/arasaac/arasaac.ts';
-import type { CategoryId } from '../../../domains/card/models.ts';
 import styles from '../../styles/Modal.module.css';
 
 const ARASAAC_API = 'https://api.arasaac.org/v1/pictograms/ko/search';
@@ -78,13 +77,13 @@ export default function EditCardModal() {
       updates.pictogramUrl = undefined;
     }
 
-    updateUserCard(category as CategoryId, card.id, updates as any);
+    updateUserCard(category, card.id, updates as any);
     closeEditCardModal();
   }, [text, card, category, photoData, selectedPictogramId, updateUserCard, closeEditCardModal]);
 
   const handleDelete = useCallback(() => {
     if (!card || !category) return;
-    deleteUserCard(category as CategoryId, card.id);
+    deleteUserCard(category, card.id);
     closeEditCardModal();
   }, [card, category, deleteUserCard, closeEditCardModal]);
 

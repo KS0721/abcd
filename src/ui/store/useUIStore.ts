@@ -3,7 +3,7 @@
 // ========================================
 
 import { create } from 'zustand';
-import type { Card, CategoryId } from '@/domains/card/models.ts';
+import type { Card } from '@/domains/card/models.ts';
 import type {
   AppView, SlideIndex,
   ListenerModalState, ConfirmModalState, AddCardModalState, EditCardModalState,
@@ -25,9 +25,9 @@ interface UIStore {
   closeListenerModal: () => void;
   showConfirm: (message: string) => Promise<boolean>;
   closeConfirm: (result: boolean) => void;
-  openAddCardModal: (category: CategoryId) => void;
+  openAddCardModal: (category: string) => void;
   closeAddCardModal: () => void;
-  openEditCardModal: (card: Card, category: CategoryId) => void;
+  openEditCardModal: (card: Card, category: string) => void;
   closeEditCardModal: () => void;
 }
 

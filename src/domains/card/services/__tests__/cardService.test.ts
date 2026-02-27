@@ -7,17 +7,17 @@ import {
   updateCardInCategory,
   mergeUserCards,
 } from '../cardService.ts';
-import type { Card, CategoryId } from '../../models.ts';
+import type { Card } from '../../models.ts';
 
 function makeCard(id: string, text: string): Card {
   return { id, text, category: 'thing' };
 }
 
-function makeCards(): Record<CategoryId, Card[]> {
+function makeCards(): Record<string, Card[]> {
   return {
     thing: [makeCard('t1', '의자'), makeCard('t2', '책상'), makeCard('t3', '컵')],
     food: [makeCard('f1', '밥'), makeCard('f2', '물')],
-  } as Record<CategoryId, Card[]>;
+  } as Record<string, Card[]>;
 }
 
 describe('moveArrayItem', () => {
@@ -53,7 +53,7 @@ describe('reorderCardsInCategory', () => {
 
   it('존재하지 않는 카테고리면 원본 반환', () => {
     const cards = makeCards();
-    const result = reorderCardsInCategory(cards, 'medical' as CategoryId, 0, 1);
+    const result = reorderCardsInCategory(cards, 'medical', 0, 1);
     expect(result).toBe(cards);
   });
 });
@@ -61,7 +61,7 @@ describe('reorderCardsInCategory', () => {
 describe('addCardToCategory', () => {
   it('카드 추가 시 cards와 userCards 모두 업데이트', () => {
     const cards = makeCards();
-    const userCards = {} as Record<CategoryId, Card[]>;
+    const userCards = {} as Record<string, Card[]>;
     const newCard = makeCard('t4', '연필');
     const result = addCardToCategory(cards, userCards, 'thing', newCard);
     expect(result.cards.thing).toHaveLength(4);
@@ -71,8 +71,8 @@ describe('addCardToCategory', () => {
   });
 
   it('빈 카테고리에도 추가 가능', () => {
-    const cards = {} as Record<CategoryId, Card[]>;
-    const userCards = {} as Record<CategoryId, Card[]>;
+    const cards = {} as Record<string, Card[]>;
+    const userCards = {} as Record<string, Card[]>;
     const newCard = makeCard('m1', '약');
     const result = addCardToCategory(cards, userCards, 'medical', newCard);
     expect(result.cards.medical).toHaveLength(1);
@@ -83,7 +83,7 @@ describe('addCardToCategory', () => {
 describe('deleteCardFromCategory', () => {
   it('카드 삭제 시 cards와 userCards 모두에서 제거', () => {
     const cards = makeCards();
-    const userCards = { thing: [makeCard('t3', '컵')] } as Record<CategoryId, Card[]>;
+    const userCards = { thing: [makeCard('t3', '컵')] } as Record<string, Card[]>;
     const result = deleteCardFromCategory(cards, userCards, 'thing', 't3');
     expect(result.cards.thing).toHaveLength(2);
     expect(result.userCards.thing).toHaveLength(0);
@@ -91,7 +91,7 @@ describe('deleteCardFromCategory', () => {
 
   it('존재하지 않는 ID 삭제 시도 시 변화 없음', () => {
     const cards = makeCards();
-    const userCards = {} as Record<CategoryId, Card[]>;
+    const userCards = {} as Record<string, Card[]>;
     const result = deleteCardFromCategory(cards, userCards, 'thing', 'nonexistent');
     expect(result.cards.thing).toHaveLength(3);
   });
@@ -100,7 +100,7 @@ describe('deleteCardFromCategory', () => {
 describe('updateCardInCategory', () => {
   it('카드 텍스트 업데이트', () => {
     const cards = makeCards();
-    const userCards = { thing: [makeCard('t1', '의자')] } as Record<CategoryId, Card[]>;
+    const userCards = { thing: [makeCard('t1', '의자')] } as Record<string, Card[]>;
     const result = updateCardInCategory(cards, userCards, 'thing', 't1', { text: '소파' });
     expect(result.cards.thing[0].text).toBe('소파');
     expect(result.userCards.thing[0].text).toBe('소파');
@@ -109,8 +109,8 @@ describe('updateCardInCategory', () => {
 
 describe('mergeUserCards', () => {
   it('기본 카드에 사용자 카드 병합', () => {
-    const defaults = { thing: [makeCard('t1', '의자')] } as Record<CategoryId, Card[]>;
-    const saved = { thing: [makeCard('u1', '커스텀')] } as Record<CategoryId, Card[]>;
+    const defaults = { thing: [makeCard('t1', '의자')] } as Record<string, Card[]>;
+    const saved = { thing: [makeCard('u1', '커스텀')] } as Record<string, Card[]>;
     const result = mergeUserCards(defaults, saved, null);
     expect(result.cards.thing).toHaveLength(2);
     expect(result.cards.thing[0].id).toBe('t1');
@@ -120,7 +120,7 @@ describe('mergeUserCards', () => {
   it('저장된 순서 적용', () => {
     const defaults = {
       thing: [makeCard('t1', '의자'), makeCard('t2', '책상')],
-    } as Record<CategoryId, Card[]>;
+    } as Record<string, Card[]>;
     const order = { thing: ['t2', 't1'] };
     const result = mergeUserCards(defaults, null, order);
     expect(result.cards.thing[0].id).toBe('t2');
@@ -128,7 +128,7 @@ describe('mergeUserCards', () => {
   });
 
   it('savedUserCards가 null이면 기본 카드만', () => {
-    const defaults = { food: [makeCard('f1', '밥')] } as Record<CategoryId, Card[]>;
+    const defaults = { food: [makeCard('f1', '밥')] } as Record<string, Card[]>;
     const result = mergeUserCards(defaults, null, null);
     expect(result.cards.food).toHaveLength(1);
     expect(result.userCards).toEqual({});

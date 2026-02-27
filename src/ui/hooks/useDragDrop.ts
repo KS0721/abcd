@@ -4,7 +4,6 @@
 // ========================================
 
 import { useRef, useCallback } from 'react';
-import type { CategoryId } from '../../domains/card/models.ts';
 import { useCardStore } from '../../domains/card/store/useCardStore.ts';
 
 interface DragState {
@@ -12,7 +11,7 @@ interface DragState {
   overIndex: number | null;
 }
 
-export function useDragDrop(category: CategoryId) {
+export function useDragDrop(category: string) {
   const stateRef = useRef<DragState>({ dragIndex: null, overIndex: null });
 
   const handleDragStart = useCallback((index: number) => {

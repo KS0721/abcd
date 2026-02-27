@@ -17,7 +17,7 @@ export type CategoryId =
 export interface Card {
   id: string;
   text: string;
-  category: CategoryId | 'emergency';
+  category: string; // CategoryId | 'emergency' | 사용자 정의
   arasaacKeyword?: string;
   pictogramId?: number;     // ARASAAC 픽토그램 ID 직접 지정 (키워드 검색 우회)
   pictogramUrl?: string;    // 외부 이미지 URL 또는 data: URI (최우선)

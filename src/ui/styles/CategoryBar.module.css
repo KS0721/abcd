@@ -68,3 +68,75 @@
 .active[data-category="descriptor"] { background: var(--cat-descriptor); }
 .active[data-category="animal"]     { background: var(--cat-animal); color: #1A1A1A; }
 .active[data-category="nature"]     { background: var(--cat-nature); }
+
+/* 사용자 정의 카테고리 */
+.activeCustom { background: var(--color-primary) !important; }
+
+/* 카테고리 추가 버튼 */
+.addBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px;
+  background: var(--color-bg);
+  border: 2px dashed var(--color-border);
+  border-radius: 22px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.addBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* 카테고리 추가 입력 행 */
+.addRow {
+  display: flex;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.addInput {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.addInput:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
+
+.addSaveBtn {
+  padding: 8px 14px;
+  min-height: 40px;
+  border: none;
+  border-radius: 8px;
+  background: var(--color-primary);
+  color: white;
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.addCancelBtn {
+  padding: 8px 14px;
+  min-height: 40px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}

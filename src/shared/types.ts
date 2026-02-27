@@ -2,7 +2,7 @@
 // 공통 UI 타입 (특정 도메인에 속하지 않는 타입)
 // ========================================
 
-import type { Card, CategoryId } from '../domains/card/models.ts';
+import type { Card } from '../domains/card/models.ts';
 
 // 뷰 타입
 export type AppView = 'app';
@@ -40,11 +40,11 @@ export interface ConfirmModalState {
 
 export interface AddCardModalState {
   isOpen: boolean;
-  category: CategoryId | null;
+  category: string | null;
 }
 
 export interface EditCardModalState {
   isOpen: boolean;
   card: Card | null;
-  category: CategoryId | null;
+  category: string | null;
 }
